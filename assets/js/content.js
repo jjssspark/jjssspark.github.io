@@ -20,7 +20,7 @@
 export const profile = {
   name: 'JISU PARK',
   role: 'ML Engineer / Full-stack',
-  tagline: '야구라는 한 도메인을 딥러닝으로 끝까지 판 개발자',
+  tagline: '사용자 편의를 고민하는 서비스 개발자',
   stats: [
     { label: 'PROJECTS', value: 11 },
     { label: 'TEAM COMMITS', value: 359 },
