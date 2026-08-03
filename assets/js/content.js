@@ -18,13 +18,13 @@
  */
 
 export const profile = {
-  name: '박지수',
+  name: 'JISU PARK',
   role: 'ML Engineer / Full-stack',
   tagline: '야구라는 한 도메인을 딥러닝으로 끝까지 판 개발자',
   stats: [
-    { label: 'PROJECTS', value: 10 },
+    { label: 'PROJECTS', value: 11 },
     { label: 'TEAM COMMITS', value: 359 },
-    { label: 'STACKS', value: 19 },
+    { label: 'STACKS', value: 22 },
   ],
   links: {
     email: 'hsyoun585@gmail.com',
@@ -129,6 +129,17 @@ export const projects = [
     stack: ['React', 'TypeScript', 'Claude API'],
     viz: null,
     links: { repo: 'https://github.com/rhantj/perjury', demo: null },
+  },
+  {
+    id: 'univ',
+    name: 'UniRoad',
+    tier: 'shipped',
+    status: 'shipped',
+    summary: '대학생 인증 기반으로 커뮤니티·채팅·중고거래를 한 앱에서 제공하는 대학생 전용 모바일 서비스.',
+    role: null,
+    stack: ['React Native', 'Expo', 'TypeScript', 'Firebase'],
+    viz: null,
+    links: { repo: 'https://github.com/UNIROAD-KR/Frontend', demo: null },
   },
   {
     id: 'onque',

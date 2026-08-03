@@ -63,6 +63,34 @@ nav {
   align-items: center;
   overflow: hidden;
 }
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 115%,
+    oklch(38% 0.07 150 / 0.35),
+    transparent 65%
+  );
+  pointer-events: none;
+}
+.hero-diamond {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: min(70vh, 640px);
+  height: min(70vh, 640px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hero-diamond rect {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  opacity: 0.22;
+}
 .hero-inner {
   position: relative;
   z-index: 1;
@@ -185,6 +213,14 @@ nav {
   );
   opacity: 0;
   transition: opacity var(--duration-fast) var(--ease-out-expo);
+  pointer-events: none;
+}
+.project-card::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed color-mix(in oklch, var(--color-accent) 45%, transparent);
+  border-radius: calc(var(--radius-lg) - 4px);
   pointer-events: none;
 }
 @media (hover: hover) {
@@ -351,7 +387,7 @@ footer {
   position: fixed;
   top: 0;
   right: 0;
-  width: 4px;
+  width: 10px;
   height: 100vh;
   z-index: 60;
   pointer-events: none;
@@ -359,7 +395,7 @@ footer {
 .scroll-seam path {
   fill: none;
   stroke: var(--color-accent);
-  stroke-width: 2;
+  stroke-width: 3;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
 }
