@@ -24,6 +24,14 @@ nav {
   list-style: none;
   padding: 0;
 }
+@media (max-width: 480px) {
+  .nav-links {
+    gap: var(--space-2);
+  }
+  .nav-links a {
+    font-size: var(--text-xs);
+  }
+}
 .nav-links a {
   text-decoration: none;
   position: relative;
