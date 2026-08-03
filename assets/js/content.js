@@ -93,7 +93,7 @@ export const projects = [
     role: null,
     stack: ['Python', 'Flask', 'MariaDB', 'Redis', 'Celery'],
     viz: null,
-    links: { repo: 'https://github.com/jjssspark/TruthLens', demo: null },
+    links: { repo: 'https://github.com/jjssspark/TruthLens', demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app' },
   },
   {
     id: 'tripmate',
