@@ -1,0 +1,83 @@
+:root {
+  /* 원시 — 중립 (야간 구장 네이비 계열) */
+  --navy-950: oklch(16% 0.020 250);
+  --navy-900: oklch(21% 0.020 250);
+  --navy-800: oklch(26% 0.018 250);
+  --navy-700: oklch(30% 0.016 250);
+  --navy-400: oklch(65% 0.010 250);
+  --navy-100: oklch(94% 0.008 250);
+
+  /* 원시 — 강조 (클레이 오렌지) */
+  --clay-400: oklch(78% 0.14 55);
+  --clay-600: oklch(72% 0.17 55);
+
+  /* 원시 — 데이터 시각화 전용 (시안) */
+  --cyan-400: oklch(78% 0.15 195);
+  --cyan-600: oklch(68% 0.16 195);
+
+  /* 의미 토큰 — 컴포넌트는 이것만 참조 */
+  --color-bg: var(--navy-950);
+  --color-surface: var(--navy-900);
+  --color-surface-alt: var(--navy-800);
+  --color-border: var(--navy-700);
+  --color-text: var(--navy-100);
+  --color-text-muted: var(--navy-400);
+  --color-accent: var(--clay-600);
+  --color-accent-hover: var(--clay-400);
+  --color-data: var(--cyan-400);
+  --color-grid: var(--navy-700);
+
+  /* 타이포그래피 */
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: clamp(0.75rem, 0.73rem + 0.10vw, 0.813rem);
+  --text-sm: clamp(0.875rem, 0.85rem + 0.12vw, 0.938rem);
+  --text-base: clamp(1rem, 0.92rem + 0.40vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1.02rem + 0.52vw, 1.375rem);
+  --text-xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --text-2xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+  --text-hero: clamp(3rem, 1rem + 7vw, 8rem);
+
+  --leading-tight: 1.15;
+  --leading-body: 1.6;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.04em;
+
+  /* 간격 — 4px 배수 */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-section: clamp(4rem, 3rem + 5vw, 10rem);
+
+  /* 반경 · 그림자 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.05);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.24);
+  --shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.32);
+
+  /* 모션 */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 600ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
