@@ -75,15 +75,20 @@ export const projects = [
   },
   {
     id: 'stovelens-ai',
-    name: 'StoveLens AI',
+    name: 'SalaryCast_AI',
     tier: 'shipped',
     status: 'shipped',
     summary:
       'KBO FA 선수의 최근 성적 데이터를 기반으로 예상 연봉을 예측하고 구단별 적정 제시가를 추천하는 XGBoost·LightGBM 앙상블 기반 예측 서비스.',
     role: null,
     stack: ['Python', 'XGBoost', 'LightGBM', 'Streamlit'],
-    viz: 'heatmap',
-    links: { repo: 'https://github.com/jjssspark/SalaryCast_AI', demo: 'https://stovelens-ai.streamlit.app/' },
+    viz: null,
+    image: 'assets/img/salarycast-home.jpg',
+    links: {
+      repo: 'https://github.com/jjssspark/SalaryCast_AI',
+      demo: 'https://stovelens-ai.streamlit.app/',
+      notion: 'https://app.notion.com/p/SalaryCast_AI-00af6f1e619a82c4b882016d34088dd1?source=copy_link',
+    },
   },
   {
     id: 'truthlens',
@@ -95,7 +100,12 @@ export const projects = [
     role: null,
     stack: ['Python', 'Flask', 'MariaDB', 'Redis', 'Celery'],
     viz: null,
-    links: { repo: 'https://github.com/jjssspark/TruthLens', demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app' },
+    image: 'assets/img/truthlens-home.jpg',
+    links: {
+      repo: 'https://github.com/jjssspark/TruthLens',
+      demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app',
+      notion: 'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
+    },
   },
   {
     id: 'tripmate',
