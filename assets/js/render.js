@@ -50,11 +50,17 @@ function projectCardHtml(project, index) {
   const vizHtml = project.viz
     ? `<canvas class="viz-canvas" data-viz="${project.viz}" aria-hidden="true"></canvas>`
     : '';
+  const imgHtml = project.image
+    ? `<img class="project-thumb" src="${escapeHtml(project.image)}" alt="${escapeHtml(project.name)} 스크린샷" loading="lazy" />`
+    : '';
   const linkHtml = project.links.repo
     ? `<a class="project-link" href="${escapeHtml(project.links.repo)}" target="_blank" rel="noopener noreferrer">Repository <span aria-hidden="true">↗</span></a>`
     : `<span class="project-link">비공개 저장소</span>`;
   const demoHtml = project.links.demo
     ? ` · <a class="project-link" href="${escapeHtml(project.links.demo)}" target="_blank" rel="noopener noreferrer">Demo <span aria-hidden="true">↗</span></a>`
+    : '';
+  const notionHtml = project.links.notion
+    ? ` · <a class="project-link" href="${escapeHtml(project.links.notion)}" target="_blank" rel="noopener noreferrer">Notion <span aria-hidden="true">↗</span></a>`
     : '';
   const statusHtml =
     project.status === 'in-play'
@@ -66,7 +72,25 @@ function projectCardHtml(project, index) {
     ? `<p class="project-desc"><strong>담당:</strong> ${escapeHtml(project.role)}</p>`
     : '';
   const tierClass =
-    project.tier === 'featured' ? ' project-card--featured' : project.tier === 'coming-soon' ? ' project-card--soon' : '';
+    (project.tier === 'featured' ? ' project-card--featured' : project.tier === 'coming-soon' ? ' project-card--soon' : '') +
+    (project.image ? ' project-card--media' : '');
+
+  if (project.image) {
+    return `
+      <article class="project-card${tierClass} reveal" style="--delay:${(index % 6) * 60}ms" data-stack-list="${project.stack.map(escapeHtml).join(',')}">
+        <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
+        ${statusHtml}
+        <h3 class="project-name">${escapeHtml(project.name)}</h3>
+        <p class="project-desc">${escapeHtml(project.summary)}</p>
+        ${imgHtml}
+        <div class="project-more">
+          ${roleHtml}
+          ${tagsHtml}
+          ${linkHtml}${demoHtml}${notionHtml}
+        </div>
+      </article>
+    `;
+  }
 
   return `
     <article class="project-card${tierClass} reveal" style="--delay:${(index % 6) * 60}ms" data-stack-list="${project.stack.map(escapeHtml).join(',')}">

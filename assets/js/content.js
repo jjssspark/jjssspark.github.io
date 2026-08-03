@@ -2,6 +2,7 @@
  * @typedef {Object} ProjectLinks
  * @property {string|null} repo
  * @property {string|null} demo
+ * @property {string|null} [notion]
  */
 
 /**
@@ -14,6 +15,7 @@
  * @property {string|null} role
  * @property {string[]} stack
  * @property {'trajectory'|'heatmap'|null} viz
+ * @property {string|null} [image] - 실제 스크린샷 썸네일 경로. 있으면 카드가 호버 시 확장되는 미디어 카드로 렌더링됨
  * @property {ProjectLinks} links
  */
 
@@ -101,11 +103,16 @@ export const projects = [
     tier: 'shipped',
     status: 'shipped',
     summary:
-      '여행지·일정·예산·동행 유형과 선호 스타일을 입력하면 AI가 동선과 식사 시간대까지 고려한 여행 일정을 생성해주는 AI 여행 플래너.',
-    role: null,
+      'AI가 목적지·날짜·예산·동행 유형·선호 스타일을 입력받아 Day별 여행 일정(동선·식사시간 고려)을 생성해주는 서비스.',
+    role: '팀 프로젝트 종료 후 개인 저장소로 이전 — 인증·AI 파이프라인·배포 전 영역 단독 고도화',
     stack: ['React', 'TypeScript', 'Vite', 'Supabase', 'Gemini API'],
     viz: null,
-    links: { repo: 'https://github.com/jjssspark/TripMate', demo: 'https://tripgather.netlify.app' },
+    image: 'assets/img/tripmate-home.jpg',
+    links: {
+      repo: 'https://github.com/jjssspark/TripMate',
+      demo: 'https://tripgather.netlify.app',
+      notion: 'https://app.notion.com/p/3b1f6f1e619a80aeb0a8fbc1532d0f73?source=copy_link',
+    },
   },
   {
     id: 'diamondscout-ai',
