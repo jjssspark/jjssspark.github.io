@@ -103,7 +103,7 @@ function renderEngineering() {
       <p><strong>해결:</strong> ${escapeHtml(item.solution)}</p>
       <div class="eng-commits">
         ${item.commits
-          .map((hash) => `<a href="https://github.com/rhantj/work-flow/commit/${hash}" target="_blank" rel="noopener noreferrer">${hash}</a>`)
+          .map((hash) => `<a href="${escapeHtml(item.repo)}/commit/${escapeHtml(hash)}" target="_blank" rel="noopener noreferrer">${escapeHtml(hash)}</a>`)
           .join('')}
       </div>
     </article>

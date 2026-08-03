@@ -162,12 +162,14 @@ export const engineering = [
     solution:
       'BAAI/bge-m3에 쿼리 노이즈 강건성 실험을 담은 LoRA 파인튜닝을 적용해 병합한 모델을 HF Hub에 올리고, 컨테이너 내부 로컬 추론(sentence-transformers)으로 전환했다.',
     commits: ['d12dd8f0'],
+    repo: 'https://github.com/rhantj/work-flow',
   },
   {
     title: 'Isolation Forest 3축 독립 판정 구조',
     problem: '이상치 탐지 로직이 축마다 제각각 구현되어 있어 판정 기준을 한 곳에서 검증하기 어려웠다.',
     solution: 'Isolation Forest 판정 경로를 compute_axis_results 기반 3축 독립 판정 구조로 통일했다.',
     commits: ['2468029e'],
+    repo: 'https://github.com/rhantj/work-flow',
   },
   {
     title: 'RAG·대시보드 비동기 처리 Redis Queue 전환',
@@ -176,6 +178,7 @@ export const engineering = [
     solution:
       'RagQueueWorker/DashboardAiQueueWorker가 Redis Stream을 컨슈머 그룹으로 소비하도록 분리하고, 큐 포화·타임아웃 전용 에러를 추가했다. 동시 재분석 요청은 in-flight 마커로 병합하고, 완료 시 SSE로 알린다.',
     commits: ['da307984', '09f390b9'],
+    repo: 'https://github.com/rhantj/work-flow',
   },
   {
     title: 'CI 배포 게이트',
@@ -184,5 +187,6 @@ export const engineering = [
     solution:
       'FastAPI 테스트를 workflow_call로 배포 게이트에 편입하고, 마이그레이션 버전 중복 검사를 스크립트 하나로 통일해 deploy 잡의 test 단계에 물렸다.',
     commits: ['db8fd9bc', 'c6f5b5b2'],
+    repo: 'https://github.com/rhantj/work-flow',
   },
 ];
