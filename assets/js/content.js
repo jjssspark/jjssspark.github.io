@@ -77,9 +77,9 @@ export const projects = [
     tier: 'shipped',
     status: 'shipped',
     summary:
-      'KBO FA 선수의 최근 성적 데이터를 기반으로 예상 연봉을 예측하고 구단별 적정 제시가를 추천하는 XGBoost 기반 예측 서비스.',
+      'KBO FA 선수의 최근 성적 데이터를 기반으로 예상 연봉을 예측하고 구단별 적정 제시가를 추천하는 XGBoost·LightGBM 앙상블 기반 예측 서비스.',
     role: null,
-    stack: ['Python', 'XGBoost', 'Streamlit'],
+    stack: ['Python', 'XGBoost', 'LightGBM', 'Streamlit'],
     viz: 'heatmap',
     links: { repo: 'https://github.com/jjssspark/SalaryCast_AI', demo: 'https://stovelens-ai.streamlit.app/' },
   },
