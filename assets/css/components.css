@@ -69,9 +69,9 @@ nav {
   inset: 0;
   z-index: 0;
   background: radial-gradient(
-    ellipse 80% 60% at 50% 115%,
-    oklch(38% 0.07 150 / 0.35),
-    transparent 65%
+    ellipse 85% 65% at 50% 120%,
+    oklch(42% 0.09 150 / 0.5),
+    transparent 62%
   );
   pointer-events: none;
 }
@@ -80,16 +80,53 @@ nav {
   z-index: 0;
   top: 50%;
   left: 50%;
-  width: min(70vh, 640px);
-  height: min(70vh, 640px);
+  width: min(75vh, 700px);
+  height: min(75vh, 700px);
   transform: translate(-50%, -50%);
   pointer-events: none;
+  animation: diamond-pulse 4s var(--ease-in-out) infinite;
 }
-.hero-diamond rect {
-  fill: none;
+.hero-diamond rect.hero-diamond__infield {
+  fill: color-mix(in oklch, var(--color-accent) 10%, transparent);
   stroke: var(--color-accent);
+  stroke-width: 3;
+  opacity: 0.55;
+  stroke-dasharray: 810;
+  stroke-dashoffset: 810;
+  animation: diamond-draw 1.6s var(--ease-out-expo) 0.2s forwards;
+}
+.hero-diamond circle.hero-diamond__mound {
+  fill: none;
+  stroke: var(--color-stitch);
   stroke-width: 2;
-  opacity: 0.22;
+  opacity: 0.5;
+}
+.hero-diamond rect.hero-diamond__base {
+  fill: var(--color-text);
+  opacity: 0.4;
+}
+@keyframes diamond-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes diamond-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 18px color-mix(in oklch, var(--color-accent) 35%, transparent));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-diamond {
+    animation: none;
+  }
+  .hero-diamond rect.hero-diamond__infield {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
 }
 .hero-inner {
   position: relative;
@@ -104,8 +141,8 @@ nav {
   inset: 0;
   z-index: 0;
   background: radial-gradient(
-    400px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in oklch, var(--color-accent) 15%, transparent),
+    520px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklch, var(--color-accent) 26%, transparent),
     transparent 70%
   );
   pointer-events: none;
@@ -215,13 +252,18 @@ nav {
   transition: opacity var(--duration-fast) var(--ease-out-expo);
   pointer-events: none;
 }
+.project-card {
+  outline: 1px dashed color-mix(in oklch, var(--color-stitch) 55%, transparent);
+  outline-offset: -3px;
+}
 .project-card::after {
   content: '';
   position: absolute;
-  inset: 6px;
-  border: 1px dashed color-mix(in oklch, var(--color-accent) 45%, transparent);
+  inset: 7px;
+  border: 2px dashed color-mix(in oklch, var(--color-stitch) 70%, transparent);
   border-radius: calc(var(--radius-lg) - 4px);
   pointer-events: none;
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
 }
 @media (hover: hover) {
   .project-card:hover::before {
@@ -229,6 +271,9 @@ nav {
   }
   .project-card:hover {
     border-color: var(--color-accent);
+  }
+  .project-card:hover::after {
+    border-color: var(--color-stitch-hover);
   }
 }
 .project-card--featured {

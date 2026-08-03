@@ -16,7 +16,7 @@ function setupSpotlight(el) {
  * @param {HTMLElement} card
  */
 function setupTilt(card) {
-  const maxDeg = 4;
+  const maxDeg = 10;
   card.addEventListener('mousemove', (event) => {
     const rect = card.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width - 0.5;
@@ -32,7 +32,7 @@ function setupTilt(card) {
  * @param {HTMLElement} btn
  */
 function setupMagnetic(btn) {
-  const pull = 6;
+  const pull = 14;
   btn.addEventListener('mousemove', (event) => {
     const rect = btn.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;

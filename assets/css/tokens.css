@@ -8,12 +8,16 @@
   --navy-100: oklch(94% 0.008 250);
 
   /* 원시 — 강조 (클레이 오렌지) */
-  --clay-400: oklch(78% 0.14 55);
-  --clay-600: oklch(72% 0.17 55);
+  --clay-400: oklch(80% 0.16 55);
+  --clay-600: oklch(74% 0.19 55);
 
   /* 원시 — 데이터 시각화 전용 (시안) */
   --cyan-400: oklch(78% 0.15 195);
   --cyan-600: oklch(68% 0.16 195);
+
+  /* 원시 — 야구 실밥 전용 (레드) */
+  --stitch-500: oklch(60% 0.20 25);
+  --stitch-400: oklch(68% 0.19 25);
 
   /* 의미 토큰 — 컴포넌트는 이것만 참조 */
   --color-bg: var(--navy-950);
@@ -26,6 +30,8 @@
   --color-accent-hover: var(--clay-400);
   --color-data: var(--cyan-400);
   --color-grid: var(--navy-700);
+  --color-stitch: var(--stitch-500);
+  --color-stitch-hover: var(--stitch-400);
 
   /* 타이포그래피 */
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
