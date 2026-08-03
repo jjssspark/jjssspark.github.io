@@ -81,7 +81,7 @@ export const projects = [
     role: null,
     stack: ['Python', 'XGBoost', 'Streamlit'],
     viz: 'heatmap',
-    links: { repo: 'https://github.com/jjssspark/SalaryCast_AI', demo: null },
+    links: { repo: 'https://github.com/jjssspark/SalaryCast_AI', demo: 'https://stovelens-ai.streamlit.app/' },
   },
   {
     id: 'truthlens',
