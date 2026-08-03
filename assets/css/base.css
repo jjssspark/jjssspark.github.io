@@ -67,7 +67,8 @@ ul {
 
 .section {
   padding-block: var(--space-section);
-  scroll-margin-top: var(--space-8);
+  /* sticky header(~62px)에 포커스된 섹션 제목이 가려지지 않도록 여유를 둔다 */
+  scroll-margin-top: calc(var(--space-16) + var(--space-2));
 }
 
 .section-kicker {
