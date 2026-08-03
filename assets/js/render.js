@@ -44,7 +44,7 @@ function renderHero() {
 function projectCardHtml(project, index) {
   const tagsHtml = project.stack.length
     ? `<ul class="tag-list" aria-label="사용 기술">${project.stack
-        .map((tag) => `<li><button type="button" class="tag" data-stack="${escapeHtml(tag)}">${escapeHtml(tag)}</button></li>`)
+        .map((tag) => `<li><button type="button" class="tag" data-stack="${escapeHtml(tag)}" aria-pressed="false">${escapeHtml(tag)}</button></li>`)
         .join('')}</ul>`
     : '';
   const vizHtml = project.viz

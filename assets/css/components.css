@@ -24,14 +24,6 @@ nav {
   list-style: none;
   padding: 0;
 }
-@media (max-width: 480px) {
-  .nav-links {
-    gap: var(--space-2);
-  }
-  .nav-links a {
-    font-size: var(--text-xs);
-  }
-}
 .nav-links a {
   text-decoration: none;
   position: relative;
@@ -50,6 +42,17 @@ nav {
 }
 .nav-links a:hover::after {
   transform: scaleX(1);
+}
+
+/* 320px 나브 오버플로 수정 (Task 11) — 베이스 규칙 뒤에 둬서 나중에 .nav-links a에
+   font-size가 추가돼도 이 미디어쿼리가 조용히 묻히지 않도록 한다 */
+@media (max-width: 480px) {
+  .nav-links {
+    gap: var(--space-2);
+  }
+  .nav-links a {
+    font-size: var(--text-xs);
+  }
 }
 
 /* Hero */
@@ -196,11 +199,8 @@ nav {
   padding: var(--space-8);
 }
 .project-card--soon {
-  opacity: 0.55;
+  background: var(--color-surface-alt);
   border-style: dashed;
-}
-.project-card--soon:hover {
-  opacity: 0.75;
 }
 .project-card.is-dimmed {
   opacity: 0.35;

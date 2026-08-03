@@ -47,19 +47,28 @@ function setupMagnetic(btn) {
 function setupCrossFilter() {
   const tagButtons = Array.from(document.querySelectorAll('.tag'));
   const cards = Array.from(document.querySelectorAll('.project-card'));
+  const filterStatus = document.getElementById('filter-status');
   if (!tagButtons.length) return;
 
   /**
    * @param {string|null} stack
    */
   function applyFilter(stack) {
+    let matchCount = 0;
     cards.forEach((card) => {
       const cardStack = (card.dataset.stackList || '').split(',');
-      card.classList.toggle('is-dimmed', Boolean(stack) && !cardStack.includes(stack));
+      const isDimmed = Boolean(stack) && !cardStack.includes(stack);
+      card.classList.toggle('is-dimmed', isDimmed);
+      if (stack && !isDimmed) matchCount += 1;
     });
     tagButtons.forEach((btn) => {
-      btn.classList.toggle('is-active', Boolean(stack) && btn.dataset.stack === stack);
+      const isActiveForThisBtn = Boolean(stack) && btn.dataset.stack === stack;
+      btn.classList.toggle('is-active', isActiveForThisBtn);
+      btn.setAttribute('aria-pressed', String(isActiveForThisBtn));
     });
+    if (filterStatus) {
+      filterStatus.textContent = stack ? `${stack} 필터 적용됨 — ${matchCount}개 프로젝트` : '';
+    }
   }
 
   tagButtons.forEach((btn) => {
