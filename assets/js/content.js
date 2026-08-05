@@ -129,11 +129,12 @@ export const projects = [
     name: 'DiamondScout AI',
     tier: 'shipped',
     status: 'shipped',
-    summary: 'Gradio 기반 UI로 야구 선수 스카우팅 데이터를 분석하는 도구.',
-    role: null,
-    stack: ['Python', 'Gradio'],
-    viz: null,
-    links: { repo: null, demo: null },
+    summary:
+      'Statcast 데이터로 다음 구종을 예측하고, RAG+로컬 LLM으로 투수·타자 관점 코칭 리포트와 즉석 Q&A를 제공하는 야구 전력분석 도구.',
+    role: '데이터 전처리부터 모델링(RandomForest/LSTM), FAISS RAG·로컬 LLM 연동, Gradio UI까지 전 과정 단독 개발',
+    stack: ['Python', 'scikit-learn', 'FAISS', 'Ollama', 'Gradio'],
+    viz: 'heatmap',
+    links: { repo: 'https://github.com/jjssspark/DiamondScout-AI', demo: null },
   },
   {
     id: 'perjury',
