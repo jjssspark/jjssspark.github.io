@@ -133,8 +133,14 @@ export const projects = [
       'Statcast 데이터로 다음 구종을 예측하고, RAG+로컬 LLM으로 투수·타자 관점 코칭 리포트와 즉석 Q&A를 제공하는 야구 전력분석 도구.',
     role: '데이터 전처리부터 모델링(RandomForest/LSTM), FAISS RAG·로컬 LLM 연동, Gradio UI까지 전 과정 단독 개발',
     stack: ['Python', 'scikit-learn', 'FAISS', 'Ollama', 'Gradio'],
-    viz: 'heatmap',
-    links: { repo: 'https://github.com/jjssspark/DiamondScout-AI', demo: null },
+    viz: null,
+    image: 'assets/img/diamondscout-home.jpg',
+    links: {
+      repo: 'https://github.com/jjssspark/DiamondScout-AI',
+      demo: 'https://diamondscout-ai.onrender.com',
+      notion:
+        'https://app.notion.com/p/DiamondScout_AI-3b1f6f1e619a80e887d5ce471c3c972d?source=copy_link',
+    },
   },
   {
     id: 'perjury',
