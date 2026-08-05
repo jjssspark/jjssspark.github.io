@@ -406,7 +406,10 @@ nav {
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
   }
   .project-card--media:hover .project-more {
-    max-height: 220px;
+    /* max-height 트랜지션에는 고정값이 필요한데, 220px는 담당 설명이 길고 태그가 많은
+       카드(DiamondScout: 실측 242px)에서 맨 아랫줄 링크를 잘라먹었다. 가장 높은 카드보다
+       넉넉히 잡는다 - overflow:hidden이라 상한이 커도 여백이 생기지는 않는다. */
+    max-height: 420px;
     opacity: 1;
     margin-top: var(--space-3);
   }
