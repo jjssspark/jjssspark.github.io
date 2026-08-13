@@ -25,8 +25,7 @@ export const profile = {
   tagline: '사용자 편의를 고민하는 서비스 개발자',
   stats: [
     { label: 'PROJECTS', value: 10 },
-    { label: 'TEAM COMMITS', value: 359 },
-    { label: 'STACKS', value: 22 },
+    { label: 'STACKS', value: 28 },
   ],
   links: {
     email: 'hsyoun585@gmail.com',
