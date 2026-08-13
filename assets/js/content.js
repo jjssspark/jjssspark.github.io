@@ -24,7 +24,7 @@ export const profile = {
   role: 'ML Engineer / Full-stack',
   tagline: '사용자 편의를 고민하는 서비스 개발자',
   stats: [
-    { label: 'PROJECTS', value: 11 },
+    { label: 'PROJECTS', value: 10 },
     { label: 'TEAM COMMITS', value: 359 },
     { label: 'STACKS', value: 22 },
   ],
@@ -43,7 +43,7 @@ export const projects = [
     tier: 'featured',
     status: 'in-play',
     summary:
-      '팀 프로젝트의 회의·업무·개발 기록·산출물·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 10인 팀, 441커밋 중 359커밋으로 2위 기여자.',
+      '팀 프로젝트의 회의·업무·개발 기록·산출물·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 6인 팀에서 부팀장을 맡았다.',
     role: 'AI 어시스턴트(RAG 챗봇), 대시보드 지연위험도 분석, CI/CD 배포 게이트',
     stack: ['React', 'TypeScript', 'Spring Boot', 'FastAPI', 'LangGraph', 'Redis'],
     viz: null,
@@ -161,17 +161,6 @@ export const projects = [
     },
   },
   {
-    id: 'univ',
-    name: 'UniRoad',
-    tier: 'shipped',
-    status: 'shipped',
-    summary: '대학생 인증 기반으로 커뮤니티·채팅·중고거래를 한 앱에서 제공하는 대학생 전용 모바일 서비스.',
-    role: null,
-    stack: ['React Native', 'Expo', 'TypeScript', 'Firebase'],
-    viz: null,
-    links: { repo: 'https://github.com/UNIROAD-KR/Frontend', demo: null },
-  },
-  {
     id: 'onque',
     name: 'OnQue',
     tier: 'coming-soon',
@@ -185,13 +174,20 @@ export const projects = [
   {
     id: 'zoner',
     name: 'Zoner',
-    tier: 'coming-soon',
-    status: 'coming-soon',
-    summary: 'React 기반 서비스. 준비 중입니다.',
-    role: null,
-    stack: [],
+    tier: 'shipped',
+    status: 'shipped',
+    summary:
+      '웹캠으로 학습 집중도를 5초마다 판정하고, 세션이 끝나면 언제 무너졌는지·무엇이 방해했는지를 근거와 함께 리포트로 돌려주는 웹앱. 영상은 서버로 보내지 않고 브라우저 안에서만 추론한다.',
+    role: '컴퓨터공학 캡스톤디자인 팀 프로젝트에서 기획 공동 참여·프론트엔드 담당 (우수작품 선정) — 이후 팀 동의를 얻어 단독 고도화. 브라우저 내 비전 추론, RLS 17개 정책 기반 권한 설계, Edge Function 2개, 테스트 276개',
+    stack: ['React', 'MediaPipe', 'Supabase', 'PostgreSQL', 'Vercel'],
     viz: null,
-    links: { repo: null, demo: null },
+    image: 'assets/img/zoner-home.jpg',
+    links: {
+      repo: 'https://github.com/jjssspark/Zoner',
+      demo: 'https://zoner-one.vercel.app',
+      notion:
+        'https://app.notion.com/p/Zoner-3b1f6f1e619a8022a0edf01e27643063?source=copy_link',
+    },
   },
 ];
 
