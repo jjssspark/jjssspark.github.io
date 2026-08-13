@@ -414,6 +414,17 @@ nav {
     margin-top: var(--space-3);
   }
 }
+/* 터치 기기에는 hover가 없어 위 블록이 적용되지 않는다. 펼칠 방법이 없으므로
+   담당·태그·링크를 처음부터 펼쳐 둔다 - 안 그러면 폰에서 Repository/Demo 링크가
+   영영 보이지 않는다. */
+@media (hover: none) {
+  .project-card--media .project-more {
+    max-height: none;
+    opacity: 1;
+    overflow: visible;
+    margin-top: var(--space-3);
+  }
+}
 
 /* Engineering */
 .eng-list {

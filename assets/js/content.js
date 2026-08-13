@@ -3,6 +3,7 @@
  * @property {string|null} repo
  * @property {string|null} demo
  * @property {string|null} [notion]
+ * @property {string|null} [video] - 시연 영상 URL
  */
 
 /**
@@ -42,11 +43,19 @@ export const projects = [
     tier: 'featured',
     status: 'in-play',
     summary:
-      '팀 프로젝트의 회의·업무·개발 기록·산출물·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 6인 팀에서 부팀장을 맡았다.',
-    role: 'AI 어시스턴트(RAG 챗봇), 대시보드 지연위험도 분석, CI/CD 배포 게이트',
-    stack: ['React', 'TypeScript', 'Spring Boot', 'FastAPI', 'LangGraph', 'Redis'],
+      '팀 프로젝트의 회의록·업무·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 회의록을 올리면 To-Do가 자동으로 뽑혀 업무 보드에 꽂히고, 그 기록이 그대로 기여도 평가 근거가 된다. 6인 팀에서 부팀장을 맡았다.',
+    role:
+      '실시간 알림(SSE)·회의록 AI 분석 파이프라인·심사자 기여도 평가·마이페이지·CI/CD 배포 게이트. 개인 커밋 357개',
+    stack: ['React', 'TypeScript', 'Spring Boot', 'FastAPI', 'LangGraph', 'PostgreSQL', 'Redis', 'Docker'],
     viz: null,
-    links: { repo: 'https://github.com/rhantj/work-flow', demo: null },
+    image: 'assets/img/workflow-home.jpg',
+    links: {
+      repo: 'https://github.com/rhantj/work-flow',
+      demo: 'https://t3-workflow-ai.site',
+      video: 'https://youtu.be/D5jy2qbKh7g',
+      notion:
+        'https://app.notion.com/p/WorkFlow_AI-3b1f6f1e619a803a9e5cf884f8d23c05?source=copy_link',
+    },
   },
   {
     id: 'jivis',
@@ -191,6 +200,24 @@ export const projects = [
 ];
 
 export const engineering = [
+  {
+    title: '실시간 알림이 13곳에서 통째로 발송되지 않던 문제',
+    problem:
+      '업무 배정·댓글·완료 승인 알림이 실시간으로 뜨지 않았다. DB에는 쌓여서 새로고침하면 보였기 때문에 닷새 동안 아무도 문제로 인식하지 않았다.',
+    solution:
+      'NotificationService에 이름이 비슷한 메서드가 둘 있었다 — notify()는 DB 저장만, notifyAfterCommit()이 SSE 발송까지 담당한다. 호출부 13곳이 전부 앞쪽을 쓰고 있어 실시간 경로를 타는 곳이 사실상 없었다. 13곳을 교체하면서, SSE의 비동기 재처리(ASYNC dispatch) 때 JwtAuthenticationFilter가 기본 스킵돼 SecurityContext가 비던 문제도 shouldNotFilterAsyncDispatch()로 함께 잡았다.',
+    commits: ['982edb83'],
+    repo: 'https://github.com/rhantj/work-flow',
+  },
+  {
+    title: '부수 작업이 본 작업의 트랜잭션을 무너뜨리던 문제',
+    problem:
+      '심사자 활동 로그 저장이 실패하면 평가 확정·점수 저장 API 전체가 500으로 죽었다. 곁다리 기록이 본 작업을 되돌리면 안 되는데 되돌리고 있었다.',
+    solution:
+      'try/catch로 감싸는 것만으로는 통하지 않는다 — JPA save()의 예외가 트랜잭션 경계를 빠져나가는 순간 rollback-only로 마킹돼 커밋이 이미 실패로 예정된다. REQUIRES_NEW도 커밋이 AOP 프록시에서 메서드 반환 뒤에 일어나 메서드 안 try/catch의 사정권 밖이다. TransactionTemplate.executeWithoutResult()로 커밋을 같은 메서드 안으로 가져와 격리했다.',
+    commits: ['7aab8dd7'],
+    repo: 'https://github.com/rhantj/work-flow',
+  },
   {
     title: 'RAG 임베딩 LoRA 파인튜닝',
     problem:

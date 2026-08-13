@@ -62,6 +62,9 @@ function projectCardHtml(project, index) {
   const notionHtml = project.links.notion
     ? ` · <a class="project-link" href="${escapeHtml(project.links.notion)}" target="_blank" rel="noopener noreferrer">Notion <span aria-hidden="true">↗</span></a>`
     : '';
+  const videoHtml = project.links.video
+    ? ` · <a class="project-link" href="${escapeHtml(project.links.video)}" target="_blank" rel="noopener noreferrer">시연 영상 <span aria-hidden="true">↗</span></a>`
+    : '';
   const statusHtml =
     project.status === 'in-play'
       ? '<span class="status-badge">IN PLAY</span>'
@@ -86,7 +89,7 @@ function projectCardHtml(project, index) {
         <div class="project-more">
           ${roleHtml}
           ${tagsHtml}
-          ${linkHtml}${demoHtml}${notionHtml}
+          ${linkHtml}${demoHtml}${videoHtml}${notionHtml}
         </div>
       </article>
     `;
@@ -101,7 +104,7 @@ function projectCardHtml(project, index) {
       ${roleHtml}
       ${vizHtml}
       ${tagsHtml}
-      ${linkHtml}${demoHtml}
+      ${linkHtml}${demoHtml}${videoHtml}${notionHtml}
     </article>
   `;
 }
