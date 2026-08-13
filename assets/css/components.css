@@ -679,3 +679,141 @@ footer {
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────────
+   Lineup — 타순 캐러셀 (shader.se의 가로 캐러셀을 야구 타순으로)
+   ───────────────────────────────────────────── */
+.section-lead {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-8);
+}
+.lineup {
+  /* 컨테이너 밖으로 흘러나가 화면 끝까지 닿게 — 편집적 여백 */
+  margin-inline: calc(var(--space-6) * -1);
+  padding-inline: var(--space-6);
+  overflow: hidden;
+}
+.lineup__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(min(22rem, 82vw), 26rem);
+  gap: var(--space-6);
+  overflow-x: auto;
+  /* scroll-behavior:smooth를 두면 스냅과 얽혀 프로그램 스크롤이 통째로 취소된다.
+     이동은 JS가 scrollLeft 직접 대입으로 처리하고, 스냅이 착지를 정리한다. */
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-6);
+  padding-block: var(--space-4);
+  scrollbar-width: none;
+}
+.lineup__track::-webkit-scrollbar {
+  display: none;
+}
+.lineup__track > * {
+  scroll-snap-align: start;
+}
+.lineup__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.lineup__btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo),
+    transform var(--duration-fast) var(--ease-out-expo);
+}
+.lineup__btn:hover {
+  border-color: var(--color-stitch-hover);
+  background: color-mix(in oklch, var(--color-stitch) 14%, transparent);
+}
+.lineup__btn:active {
+  transform: scale(0.94);
+}
+.lineup__btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.lineup__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────
+   About — 선언 한 줄 + 서술 (레퍼런스의 리드 구조)
+   ───────────────────────────────────────────── */
+.about-lead {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  max-width: 26ch;
+  margin-bottom: var(--space-6);
+  word-break: keep-all;
+}
+.about-text {
+  color: var(--color-text-muted);
+  max-width: 62ch;
+  margin-bottom: var(--space-4);
+  word-break: keep-all;
+}
+
+/* ─────────────────────────────────────────────
+   Scroll prompt
+   ───────────────────────────────────────────── */
+.hero-scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-12);
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out-expo);
+}
+.hero-scroll:hover {
+  color: var(--color-stitch-hover);
+}
+.hero-scroll__rail {
+  position: relative;
+  width: 4.5rem;
+  height: 1px;
+  background: color-mix(in oklch, var(--color-stitch) 35%, transparent);
+  overflow: hidden;
+}
+/* 공이 굴러가듯 좌→우로 빛이 지나간다 */
+.hero-scroll__rail::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: 1.5rem;
+  background: var(--color-stitch-hover);
+  animation: rail-run 2s var(--ease-in-out) infinite;
+}
+@keyframes rail-run {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(300%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-scroll__rail::after {
+    animation: none;
+    transform: none;
+  }
+  .lineup__track {
+    scroll-behavior: auto;
+  }
+}

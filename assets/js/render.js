@@ -165,8 +165,59 @@ function renderContact() {
   `;
 }
 
+/**
+ * 타순 캐러셀. 스크롤 스냅이 이동을 담당하고 버튼은 scrollBy만 호출한다 —
+ * 터치 스와이프·키보드 스크롤이 공짜로 따라온다.
+ */
+function setupLineup() {
+  const track = document.getElementById('shipped-grid');
+  const counter = document.getElementById('lineup-count');
+  if (!track || !counter) return;
+
+  const cards = Array.from(track.children);
+  if (!cards.length) return;
+
+  // 가로 캐러셀 안의 카드는 뷰포트와 교차하지 않아 IntersectionObserver가 영영 안 깨운다.
+  // 트랙이 화면에 들어오는 시점에 전부 한 번에 드러낸다.
+  const wake = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      cards.forEach((card) => card.classList.add('is-visible'));
+      wake.disconnect();
+    },
+    { rootMargin: '0px 0px -10% 0px' }
+  );
+  wake.observe(track);
+
+  const step = () => cards[0].getBoundingClientRect().width + 24;
+  const total = String(cards.length).padStart(2, '0');
+
+  const currentIndex = () =>
+    Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), cards.length - 1);
+
+  const syncCounter = () => {
+    counter.textContent = `${String(currentIndex() + 1).padStart(2, '0')} / ${total}`;
+  };
+
+  document.querySelectorAll('[data-lineup]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.lineup === 'next' ? 1 : -1;
+      const next = Math.min(Math.max(currentIndex() + dir, 0), cards.length - 1);
+      // scrollLeft 직접 대입 — 부드러움은 CSS scroll-behavior가 맡는다.
+      // JS의 behavior:'smooth'는 scroll-snap과 얽혀 환경에 따라 무시된다.
+      track.scrollLeft = next * step();
+      // 스냅이 착지 위치를 미세 조정하므로 인덱스는 계산값으로 직접 표기한다
+      counter.textContent = `${String(next + 1).padStart(2, '0')} / ${total}`;
+    });
+  });
+
+  track.addEventListener('scroll', syncCounter, { passive: true });
+  syncCounter();
+}
+
 renderHero();
 renderProjects();
+setupLineup();
 renderSkills();
 renderPrinciples();
 renderContact();
