@@ -817,3 +817,126 @@ footer {
     scroll-behavior: auto;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   CRT — 구식 중계 화면 질감
+   전 화면 고정 오버레이. 장식이므로 클릭을 통과시킨다.
+   ═══════════════════════════════════════════════ */
+.crt {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  /* 주사선 */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    var(--crt-scanline) 3px,
+    var(--crt-scanline) 4px
+  );
+  /* 브라운관 가장자리 어두워짐 */
+  box-shadow:
+    inset 0 0 140px 40px oklch(0% 0 0 / 0.55),
+    inset 0 0 40px 8px oklch(0% 0 0 / 0.4);
+}
+
+/* 색수차 — 옛 화면의 RGB 어긋남. 제목에만 얹어 본문 가독성은 지킨다 */
+.hero-name,
+.section-title,
+.about-lead {
+  text-shadow:
+    -1px 0 0 var(--crt-aberration-r),
+    1px 0 0 var(--crt-aberration-b);
+}
+
+/* 세리프 — 레퍼런스의 큰 세리프 헤드라인 */
+.hero-name,
+.section-title,
+.about-lead,
+.project-name,
+.principle-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+}
+.logo {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-lg);
+}
+
+/* ═══════════════════════════════════════════════
+   Boot — 전광판 점등 시퀀스
+   ═══════════════════════════════════════════════ */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: oklch(18% 0.03 250);
+  transition: opacity 500ms var(--ease-out-expo);
+}
+.boot[hidden] {
+  display: none;
+}
+.boot.is-done {
+  opacity: 0;
+}
+.boot__screen {
+  width: min(46rem, 88vw);
+  padding: var(--space-12) var(--space-8);
+  border: 2px solid color-mix(in oklch, var(--color-phosphor) 45%, transparent);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--color-phosphor);
+}
+.boot__brand {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-wide);
+  text-shadow: 0 0 18px color-mix(in oklch, var(--color-phosphor) 60%, transparent);
+  margin-bottom: var(--space-4);
+}
+.boot__meta {
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  opacity: 0.8;
+  margin-bottom: var(--space-8);
+}
+.boot__bar {
+  height: 1.5rem;
+  border: 1px solid var(--color-phosphor);
+  padding: 3px;
+  margin-bottom: var(--space-6);
+}
+/* 도트 매트릭스처럼 칸이 차오른다 */
+.boot__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-phosphor) 0 10px,
+    transparent 10px 14px
+  );
+  animation: boot-fill 1.8s steps(18) forwards;
+}
+@keyframes boot-fill {
+  to { width: 100%; }
+}
+.boot__foot {
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot__fill {
+    animation: none;
+    width: 100%;
+  }
+  .crt {
+    background-image: none;
+  }
+}

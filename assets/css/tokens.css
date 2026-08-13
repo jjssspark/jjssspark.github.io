@@ -33,7 +33,14 @@
   --color-stitch: var(--stitch-500);
   --color-stitch-hover: var(--stitch-400);
 
+  /* CRT — 구식 중계 화면 질감 (shader.se 레퍼런스) */
+  --color-phosphor: oklch(88% 0.14 85); /* 전광판 앰버 */
+  --crt-scanline: oklch(0% 0 0 / 0.26);
+  --crt-aberration-r: oklch(62% 0.24 25 / 0.5);
+  --crt-aberration-b: oklch(70% 0.18 240 / 0.5);
+
   /* 타이포그래피 */
+  --font-serif: 'DM Serif Display', 'Times New Roman', serif;
   --font-sans: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
