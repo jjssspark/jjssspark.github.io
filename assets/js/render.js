@@ -78,10 +78,18 @@ function projectCardHtml(project, index) {
     (project.tier === 'featured' ? ' project-card--featured' : project.tier === 'coming-soon' ? ' project-card--soon' : '') +
     (project.image ? ' project-card--media' : '');
 
+  // 야구공 실밥. rx로 카드 모서리를 따라 돌고, hover 시 stroke-dashoffset이 흐른다.
+  const seamHtml = `
+      <svg class="card-seam" aria-hidden="true" preserveAspectRatio="none">
+        <rect class="card-seam__path" x="6" y="6" rx="14" />
+      </svg>`;
+
   if (project.image) {
     return `
       <article class="project-card${tierClass} reveal" style="--delay:${(index % 6) * 60}ms" data-stack-list="${project.stack.map(escapeHtml).join(',')}">
-        <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
+        ${seamHtml}
+        ${seamHtml}
+      <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
         ${statusHtml}
         <h3 class="project-name">${escapeHtml(project.name)}</h3>
         <p class="project-desc">${escapeHtml(project.summary)}</p>
@@ -97,6 +105,7 @@ function projectCardHtml(project, index) {
 
   return `
     <article class="project-card${tierClass} reveal" style="--delay:${(index % 6) * 60}ms" data-stack-list="${project.stack.map(escapeHtml).join(',')}">
+      ${seamHtml}
       <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
       ${statusHtml}
       <h3 class="project-name">${escapeHtml(project.name)}</h3>
