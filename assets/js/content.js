@@ -50,7 +50,7 @@ export const projects = [
     viz: null,
     image: 'assets/img/workflow-home.jpg',
     links: {
-      repo: 'https://github.com/rhantj/work-flow',
+      repo: 'https://github.com/jjssspark/WorkFlow_AI',
       demo: 'https://t3-workflow-ai.site',
       video: 'https://youtu.be/D5jy2qbKh7g',
       notion:
@@ -211,7 +211,7 @@ export const engineering = [
     solution:
       'NotificationService에 이름이 비슷한 메서드가 둘 있었다 — notify()는 DB 저장만, notifyAfterCommit()이 SSE 발송까지 담당한다. 호출부 13곳이 전부 앞쪽을 쓰고 있어 실시간 경로를 타는 곳이 사실상 없었다. 13곳을 교체하면서, SSE의 비동기 재처리(ASYNC dispatch) 때 JwtAuthenticationFilter가 기본 스킵돼 SecurityContext가 비던 문제도 shouldNotFilterAsyncDispatch()로 함께 잡았다.',
     commits: ['982edb83'],
-    repo: 'https://github.com/rhantj/work-flow',
+    repo: 'https://github.com/jjssspark/WorkFlow_AI',
   },
   {
     title: '부수 작업이 본 작업의 트랜잭션을 무너뜨리던 문제',
@@ -220,7 +220,7 @@ export const engineering = [
     solution:
       'try/catch로 감싸는 것만으로는 통하지 않는다 — JPA save()의 예외가 트랜잭션 경계를 빠져나가는 순간 rollback-only로 마킹돼 커밋이 이미 실패로 예정된다. REQUIRES_NEW도 커밋이 AOP 프록시에서 메서드 반환 뒤에 일어나 메서드 안 try/catch의 사정권 밖이다. TransactionTemplate.executeWithoutResult()로 커밋을 같은 메서드 안으로 가져와 격리했다.',
     commits: ['7aab8dd7'],
-    repo: 'https://github.com/rhantj/work-flow',
+    repo: 'https://github.com/jjssspark/WorkFlow_AI',
   },
   {
     title: '내부 AI 엔드포인트가 게이트웨이를 우회해 직접 호출되던 문제',
@@ -229,7 +229,7 @@ export const engineering = [
     solution:
       '나머지 엔드포인트(delay·workload·checklist·contribution·meeting) 전체에 같은 검증을 적용하고, verify_internal_api_key를 core/security.py로 옮겨 공용화했다. Spring 쪽 FastAPI 클라이언트 6개에도 헤더를 추가하고, 헤더 전송 검증 테스트와 회귀 테스트를 함께 갱신했다.',
     commits: ['003a4a0c'],
-    repo: 'https://github.com/rhantj/work-flow',
+    repo: 'https://github.com/jjssspark/WorkFlow_AI',
   },
   {
     title: '테스트에서만 안 잡히던 401 — Spring Security와 /error forward',
@@ -238,7 +238,7 @@ export const engineering = [
     solution:
       'ErrorPageFilter가 /error로 내부 forward를 하는데 /error가 SecurityConfig의 permitAll 목록에 없어 그 재요청이 인증에 걸리고 있었다. MockMvc는 이 forward를 시뮬레이션하지 않는다. mock 없이 호출하면 정상(200/400), mock이 예외를 던지면 401이 재현되는 것으로 원인을 확정하고 /error를 permitAll에 추가했다. 같은 PR에서 상태값 불일치("완료" vs "done")와 4xx까지 재시도하던 @Retryable도 함께 잡았다.',
     commits: ['84a9b03b'],
-    repo: 'https://github.com/rhantj/work-flow',
+    repo: 'https://github.com/jjssspark/WorkFlow_AI',
   },
   {
     title: '프로젝트 전환 시 이전 요청이 화면을 덮어쓰던 경쟁 조건',
@@ -247,7 +247,7 @@ export const engineering = [
     solution:
       '응답 시점에 요청 당시의 projectId와 어긋나면 그 응답을 버리도록 currentProjectIdRef 가드를 적용했다. 알림 목록에서 이미 쓰던 패턴과 통일해, 같은 종류의 레이스가 화면마다 제각각 처리되지 않게 했다.',
     commits: ['3caf32f7'],
-    repo: 'https://github.com/rhantj/work-flow',
+    repo: 'https://github.com/jjssspark/WorkFlow_AI',
   },
   {
     title: '「AI 추천이 나쁘다」의 정체 — AI가 호출조차 안 되고 있었다',
