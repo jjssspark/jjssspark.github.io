@@ -1,4 +1,4 @@
-import { profile, projects, engineering } from './content.js';
+import { profile, projects, skills, principles } from './content.js';
 
 /**
  * @param {string} str
@@ -112,27 +112,34 @@ function projectCardHtml(project, index) {
 function renderProjects() {
   const featured = projects.filter((p) => p.tier === 'featured');
   const shipped = projects.filter((p) => p.tier === 'shipped');
-  const soon = projects.filter((p) => p.tier === 'coming-soon');
 
   document.getElementById('featured-grid').innerHTML = featured.map((p, i) => projectCardHtml(p, i)).join('');
   document.getElementById('shipped-grid').innerHTML = shipped.map((p, i) => projectCardHtml(p, i)).join('');
-  document.getElementById('soon-grid').innerHTML = soon.map((p, i) => projectCardHtml(p, i)).join('');
 }
 
-function renderEngineering() {
-  const list = document.getElementById('engineering-list');
-  list.innerHTML = engineering
+function renderSkills() {
+  document.getElementById('skill-list').innerHTML = skills
+    .map(
+      (group, index) => `
+    <div class="skill-row reveal" style="--delay:${index * 60}ms">
+      <dt class="skill-group">${escapeHtml(group.group)}</dt>
+      <dd class="skill-items">
+        ${group.items.map((item) => `<span class="skill-chip">${escapeHtml(item)}</span>`).join('')}
+      </dd>
+    </div>
+  `
+    )
+    .join('');
+}
+
+function renderPrinciples() {
+  document.getElementById('principle-list').innerHTML = principles
     .map(
       (item, index) => `
-    <article class="eng-item reveal" style="--delay:${index * 80}ms">
-      <h3>${escapeHtml(item.title)}</h3>
-      <p><strong>문제:</strong> ${escapeHtml(item.problem)}</p>
-      <p><strong>해결:</strong> ${escapeHtml(item.solution)}</p>
-      <div class="eng-commits">
-        ${item.commits
-          .map((hash) => `<a href="${escapeHtml(item.repo)}/commit/${escapeHtml(hash)}" target="_blank" rel="noopener noreferrer">${escapeHtml(hash)}</a>`)
-          .join('')}
-      </div>
+    <article class="principle-item reveal" style="--delay:${index * 80}ms">
+      <span class="principle-index">${String(index + 1).padStart(2, '0')}</span>
+      <h3 class="principle-title">${escapeHtml(item.title)}</h3>
+      <p class="principle-body">${escapeHtml(item.body)}</p>
     </article>
   `
     )
@@ -150,5 +157,6 @@ function renderContact() {
 
 renderHero();
 renderProjects();
-renderEngineering();
+renderSkills();
+renderPrinciples();
 renderContact();

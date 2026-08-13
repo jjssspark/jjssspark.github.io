@@ -203,6 +203,32 @@ export const projects = [
   },
 ];
 
+/** 기술 스택 — 각 프로젝트의 실제 의존성에서 확인된 것만 */
+export const skills = [
+  { group: 'Language', items: ['Python', 'TypeScript', 'JavaScript', 'Java'] },
+  { group: 'Backend', items: ['FastAPI', 'Spring Boot', 'Flask', 'Celery'] },
+  { group: 'Frontend', items: ['React', 'Next.js', 'Tailwind', 'Streamlit', 'Gradio'] },
+  { group: 'Data · Infra', items: ['PostgreSQL', 'Redis', 'Supabase', 'Docker', 'GitHub Actions'] },
+  { group: 'ML · DL', items: ['PyTorch', 'TensorFlow', 'scikit-learn', 'XGBoost', 'LightGBM', 'YOLOv8', 'MediaPipe'] },
+  { group: 'LLM · RAG', items: ['Claude API', 'Gemini API', 'Hugging Face', 'FAISS', 'LangGraph'] },
+];
+
+/** 일하는 방식 — 실제 작업에서 반복된 패턴 */
+export const principles = [
+  {
+    title: '증상이 아니라 원인을 찾는다',
+    body: '「AI 추천 품질이 나쁘다」의 실제 원인이 AI가 호출조차 되지 않은 것이었던 적이 있다. 화면에 보이는 문구를 코드에서 grep 하는 것부터 시작해, 가설이 틀리면 틀렸다고 기록하고 다음으로 넘어간다.',
+  },
+  {
+    title: '조용히 실패하게 두지 않는다',
+    body: '폴백이 정상 응답과 구분되지 않으면 버그가 품질 문제로 위장된다. 부가 기능의 실패가 핵심 API를 죽이지 않도록 경계를 나누고, 폴백은 폴백임이 드러나게 만든다.',
+  },
+  {
+    title: '푼 문제는 기록으로 남긴다',
+    body: '원인과 함께 실패한 시도까지 적어둔다. 같은 원인의 문제를 다른 프로젝트에서 처음부터 다시 조사하지 않기 위해서다. 지금까지 24건을 누적했다.',
+  },
+];
+
 export const engineering = [
   {
     title: '실시간 알림이 13곳에서 통째로 발송되지 않던 문제',
