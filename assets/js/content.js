@@ -22,8 +22,8 @@
 
 export const profile = {
   name: 'JISU PARK',
-  role: 'ML Engineer / Full-stack',
-  tagline: '사용자 편의를 고민하는 서비스 개발자',
+  role: 'Full-stack Developer',
+  tagline: '쓰는 사람 입장에서 편한 서비스를 만들고, 필요한 곳에 AI를 붙입니다',
   stats: [
     { label: 'PROJECTS', value: 10 },
     { label: 'STACKS', value: 28 },
@@ -94,7 +94,7 @@ export const projects = [
     image: 'assets/img/salarycast-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/SalaryCast_AI',
-      demo: 'https://stovelens-ai.streamlit.app/',
+      demo: null,
       notion: 'https://app.notion.com/p/SalaryCast_AI-00af6f1e619a82c4b882016d34088dd1?source=copy_link',
     },
   },
@@ -111,7 +111,7 @@ export const projects = [
     image: 'assets/img/truthlens-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/TruthLens',
-      demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app',
+      demo: null,
       notion: 'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
     },
   },
@@ -171,13 +171,17 @@ export const projects = [
   {
     id: 'onque',
     name: 'OnQue',
-    tier: 'coming-soon',
-    status: 'coming-soon',
-    summary: 'FastAPI와 Gemini API를 연동한 서비스. 준비 중입니다.',
-    role: null,
-    stack: [],
+    tier: 'shipped',
+    status: 'shipped',
+    summary:
+      '회의록을 LLM으로 요약하고, 오간 대화에서 「누가 언제까지 무엇을」에 해당하는 약속을 뽑아 추적하는 팀 협업 워크스페이스. @비서 봇에게 물으면 그동안의 기록을 근거로 답한다.',
+    role: '컴퓨터공학 캡스톤디자인 3인 팀 — FastAPI 백엔드와 Next.js 프론트 전 구간, JWT 인증·권한, Render/Vercel 배포',
+    stack: ['Next.js', 'React', 'TypeScript', 'FastAPI', 'PostgreSQL', 'Gemini API'],
     viz: null,
-    links: { repo: null, demo: null },
+    links: {
+      repo: 'https://github.com/jjssspark/OnQue',
+      demo: 'https://onque-frontend.vercel.app',
+    },
   },
   {
     id: 'zoner',
@@ -219,37 +223,39 @@ export const engineering = [
     repo: 'https://github.com/rhantj/work-flow',
   },
   {
-    title: 'RAG 임베딩 LoRA 파인튜닝',
+    title: '내부 AI 엔드포인트가 게이트웨이를 우회해 직접 호출되던 문제',
     problem:
-      'HF Inference API는 서버리스라 커스텀(파인튜닝) 임베딩 모델을 서빙하지 못해, RAG 검색이 쿼리 노이즈에 취약한 상태로 원격 API에 묶여 있었다.',
+      '서비스 간 공유 시크릿(X-Internal-Api-Key) 검증이 RAG·Assistant 엔드포인트에만 걸려 있었다. docker-compose로 노출된 FastAPI 8000 포트를 통해 Spring 게이트웨이를 건너뛴 직접 호출이 가능한 상태였다.',
     solution:
-      'BAAI/bge-m3에 쿼리 노이즈 강건성 실험을 담은 LoRA 파인튜닝을 적용해 병합한 모델을 HF Hub에 올리고, 컨테이너 내부 로컬 추론(sentence-transformers)으로 전환했다.',
-    commits: ['d12dd8f0'],
+      '나머지 엔드포인트(delay·workload·checklist·contribution·meeting) 전체에 같은 검증을 적용하고, verify_internal_api_key를 core/security.py로 옮겨 공용화했다. Spring 쪽 FastAPI 클라이언트 6개에도 헤더를 추가하고, 헤더 전송 검증 테스트와 회귀 테스트를 함께 갱신했다.',
+    commits: ['003a4a0c'],
     repo: 'https://github.com/rhantj/work-flow',
   },
   {
-    title: 'Isolation Forest 3축 독립 판정 구조',
-    problem: '이상치 탐지 로직이 축마다 제각각 구현되어 있어 판정 기준을 한 곳에서 검증하기 어려웠다.',
-    solution: 'Isolation Forest 판정 경로를 compute_axis_results 기반 3축 독립 판정 구조로 통일했다.',
-    commits: ['2468029e'],
+    title: '테스트에서만 안 잡히던 401 — Spring Security와 /error forward',
+    problem:
+      '컨트롤러에서 처리되지 않은 예외에 500이 아니라 401이 반환됐다. MockMvc 기반 테스트로는 재현되지 않아 원인이 오래 드러나지 않았다.',
+    solution:
+      'ErrorPageFilter가 /error로 내부 forward를 하는데 /error가 SecurityConfig의 permitAll 목록에 없어 그 재요청이 인증에 걸리고 있었다. MockMvc는 이 forward를 시뮬레이션하지 않는다. mock 없이 호출하면 정상(200/400), mock이 예외를 던지면 401이 재현되는 것으로 원인을 확정하고 /error를 permitAll에 추가했다. 같은 PR에서 상태값 불일치("완료" vs "done")와 4xx까지 재시도하던 @Retryable도 함께 잡았다.',
+    commits: ['84a9b03b'],
     repo: 'https://github.com/rhantj/work-flow',
   },
   {
-    title: 'RAG·대시보드 비동기 처리 Redis Queue 전환',
+    title: '프로젝트 전환 시 이전 요청이 화면을 덮어쓰던 경쟁 조건',
     problem:
-      'RAG 챗봇 응답과 대시보드 지연위험도·업무편중 재분석이 요청 스레드에서 동기 처리되어, 처리 시간이 길어질수록 API가 그대로 블로킹됐다.',
+      '프로젝트를 전환·생성한 직후 다른 프로젝트의 회의록이 화면에 보였다. 이전 프로젝트로 나간 조회 요청이 뒤늦게 응답하면, 그 응답이 이미 바뀐 현재 화면을 무조건 덮어썼다.',
     solution:
-      'RagQueueWorker/DashboardAiQueueWorker가 Redis Stream을 컨슈머 그룹으로 소비하도록 분리하고, 큐 포화·타임아웃 전용 에러를 추가했다. 동시 재분석 요청은 in-flight 마커로 병합하고, 완료 시 SSE로 알린다.',
-    commits: ['da307984', '09f390b9'],
+      '응답 시점에 요청 당시의 projectId와 어긋나면 그 응답을 버리도록 currentProjectIdRef 가드를 적용했다. 알림 목록에서 이미 쓰던 패턴과 통일해, 같은 종류의 레이스가 화면마다 제각각 처리되지 않게 했다.',
+    commits: ['3caf32f7'],
     repo: 'https://github.com/rhantj/work-flow',
   },
   {
-    title: 'CI 배포 게이트',
+    title: '「AI 추천이 나쁘다」의 정체 — AI가 호출조차 안 되고 있었다',
     problem:
-      'FastAPI 테스트 워크플로가 배포 잡의 needs에 없어 테스트가 깨져도 배포가 나갈 수 있었고(2026-08-01 실제 발생), 마이그레이션 버전 중복도 PR 단위로는 보이지 않아 dev/main이 배포 불가 상태가 된 적이 있다(2026-07-27).',
+      'AI가 만든 여행 일정의 장소 이름이 전부 「제주도 인기 명소 3」 같은 일반명사로 나왔다. 사용자 눈에는 추천 품질 문제로 보였다.',
     solution:
-      'FastAPI 테스트를 workflow_call로 배포 게이트에 편입하고, 마이그레이션 버전 중복 검사를 스크립트 하나로 통일해 deploy 잡의 test 단계에 물렸다.',
-    commits: ['db8fd9bc', 'c6f5b5b2'],
-    repo: 'https://github.com/rhantj/work-flow',
+      '로딩 30초를 맞추려 27초 예산을 주 모델 18초 + 재시도로 나눈 게 화근이었다. 타임아웃으로 실패하면 재시도에 남는 시간이 없어 둘 다 죽고 폴백 목업이 반환됐고, 응답에 표시가 없어 정상 응답과 구분되지 않았다. 프롬프트를 고치던 첫 가설은 틀렸다 — Gemini가 애초에 호출되지 않아 프롬프트는 폴백에 닿지 않는다. 재시도는 빠른 실패(503 등)에만 의미가 있으므로 주 모델에 예산 대부분을 넘기고, 응답에 isFallback을 실어 사용자가 임시 일정임을 알게 했다. 폴백 경로는 API 키를 비운 인스턴스를 별도 포트로 띄워 요금 0으로 검증했다.',
+    commits: ['7454238'],
+    repo: 'https://github.com/jjssspark/TripMate',
   },
 ];
