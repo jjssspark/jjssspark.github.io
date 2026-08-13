@@ -148,11 +148,17 @@ export const projects = [
     tier: 'shipped',
     status: 'shipped',
     summary:
-      '클루의 추리 룰 위에서 LLM 에이전트 5명을 거짓 반증과 1:1 밀담으로 교란·교섭하는 싱글플레이 웹 추리게임. NHN Game×AI 해커톤 사전 과제.',
-    role: null,
-    stack: ['React', 'TypeScript', 'Claude API'],
+      '클루의 추리 룰 위에서 LLM 에이전트 5명을 거짓 반증과 1:1 밀담으로 교란·교섭하는 싱글플레이 웹 추리게임. 설치·로그인·API 키 없이 링크만으로 플레이. NHN Game×AI 해커톤 사전 과제.',
+    role: '2인 팀 — UI 전체 설계·구현(화면 14개), CSS 변수 기반 디자인 시스템 직접 구축, 시나리오 4종·직업 10종 콘텐츠와 밸런싱 데이터 작성',
+    stack: ['React', 'TypeScript', 'Zustand', 'Cloudflare Workers', 'Claude API'],
     viz: null,
-    links: { repo: 'https://github.com/rhantj/perjury', demo: null },
+    image: 'assets/img/perjury-home.jpg',
+    links: {
+      repo: 'https://github.com/rhantj/perjury',
+      demo: 'https://rhantj.github.io/perjury/',
+      notion:
+        'https://app.notion.com/p/Perjury_game-3b1f6f1e619a8065b49aedb4f9872502?source=copy_link',
+    },
   },
   {
     id: 'univ',
