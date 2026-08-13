@@ -45,7 +45,7 @@ export const projects = [
     summary:
       '팀 프로젝트의 회의록·업무·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 회의록을 올리면 To-Do가 자동으로 뽑혀 업무 보드에 꽂히고, 그 기록이 그대로 기여도 평가 근거가 된다. 6인 팀에서 부팀장을 맡았다.',
     role:
-      '실시간 알림(SSE)·회의록 AI 분석 파이프라인·심사자 기여도 평가·마이페이지·CI/CD 배포 게이트. 개인 커밋 357개',
+      '실시간 알림(SSE)·회의록 AI 분석 파이프라인·심사자 기여도 평가·마이페이지·CI/CD 배포 게이트. 개인 커밋 356개',
     stack: ['React', 'TypeScript', 'Spring Boot', 'FastAPI', 'LangGraph', 'PostgreSQL', 'Redis', 'Docker'],
     viz: null,
     image: 'assets/img/workflow-home.jpg',

@@ -19,7 +19,7 @@ function renderHero() {
   statLine.innerHTML = profile.stats
     .map(
       (stat) => `
-    <div>
+    <div class="scoreboard__cell">
       <dt>${escapeHtml(stat.label)}</dt>
       <dd data-countup="${stat.value}">0</dd>
     </div>
@@ -82,7 +82,8 @@ function projectCardHtml(project, index) {
   const seamHtml = `
       <svg class="card-seam" aria-hidden="true" preserveAspectRatio="none">
         <rect class="card-seam__path" x="6" y="6" rx="14" />
-      </svg>`;
+      </svg>
+      <div class="card-zone" aria-hidden="true">${'<span></span>'.repeat(9)}</div>`;
 
   if (project.image) {
     return `

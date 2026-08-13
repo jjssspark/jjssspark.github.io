@@ -163,12 +163,28 @@ nav {
   color: var(--color-text-muted);
   max-width: 40ch;
 }
+/* 전광판 — 야구장 스코어보드. 칸을 나누고 숫자를 발광시킨다 */
 .stat-line {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: var(--space-8);
+  gap: 0;
   margin-block: var(--space-8);
   font-family: var(--font-mono);
+  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklch, var(--color-grid) 35%, transparent);
+  overflow: hidden;
+}
+.scoreboard__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-6);
+  min-width: 7.5rem;
+}
+.scoreboard__cell + .scoreboard__cell {
+  border-left: 1px solid color-mix(in oklch, var(--color-stitch) 30%, transparent);
 }
 .stat-line dt {
   font-size: var(--text-xs);
@@ -176,9 +192,38 @@ nav {
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
 }
+/* 전광판 램프처럼 번지게 — 도트 전광판의 빛 번짐 */
 .stat-line dd {
   font-size: var(--text-xl);
-  color: var(--color-accent);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-stitch-hover);
+  text-shadow:
+    0 0 12px color-mix(in oklch, var(--color-stitch) 70%, transparent),
+    0 0 28px color-mix(in oklch, var(--color-stitch) 35%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 스트라이크존 — 카드 호버 시 9분할 격자가 배경에 뜬다. 히어로 strike-grid와 같은 모티프 */
+.card-zone {
+  position: absolute;
+  inset: 18%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  opacity: 0;
+  pointer-events: none;
+  /* 음수 z-index — 카드 배경 위, 본문 텍스트 아래에 칠해지게 한다 */
+  z-index: -1;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+.card-zone span {
+  border: 1px solid color-mix(in oklch, var(--color-stitch) 30%, transparent);
+}
+@media (hover: hover) {
+  .project-card:hover .card-zone {
+    opacity: 1;
+  }
 }
 .hero-cta {
   display: flex;
