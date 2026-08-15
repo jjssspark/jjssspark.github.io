@@ -1,5 +1,18 @@
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/**
+ * 캔버스는 CSS 변수를 직접 못 쓴다. 토큰을 읽어와 색의 단일 출처를 유지한다 —
+ * 하드코딩하면 팔레트를 바꿀 때 여기만 옛 색으로 남는다.
+ * @param {string} name
+ * @returns {string}
+ */
+function token(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+const accent = token('--color-accent');
+const gridColor = token('--color-grid');
+
 const ZONE_INTENSITY = [0.3, 0.6, 0.35, 0.55, 0.9, 0.5, 0.25, 0.65, 0.3];
 
 /**
@@ -17,9 +30,9 @@ function drawHeatmap(canvas, progress) {
     const row = Math.floor(i / 3);
     const col = i % 3;
     const alpha = intensity * progress;
-    ctx.fillStyle = `oklch(72% 0.17 55 / ${alpha.toFixed(2)})`;
+    ctx.fillStyle = `color-mix(in oklch, ${accent} ${Math.round(alpha * 100)}%, transparent)`;
     ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
-    ctx.strokeStyle = 'oklch(30% 0.016 250)';
+    ctx.strokeStyle = gridColor;
     ctx.strokeRect(col * cellW, row * cellH, cellW, cellH);
   });
 }

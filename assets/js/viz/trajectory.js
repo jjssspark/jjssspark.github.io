@@ -1,6 +1,18 @@
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /**
+ * 캔버스는 CSS 변수를 직접 못 쓴다. 토큰을 읽어와 색의 단일 출처를 유지한다 —
+ * 하드코딩하면 팔레트를 바꿀 때 여기만 옛 색으로 남는다.
+ * @param {string} name
+ * @returns {string}
+ */
+function token(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+const dataColor = token('--color-data');
+
+/**
  * @param {HTMLCanvasElement} canvas
  * @param {number} progress - 0..1
  */
@@ -9,7 +21,7 @@ function drawTrajectory(canvas, progress) {
   if (!ctx) return;
   const { width, height } = canvas;
   ctx.clearRect(0, 0, width, height);
-  ctx.strokeStyle = 'oklch(78% 0.15 195)';
+  ctx.strokeStyle = dataColor;
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 4]);
   ctx.beginPath();
