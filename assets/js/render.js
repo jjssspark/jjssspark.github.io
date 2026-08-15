@@ -83,14 +83,16 @@ function projectCardHtml(project, index) {
       <svg class="card-seam" aria-hidden="true" preserveAspectRatio="none">
         <rect class="card-seam__path" x="6" y="6" rx="14" />
       </svg>
-      <div class="card-zone" aria-hidden="true">${'<span></span>'.repeat(9)}</div>`;
+      `;
+
+  // 링크 줄을 따로 감싼다 — 내용 길이가 달라도 하단선이 맞는다(.project-foot { margin-top: auto })
+  const footHtml = `<div class="project-foot">${linkHtml}${demoHtml}${videoHtml}${notionHtml}</div>`;
 
   if (project.image) {
     return `
       <article class="project-card${tierClass} reveal" style="--delay:${(index % 6) * 60}ms" data-stack-list="${project.stack.map(escapeHtml).join(',')}">
         ${seamHtml}
-        ${seamHtml}
-      <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
+        <span class="project-index">${String(index + 1).padStart(2, '0')}</span>
         ${statusHtml}
         <h3 class="project-name">${escapeHtml(project.name)}</h3>
         <p class="project-desc">${escapeHtml(project.summary)}</p>
@@ -98,8 +100,8 @@ function projectCardHtml(project, index) {
         <div class="project-more">
           ${roleHtml}
           ${tagsHtml}
-          ${linkHtml}${demoHtml}${videoHtml}${notionHtml}
         </div>
+        ${footHtml}
       </article>
     `;
   }
@@ -114,7 +116,7 @@ function projectCardHtml(project, index) {
       ${roleHtml}
       ${vizHtml}
       ${tagsHtml}
-      ${linkHtml}${demoHtml}${videoHtml}${notionHtml}
+      ${footHtml}
     </article>
   `;
 }
@@ -188,6 +190,20 @@ function setupLineup() {
     { rootMargin: '0px 0px -10% 0px' }
   );
   wake.observe(track);
+
+  // Chrome은 가로로만 스크롤되는 요소 위의 세로 휠을 가로 스크롤로 돌려쓴다.
+  // 그 이동량이 카드 절반에 못 미치면 mandatory 스냅이 원위치시켜, 세로도 가로도 안 움직인다.
+  // 세로가 우세한 휠은 트랙이 삼키지 않고 페이지로 넘긴다.
+  track.addEventListener(
+    'wheel',
+    (event) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      event.preventDefault();
+      // behavior를 명시하지 않으면 html의 scroll-behavior:smooth를 타서 휠마다 보간이 끼어 끈적해진다
+      window.scrollBy({ top: event.deltaY, behavior: 'auto' });
+    },
+    { passive: false }
+  );
 
   const step = () => cards[0].getBoundingClientRect().width + 24;
   const total = String(cards.length).padStart(2, '0');

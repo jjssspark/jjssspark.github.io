@@ -16,7 +16,8 @@ function setupSpotlight(el) {
  * @param {HTMLElement} card
  */
 function setupTilt(card) {
-  const maxDeg = 10;
+  // 10도는 카드가 통째로 흔들려 텍스트를 읽기 어렵다. 깊이만 암시하는 정도로 낮춘다
+  const maxDeg = 3;
   card.addEventListener('mousemove', (event) => {
     const rect = card.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width - 0.5;

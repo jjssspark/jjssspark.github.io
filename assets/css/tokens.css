@@ -35,9 +35,7 @@
 
   /* CRT — 구식 중계 화면 질감 (shader.se 레퍼런스) */
   --color-phosphor: oklch(88% 0.14 85); /* 전광판 앰버 */
-  --crt-scanline: oklch(0% 0 0 / 0.26);
-  --crt-aberration-r: oklch(62% 0.24 25 / 0.5);
-  --crt-aberration-b: oklch(70% 0.18 240 / 0.5);
+  --crt-scanline: oklch(0% 0 0 / 0.12);
 
   /* 타이포그래피 */
   --font-serif: 'DM Serif Display', 'Times New Roman', serif;
@@ -66,7 +64,7 @@
   --space-8: 2rem;
   --space-12: 3rem;
   --space-16: 4rem;
-  --space-section: clamp(4rem, 3rem + 5vw, 10rem);
+  --space-section: clamp(3.5rem, 2.5rem + 3vw, 6.5rem);
 
   /* 반경 · 그림자 */
   --radius-sm: 0.25rem;
