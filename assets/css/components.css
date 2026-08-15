@@ -1186,3 +1186,146 @@ footer {
     gap: var(--space-1) 0;
   }
 }
+
+/* ─────────────────────────────────────────────
+   About — 라인업 카드 용지가 사선으로 화면을 가로지른다
+   ───────────────────────────────────────────── */
+.about {
+  position: relative;
+  /* 판이 화면 밖으로 나가야 잘린 것처럼 읽힌다 */
+  overflow: hidden;
+}
+.about-card {
+  position: relative;
+  /* 기울였을 때 좌우 끝이 비지 않도록 화면보다 넓게 */
+  width: 116%;
+  margin-left: -8%;
+  padding-block: var(--space-16);
+  background-color: var(--color-paper);
+  /* 용지의 결 — 실밥과 같은 각도의 아주 옅은 사선 */
+  background-image: repeating-linear-gradient(
+    62deg,
+    color-mix(in oklch, var(--color-paper-edge) 70%, transparent) 0 1px,
+    transparent 1px 10px
+  );
+  color: var(--color-ink);
+  transform: rotate(-2.2deg);
+  box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
+}
+/* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
+.about-card__inner {
+  transform: rotate(2.2deg);
+}
+
+/* 밝은 판 위에서는 색을 통째로 뒤집는다.
+   전역 토큰은 어두운 배경 기준이라 그대로 쓰면 대비가 무너진다 */
+.about-card .section-title,
+.about-card .about-lead {
+  color: var(--color-ink);
+}
+.about-card .about-text {
+  color: var(--color-ink-muted);
+}
+.about-card .section-kicker {
+  color: var(--color-accent);
+}
+
+/* 2단 조판 — 매거진 판형 */
+.about-cols {
+  columns: 2;
+  column-gap: var(--space-12);
+  margin-top: var(--space-8);
+}
+.about-cols .about-text {
+  /* 문단이 단 경계에서 쪼개지면 읽는 흐름이 끊긴다 */
+  break-inside: avoid;
+  max-width: none;
+}
+
+@media (max-width: 48rem) {
+  .about-cols {
+    columns: 1;
+  }
+  /* 좁은 화면에서 각도가 크면 글줄이 눈에 띄게 기운다 */
+  .about-card {
+    transform: rotate(-1deg);
+    width: 108%;
+    margin-left: -4%;
+    padding-block: var(--space-12);
+  }
+  .about-card__inner {
+    transform: rotate(1deg);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   히어로 — 풀블리드 야간 구장 위 가운데 정렬
+   ───────────────────────────────────────────── */
+.hero {
+  text-align: center;
+}
+.hero-inner {
+  max-width: 64rem;
+}
+.hero-name {
+  font-size: var(--text-display);
+}
+.hero-tagline {
+  margin-inline: auto;
+}
+.hero-cta,
+.hero-scroll {
+  justify-content: center;
+}
+.stat-line {
+  margin-inline: auto;
+}
+/* 조명탑 — 야간 경기의 상단 광원 두 개 */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 42% at 16% -8%, color-mix(in oklch, var(--color-phosphor) 22%, transparent), transparent 70%),
+    radial-gradient(60% 42% at 84% -8%, color-mix(in oklch, var(--color-phosphor) 22%, transparent), transparent 70%);
+}
+.hero-diamond {
+  opacity: 0.45;
+}
+
+/* 한글은 어절 단위로 끊어야 읽힌다. keep-all 없이 두면 "…붙입 / 니다"로 잘린다 */
+.hero-tagline {
+  max-width: 48ch;
+  word-break: keep-all;
+}
+/* 가운데 정렬로 바뀌면서 다이아몬드가 글자 뒤에 바로 겹친다 — 더 뒤로 물린다 */
+.hero-diamond {
+  opacity: 0.26;
+  width: min(88vh, 860px);
+  height: min(88vh, 860px);
+}
+
+/* 좁은 화면에서 링크 6개가 한 줄에 안 들어가 가로 오버플로를 만든다(320px에서 87px).
+   줄바꿈을 허용해 두 줄로 떨어뜨린다 — 별도 메뉴 없이 전 항목이 그대로 눌린다 */
+@media (max-width: 480px) {
+  nav {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    justify-content: flex-start;
+  }
+  .nav-links {
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    width: 100%;
+  }
+}
+
+/* 판을 음수 마진으로 화면 밖까지 넓혔기 때문에, 좁은 화면에서는 컨테이너의
+   기본 여백만으로는 본문 왼쪽이 판 밖으로 밀려 잘린다. 밀어낸 만큼 되돌려 준다 */
+@media (max-width: 48rem) {
+  .about-card__inner {
+    padding-inline: calc(var(--space-6) + 5%);
+  }
+}

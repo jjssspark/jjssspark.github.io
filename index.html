@@ -80,21 +80,29 @@
       </div>
     </section>
 
-    <section id="about" class="section container" aria-labelledby="about-heading">
-      <p class="section-kicker">01 · About</p>
-      <h2 id="about-heading" class="section-title reveal">소개</h2>
-      <p class="about-lead reveal">
-        백엔드부터 프론트엔드, 배포까지 서비스 전 구간을 직접 만듭니다.
-      </p>
-      <p class="about-text reveal" style="--delay:120ms">
-        AI는 그 안에서 문제를 푸는 도구로 씁니다. 요약·예측·검색이 필요한 자리에 붙이고,
-        느려지거나 엉뚱한 응답이 와도 화면이 멈추지 않게 설계합니다.
-      </p>
-      <p class="about-text reveal" style="--delay:200ms">
-        10개 프로젝트에서 API 설계와 DB, 화면, CI/CD 배포를 전부 거쳤습니다.
-        6인 팀 프로젝트에서는 부팀장을 맡아 두 번째로 많은 커밋을 넣었고,
-        푼 문제는 원인과 실패한 시도까지 기록으로 남깁니다.
-      </p>
+    <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
+         어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
+    <section id="about" class="section about" aria-labelledby="about-heading">
+      <div class="about-card">
+        <div class="about-card__inner container">
+          <p class="section-kicker">01 · About</p>
+          <h2 id="about-heading" class="section-title reveal">소개</h2>
+          <p class="about-lead reveal">
+            백엔드부터 프론트엔드, 배포까지 서비스 전 구간을 직접 만듭니다.
+          </p>
+          <div class="about-cols">
+            <p class="about-text reveal" style="--delay:120ms">
+              AI는 그 안에서 문제를 푸는 도구로 씁니다. 요약·예측·검색이 필요한 자리에 붙이고,
+              느려지거나 엉뚱한 응답이 와도 화면이 멈추지 않게 설계합니다.
+            </p>
+            <p class="about-text reveal" style="--delay:200ms">
+              10개 프로젝트에서 API 설계와 DB, 화면, CI/CD 배포를 전부 거쳤습니다.
+              6인 팀 프로젝트에서는 부팀장을 맡아 두 번째로 많은 커밋을 넣었고,
+              푼 문제는 원인과 실패한 시도까지 기록으로 남깁니다.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="featured" class="section container" aria-labelledby="featured-heading">
