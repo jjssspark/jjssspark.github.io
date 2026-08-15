@@ -1182,21 +1182,20 @@ footer {
   margin-left: -8%;
   padding-block: var(--space-16);
   background-color: var(--color-turf);
-  /* 잔디 질감 — 세로 잎날을 아주 촘촘하고 낮은 대비로 겹치고,
-     그 위에 넓은 명암 얼룩을 얹어 균일한 색면으로 보이지 않게 한다 */
+  /* 실제 구장 사진. 원본이 폰 스크린샷(714px)이라 넓은 화면에서는 확대되어
+     다소 부드럽게 보인다 — 위에 어두운 스크림을 깔아 글자 대비를 확보한다 */
   background-image:
-    repeating-linear-gradient(
+    linear-gradient(
       90deg,
-      color-mix(in oklch, var(--turf-800) 28%, transparent) 0 1px,
-      transparent 1px 4px
+      oklch(0% 0 0 / 0.78) 0%,
+      oklch(0% 0 0 / 0.62) 42%,
+      oklch(0% 0 0 / 0.22) 72%,
+      oklch(0% 0 0 / 0.1) 100%
     ),
-    repeating-linear-gradient(
-      86deg,
-      color-mix(in oklch, var(--turf-500) 22%, transparent) 0 1px,
-      transparent 1px 7px
-    ),
-    radial-gradient(60% 70% at 18% 20%, color-mix(in oklch, var(--turf-600) 85%, transparent), transparent 70%),
-    radial-gradient(55% 65% at 78% 78%, color-mix(in oklch, var(--turf-800) 75%, transparent), transparent 70%);
+    url('../img/about-field.jpg');
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
   overflow: hidden;
   color: var(--color-turf-text);
   transform: rotate(-2.2deg);
@@ -1446,58 +1445,6 @@ body {
     0 0 0 1px color-mix(in oklch, var(--color-stitch) 22%, transparent);
 }
 
-/* 파울 라인과 장비 — 레퍼런스 사진의 구성 */
-.about-field {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-/* 분필선. 가장자리가 번지도록 그라디언트로 양끝을 흐린다 —
-   단색 막대로 두면 테이프처럼 보이고 분필 느낌이 안 난다 */
-/* 판이 화면보다 넓게(116%, -8%) 깔려 있어 % 좌표가 화면 기준과 어긋난다.
-   판 폭 기준으로 환산한 값이라 화면 안에 들어온다 */
-.about-field__chalk {
-  position: absolute;
-  top: -10%;
-  bottom: -10%;
-  left: 13%;
-  width: clamp(1.25rem, 1.8vw, 1.75rem);
-  /* 가장자리만 살짝 번지게. 넓게 번지면 분필이 아니라 조명처럼 보인다 */
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklch, var(--chalk) 70%, transparent) 18%,
-    var(--chalk) 34% 66%,
-    color-mix(in oklch, var(--chalk) 70%, transparent) 82%,
-    transparent
-  );
-  opacity: 0.9;
-  transform: rotate(1.6deg);
-}
-.about-field__gear {
-  position: absolute;
-  right: 11%;
-  bottom: 6%;
-  width: clamp(10rem, 22vw, 17rem);
-  height: auto;
-}
-.about-field__bat circle,
-.about-field__bat rect {
-  fill: var(--wood-700);
-}
-.about-field__bat .about-field__barrel {
-  fill: var(--wood-500);
-}
-.about-field__ball circle {
-  fill: oklch(96% 0.008 90);
-}
-.about-field__seam {
-  fill: none;
-  stroke: var(--lg-red-600);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 5 7;
-}
 /* 잔디 위 흰 글씨가 뭉개지지 않도록 바닥 그림자를 깐다 */
 .about-card__inner {
   position: relative;
@@ -1507,19 +1454,8 @@ body {
 
 @media (max-width: 48rem) {
   /* 좁은 화면에서는 장비가 본문을 덮는다 */
-  /* 좁은 화면에서는 본문이 판을 거의 채워 장비가 글자 위에 얹힌다.
-     아래쪽에 전용 여백을 만들고 그 안에 놓는다 */
+  /* 좁은 화면에서는 사진의 세로 구도가 더 많이 보이도록 초점을 옮긴다 */
   .about-card {
-    padding-bottom: calc(var(--space-12) + 6rem);
-  }
-  .about-field__gear {
-    width: 8rem;
-    right: 8%;
-    bottom: 1.25rem;
-    opacity: 0.75;
-  }
-  .about-field__chalk {
-    left: 74%;
-    opacity: 0.7;
+    background-position: 62% 45%;
   }
 }
