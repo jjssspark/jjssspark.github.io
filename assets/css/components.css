@@ -686,6 +686,47 @@ footer {
   margin-inline: calc(var(--space-6) * -1);
   padding-inline: var(--space-6);
   overflow: hidden;
+  position: relative;
+}
+
+/* 실밥 띠 — 35mm 필름의 스프로킷 홀 자리에 야구공 스티치를 둔다.
+   66도로 기운 짧은 획이 일정 간격으로 반복되는 것이 실밥의 형태다 */
+.lineup::before,
+.lineup::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1.15rem;
+  z-index: 2;
+  pointer-events: none;
+  background-color: var(--color-surface-alt);
+  /* 획을 짧고 굵게, 간격은 넓게 — 촘촘하면 실밥이 아니라 사선 줄무늬로 읽힌다 */
+  background-image: repeating-linear-gradient(
+    62deg,
+    color-mix(in oklch, var(--color-stitch) 45%, transparent) 0 2.5px,
+    transparent 2.5px 17px
+  );
+  border-block: 1px solid var(--color-border);
+}
+.lineup::before {
+  top: 0;
+}
+.lineup::after {
+  bottom: 0;
+  /* 아래쪽 실밥은 위와 대칭이어야 야구공처럼 읽힌다 */
+  transform: scaleY(-1);
+}
+
+/* 필름의 한 칸. 원근 휨은 카드가 아니라 이 칸에 건다 —
+   카드에 걸면 hover 틸트(interactions.js)가 transform을 덮어써 서로 지운다 */
+.lineup__frame {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+.lineup__frame > .project-card {
+  height: 100%;
 }
 .lineup__track {
   display: grid;
@@ -697,8 +738,13 @@ footer {
      이동은 JS가 scrollLeft 직접 대입으로 처리하고, 스냅이 착지를 정리한다. */
   scroll-snap-type: x mandatory;
   scroll-padding-inline: var(--space-6);
-  padding-block: var(--space-4);
+  /* 위아래 실밥 띠를 카드가 밟지 않도록 띄운다 */
+  padding-block: var(--space-8);
   scrollbar-width: none;
+  /* 필름 띠의 원근. perspective는 직계 자식에만 걸리므로 칸(.lineup__frame)의
+     부모인 트랙에 둬야 한다. .lineup에 두면 트랙만 왜곡되고 칸은 평면으로 남는다 */
+  perspective: 1400px;
+  perspective-origin: center;
 }
 .lineup__track::-webkit-scrollbar {
   display: none;
@@ -923,5 +969,220 @@ footer {
   }
   .crt {
     background-image: none;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   카드 뒷면 — 야구 카드를 뒤집으면 나오는 스탯 시트
+   ───────────────────────────────────────────── */
+/* 링크 줄과 뒷면 버튼을 세로로 쌓는다. 한 줄에 두면 링크 개수에 따라
+   버튼이 어떤 카드는 옆에, 어떤 카드는 아래에 붙어 줄이 들쭉날쭉해진다 */
+.project-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.project-foot__links {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.cardback-open {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  min-height: 24px;
+  transition:
+    background-color var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo);
+}
+.cardback-open:hover {
+  border-color: var(--color-stitch-hover);
+  background: color-mix(in oklch, var(--color-stitch) 14%, transparent);
+}
+.cardback-open:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.cardback {
+  /* dialog 기본값(가운데 정렬 + 얇은 테두리)을 걷어내고 위에서 덮게 만든다 */
+  border: none;
+  padding: 0;
+  margin: 0 0 0 auto;
+  max-width: min(46rem, 100%);
+  width: 100%;
+  max-height: 100dvh;
+  height: 100dvh;
+  background: transparent;
+  color: var(--color-text);
+  overflow: hidden;
+}
+.cardback::backdrop {
+  background: oklch(0% 0 0 / 0.72);
+}
+
+.cardback__sheet {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--space-12) var(--space-8) var(--space-8);
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  /* 카드 뒷면의 판지 질감 — 실밥 색을 아주 옅게 깐 사선 */
+  background-image: repeating-linear-gradient(
+    66deg,
+    color-mix(in oklch, var(--color-stitch) 6%, transparent) 0 1px,
+    transparent 1px 9px
+  );
+}
+
+/* 진입 — 위에서 덮으며 내려온다. 레퍼런스의 패널 슬라이드 인 */
+@media (prefers-reduced-motion: no-preference) {
+  .cardback[open] .cardback__sheet {
+    animation: cardback-in var(--duration-slow) var(--ease-out-expo);
+  }
+  .cardback[open]::backdrop {
+    animation: cardback-fade var(--duration-normal) var(--ease-out-expo);
+  }
+  /* 고스팅 — 제목이 살짝 어긋난 잔상을 끌고 들어온다 */
+  .cardback[open] .cardback__title::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: var(--color-stitch);
+    animation: cardback-ghost 640ms var(--ease-out-expo) forwards;
+    pointer-events: none;
+  }
+}
+@keyframes cardback-in {
+  from {
+    transform: translateY(-3%);
+    opacity: 0;
+  }
+}
+@keyframes cardback-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes cardback-ghost {
+  from {
+    transform: translate(10px, -4px);
+    opacity: 0.55;
+  }
+  to {
+    transform: none;
+    opacity: 0;
+  }
+}
+
+.cardback__close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  cursor: pointer;
+  min-height: 24px;
+}
+.cardback__close:hover {
+  border-color: var(--color-stitch-hover);
+}
+.cardback__close:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.cardback__kicker {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+}
+.cardback__number {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-stitch);
+  font-variant-numeric: tabular-nums;
+}
+.cardback__title {
+  position: relative;
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin-block: var(--space-2) var(--space-6);
+}
+.cardback__summary {
+  color: var(--color-text-muted);
+  max-width: 56ch;
+  word-break: keep-all;
+  margin-bottom: var(--space-8);
+}
+
+/* 스탯 표 — 실제 카드 뒷면처럼 행마다 밑줄이 그어진 표 */
+.cardback__stats {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: var(--space-3) var(--space-6);
+  margin-bottom: var(--space-8);
+}
+.cardback__stats dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  padding-top: var(--space-1);
+}
+.cardback__stats dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+}
+.cardback__chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+}
+.cardback__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 40rem) {
+  .cardback__sheet {
+    padding-inline: var(--space-6);
+  }
+  .cardback__stats {
+    grid-template-columns: 1fr;
+    gap: var(--space-1) 0;
   }
 }

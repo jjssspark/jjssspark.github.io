@@ -138,6 +138,19 @@
     </section>
   </main>
 
+  <!-- 카드 뒷면(스탯 시트). 네이티브 dialog라 포커스 트랩·Esc·포커스 복귀를 브라우저가 맡는다 -->
+  <dialog class="cardback" id="cardback" aria-labelledby="cardback-title">
+    <div class="cardback__sheet">
+      <button class="cardback__close" type="button">닫기 <span aria-hidden="true">×</span></button>
+      <p class="cardback__kicker">
+        <span class="cardback__number"></span>
+        <span>BACK OF CARD</span>
+      </p>
+      <h3 class="cardback__title" id="cardback-title"></h3>
+      <div class="cardback__body"></div>
+    </div>
+  </dialog>
+
   <footer>
     <p>&copy; 2026 Jisu Park. Built with plain HTML/CSS/JS, hosted on GitHub Pages.</p>
   </footer>

@@ -85,8 +85,15 @@ function projectCardHtml(project, index) {
       </svg>
       `;
 
+  // 타순 카드만 뒷면(스탯 시트)을 연다. 카드 전체를 클릭 대상으로 삼으면
+  // 안에 있는 링크·태그 버튼과 히트 영역이 겹치므로 전용 버튼을 둔다.
+  const backHtml =
+    project.tier === 'shipped'
+      ? `<button type="button" class="cardback-open" data-project="${escapeHtml(project.id)}">카드 뒷면 <span aria-hidden="true">↻</span></button>`
+      : '';
+
   // 링크 줄을 따로 감싼다 — 내용 길이가 달라도 하단선이 맞는다(.project-foot { margin-top: auto })
-  const footHtml = `<div class="project-foot">${linkHtml}${demoHtml}${videoHtml}${notionHtml}</div>`;
+  const footHtml = `<div class="project-foot"><span class="project-foot__links">${linkHtml}${demoHtml}${videoHtml}${notionHtml}</span>${backHtml}</div>`;
 
   if (project.image) {
     return `
@@ -126,7 +133,11 @@ function renderProjects() {
   const shipped = projects.filter((p) => p.tier === 'shipped');
 
   document.getElementById('featured-grid').innerHTML = featured.map((p, i) => projectCardHtml(p, i)).join('');
-  document.getElementById('shipped-grid').innerHTML = shipped.map((p, i) => projectCardHtml(p, i)).join('');
+  // 타순은 필름 띠라 칸(.lineup__frame)으로 한 겹 감싼다.
+  // 원근 휨을 칸에 걸어야 카드 자체의 hover 틸트(interactions.js)와 transform이 부딪히지 않는다.
+  document.getElementById('shipped-grid').innerHTML = shipped
+    .map((p, i) => `<div class="lineup__frame">${projectCardHtml(p, i)}</div>`)
+    .join('');
 }
 
 function renderSkills() {
@@ -167,6 +178,132 @@ function renderContact() {
   `;
 }
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * 카드 뒷면 — 야구 카드를 뒤집으면 나오는 스탯 시트.
+ *
+ * 네이티브 <dialog>.showModal()을 쓴다. 포커스 트랩·Esc 닫기·열었던 버튼으로의
+ * 포커스 복귀를 브라우저가 처리해줘서, 직접 구현할 때 새는 접근성 구멍이 없다.
+ *
+ * 표시하는 값은 전부 content.js에 실재하는 필드다. 없는 항목은 줄 자체를 빼고,
+ * 채우기 위한 숫자를 지어내지 않는다.
+ */
+function setupCardBack() {
+  const dialog = document.getElementById('cardback');
+  if (!dialog || typeof dialog.showModal !== 'function') return;
+
+  const body = dialog.querySelector('.cardback__body');
+  const title = dialog.querySelector('.cardback__title');
+  const number = dialog.querySelector('.cardback__number');
+
+  /** @param {import('./content.js').Project} project */
+  function fill(project, index) {
+    const rows = [
+      project.role ? ['담당', escapeHtml(project.role)] : null,
+      project.stack.length
+        ? ['스택', project.stack.map((s) => `<span class="cardback__chip">${escapeHtml(s)}</span>`).join('')]
+        : null,
+    ].filter(Boolean);
+
+    const links = [
+      project.links.repo ? ['Repository', project.links.repo] : null,
+      project.links.demo ? ['Demo', project.links.demo] : null,
+      project.links.video ? ['시연 영상', project.links.video] : null,
+      project.links.notion ? ['Notion', project.links.notion] : null,
+    ].filter(Boolean);
+
+    number.textContent = String(index + 1).padStart(2, '0');
+    title.textContent = project.name;
+    // 진입 고스팅용 복제 텍스트 — CSS ::after가 attr()로 읽는다
+    title.dataset.text = project.name;
+
+    body.innerHTML = `
+      <p class="cardback__summary">${escapeHtml(project.summary)}</p>
+      ${
+        rows.length
+          ? `<dl class="cardback__stats">${rows
+              .map(([label, value]) => `<dt>${label}</dt><dd>${value}</dd>`)
+              .join('')}</dl>`
+          : ''
+      }
+      ${
+        links.length
+          ? `<div class="cardback__links">${links
+              .map(
+                ([label, url]) =>
+                  `<a class="project-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label} <span aria-hidden="true">↗</span></a>`
+              )
+              .join('')}</div>`
+          : ''
+      }
+    `;
+  }
+
+  document.querySelectorAll('.cardback-open').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.project;
+      const project = projects.find((p) => p.id === id);
+      if (!project) return;
+      const shipped = projects.filter((p) => p.tier === 'shipped');
+      fill(project, shipped.indexOf(project));
+      dialog.showModal();
+    });
+  });
+
+  dialog.querySelector('.cardback__close')?.addEventListener('click', () => dialog.close());
+
+  // 배경(백드롭) 클릭으로 닫기. <dialog> 자체가 백드롭 영역까지 포함하므로
+  // 내부 시트 바깥을 눌렀는지로 판별한다.
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
+/**
+ * 필름 띠의 원근 휨. 트랙 중앙을 정면으로 두고, 좌우로 멀어질수록 안쪽으로 접힌다.
+ *
+ * 페이지 스크롤이 아니라 트랙 자신의 가로 스크롤이라 IntersectionObserver로는 잡을 수 없다.
+ * passive 리스너로 받되 rAF 한 프레임에 한 번만 계산하도록 합쳐 잔업을 없앤다.
+ *
+ * @param {HTMLElement} track
+ * @param {HTMLElement[]} frames
+ */
+function setupLineupWarp(track, frames) {
+  if (prefersReducedMotion) return;
+
+  const maxDeg = 18;
+  const maxDepth = 90;
+  let queued = false;
+
+  function apply() {
+    queued = false;
+    const rect = track.getBoundingClientRect();
+    if (!rect.width) return;
+    const center = rect.left + rect.width / 2;
+
+    frames.forEach((frame) => {
+      const box = frame.getBoundingClientRect();
+      // -1(왼쪽 끝) ~ 0(정면) ~ 1(오른쪽 끝)
+      const offset = Math.max(-1, Math.min(1, (box.left + box.width / 2 - center) / (rect.width / 2)));
+      const distance = Math.abs(offset);
+      frame.style.transform = `rotateY(${(-offset * maxDeg).toFixed(2)}deg) translateZ(${(-distance * maxDepth).toFixed(1)}px)`;
+      frame.style.opacity = (1 - distance * 0.4).toFixed(3);
+    });
+  }
+
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(apply);
+  }
+
+  track.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  // 초기 1회는 동기로 건다. rAF에 맡기면 탭이 백그라운드일 때 첫 배치가 영영 안 걸린다
+  apply();
+}
+
 /**
  * 타순 캐러셀. 스크롤 스냅이 이동을 담당하고 버튼은 scrollBy만 호출한다 —
  * 터치 스와이프·키보드 스크롤이 공짜로 따라온다.
@@ -176,20 +313,22 @@ function setupLineup() {
   const counter = document.getElementById('lineup-count');
   if (!track || !counter) return;
 
-  const cards = Array.from(track.children);
-  if (!cards.length) return;
+  const frames = Array.from(track.children);
+  if (!frames.length) return;
 
   // 가로 캐러셀 안의 카드는 뷰포트와 교차하지 않아 IntersectionObserver가 영영 안 깨운다.
   // 트랙이 화면에 들어오는 시점에 전부 한 번에 드러낸다.
   const wake = new IntersectionObserver(
     (entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
-      cards.forEach((card) => card.classList.add('is-visible'));
+      frames.forEach((frame) => frame.querySelector('.project-card')?.classList.add('is-visible'));
       wake.disconnect();
     },
     { rootMargin: '0px 0px -10% 0px' }
   );
   wake.observe(track);
+
+  setupLineupWarp(track, frames);
 
   // Chrome은 가로로만 스크롤되는 요소 위의 세로 휠을 가로 스크롤로 돌려쓴다.
   // 그 이동량이 카드 절반에 못 미치면 mandatory 스냅이 원위치시켜, 세로도 가로도 안 움직인다.
@@ -205,11 +344,11 @@ function setupLineup() {
     { passive: false }
   );
 
-  const step = () => cards[0].getBoundingClientRect().width + 24;
-  const total = String(cards.length).padStart(2, '0');
+  const step = () => frames[0].getBoundingClientRect().width + 24;
+  const total = String(frames.length).padStart(2, '0');
 
   const currentIndex = () =>
-    Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), cards.length - 1);
+    Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), frames.length - 1);
 
   const syncCounter = () => {
     counter.textContent = `${String(currentIndex() + 1).padStart(2, '0')} / ${total}`;
@@ -218,7 +357,7 @@ function setupLineup() {
   document.querySelectorAll('[data-lineup]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const dir = btn.dataset.lineup === 'next' ? 1 : -1;
-      const next = Math.min(Math.max(currentIndex() + dir, 0), cards.length - 1);
+      const next = Math.min(Math.max(currentIndex() + dir, 0), frames.length - 1);
       // scrollLeft 직접 대입 — 부드러움은 CSS scroll-behavior가 맡는다.
       // JS의 behavior:'smooth'는 scroll-snap과 얽혀 환경에 따라 무시된다.
       track.scrollLeft = next * step();
@@ -234,6 +373,7 @@ function setupLineup() {
 renderHero();
 renderProjects();
 setupLineup();
+setupCardBack();
 renderSkills();
 renderPrinciples();
 renderContact();
