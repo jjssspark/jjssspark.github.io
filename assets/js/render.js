@@ -85,11 +85,11 @@ function projectCardHtml(project, index) {
       </svg>
       `;
 
-  // 타순 카드만 뒷면(스탯 시트)을 연다. 카드 전체를 클릭 대상으로 삼으면
+  // 전광판 패널만 상세(박스스코어)를 연다. 패널 전체를 클릭 대상으로 삼으면
   // 안에 있는 링크·태그 버튼과 히트 영역이 겹치므로 전용 버튼을 둔다.
   const backHtml =
     project.tier === 'shipped'
-      ? `<button type="button" class="cardback-open" data-project="${escapeHtml(project.id)}">카드 뒷면 <span aria-hidden="true">↻</span></button>`
+      ? `<button type="button" class="cardback-open" data-project="${escapeHtml(project.id)}">박스스코어 <span aria-hidden="true">↗</span></button>`
       : '';
 
   // 링크 줄을 따로 감싼다 — 내용 길이가 달라도 하단선이 맞는다(.project-foot { margin-top: auto })

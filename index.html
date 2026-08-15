@@ -31,12 +31,9 @@
       <p class="boot__brand">JISU PARK</p>
       <p class="boot__meta">Developer Portfolio, Ball Park Edition<br />Version 2.0</p>
       <div class="boot__bar"><span class="boot__fill"></span></div>
-      <p class="boot__foot">Loading lineup — please stand by.</p>
+      <p class="boot__foot">Loading projects — please stand by.</p>
     </div>
   </div>
-
-  <!-- CRT 질감. 순수 장식이라 클릭을 통과시킨다 -->
-  <div class="crt" aria-hidden="true"></div>
 
   <svg class="scroll-seam" aria-hidden="true" viewBox="0 0 10 200" preserveAspectRatio="none">
     <path
@@ -81,7 +78,7 @@
           <a class="btn btn-ghost" href="#contact">연락하기</a>
         </div>
         <a class="hero-scroll" href="#featured">
-          <span class="hero-scroll__label">Scroll to see the lineup</span>
+          <span class="hero-scroll__label">Scroll to see the projects</span>
           <span class="hero-scroll__rail" aria-hidden="true"></span>
         </a>
       </div>
@@ -118,16 +115,16 @@
       <div class="project-grid project-grid--featured" id="featured-grid"></div>
     </section>
 
-    <!-- 타순 — 세로 스크롤이 필름 띠를 좌우로 흘린다.
+    <!-- 프로젝트 — 세로 스크롤이 필름 띠를 좌우로 흘린다.
          무대(stage)를 길게 잡고 그 안의 sticky 판을 화면에 붙여둔 뒤,
          무대를 지나는 진행률을 트랙의 가로 위치로 옮긴다 -->
     <section id="projects" class="section lineup-section" aria-labelledby="projects-heading">
       <div class="lineup-stage" id="lineup-stage">
         <div class="lineup-sticky">
           <div class="container">
-            <p class="section-kicker">03 · Lineup</p>
-            <h2 id="projects-heading" class="section-title reveal">타순</h2>
-            <p class="section-lead reveal">스크롤하면 타순이 한 명씩 넘어갑니다.</p>
+            <p class="section-kicker">03 · Projects</p>
+            <h2 id="projects-heading" class="section-title reveal">프로젝트</h2>
+            <p class="section-lead reveal">스크롤하면 하나씩 넘어갑니다.</p>
           </div>
 
           <div class="lineup">
@@ -136,9 +133,9 @@
 
           <div class="container">
             <div class="lineup__nav">
-              <button class="lineup__btn" type="button" data-lineup="prev" aria-label="이전 타자">←</button>
+              <button class="lineup__btn" type="button" data-lineup="prev" aria-label="이전 프로젝트">←</button>
               <span class="lineup__count" id="lineup-count" aria-live="polite"></span>
-              <button class="lineup__btn" type="button" data-lineup="next" aria-label="다음 타자">→</button>
+              <button class="lineup__btn" type="button" data-lineup="next" aria-label="다음 프로젝트">→</button>
             </div>
           </div>
         </div>
@@ -165,13 +162,13 @@
     </section>
   </main>
 
-  <!-- 카드 뒷면(스탯 시트). 네이티브 dialog라 포커스 트랩·Esc·포커스 복귀를 브라우저가 맡는다 -->
+  <!-- 박스스코어(상세 패널). 네이티브 dialog라 포커스 트랩·Esc·포커스 복귀를 브라우저가 맡는다 -->
   <dialog class="cardback" id="cardback" aria-labelledby="cardback-title">
     <div class="cardback__sheet">
       <button class="cardback__close" type="button">닫기 <span aria-hidden="true">×</span></button>
       <p class="cardback__kicker">
         <span class="cardback__number"></span>
-        <span>BACK OF CARD</span>
+        <span>BOX SCORE</span>
       </p>
       <h3 class="cardback__title" id="cardback-title"></h3>
       <div class="cardback__body"></div>

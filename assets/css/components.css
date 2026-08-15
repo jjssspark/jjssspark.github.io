@@ -862,23 +862,6 @@ footer {
    CRT — 구식 중계 화면 질감
    전 화면 고정 오버레이. 장식이므로 클릭을 통과시킨다.
    ═══════════════════════════════════════════════ */
-.crt {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  pointer-events: none;
-  /* 주사선 */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2px,
-    var(--crt-scanline) 3px,
-    var(--crt-scanline) 4px
-  );
-  /* 브라운관 가장자리 어두워짐.
-     세게 주면 좌측 정렬 본문이 통째로 그늘에 들어가 대비가 무너진다 — 흔적만 남긴다 */
-  box-shadow: inset 0 0 90px 8px oklch(0% 0 0 / 0.25);
-}
 
 
 /* 세리프 — 레퍼런스의 큰 세리프 헤드라인 */
@@ -966,9 +949,6 @@ footer {
   .boot__fill {
     animation: none;
     width: 100%;
-  }
-  .crt {
-    background-image: none;
   }
 }
 
@@ -1202,12 +1182,13 @@ footer {
   margin-left: -8%;
   padding-block: var(--space-16);
   background-color: var(--color-turf);
-  /* 잔디 깎은 줄무늬 — 외야를 정면에서 본 결 */
-  background-image: repeating-linear-gradient(
-    90deg,
-    var(--color-turf-stripe) 0 46px,
-    transparent 46px 92px
+  /* 줄무늬 대신 조명. 위가 밝고 아래로 내려갈수록 어두워지는 야간 구장의 잔디 */
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--color-turf-light) 75%, transparent),
+    transparent 58%
   );
+  overflow: hidden;
   color: var(--color-turf-text);
   transform: rotate(-2.2deg);
   box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
@@ -1412,4 +1393,73 @@ body {
    가로 오버플로 24px을 만든다 — 무대 안에서는 상쇄할 대상이 없으므로 없앤다 */
 .lineup-sticky > .lineup {
   margin-inline: 0;
+}
+
+/* 파울 라인 — 판을 가로지르는 분필선. 반복 패턴이 아니라 선 하나다 */
+.about-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--space-8);
+  height: 3px;
+  background: color-mix(in oklch, var(--color-turf-text) 72%, transparent);
+  pointer-events: none;
+}
+/* 내야 흙 — 판 아래 가장자리. 잔디와 흙의 경계가 구장을 읽히게 한다 */
+.about-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--space-12);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklch, var(--color-dirt) 55%, transparent) 45%,
+    var(--color-dirt)
+  );
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   전광판 패널 — 프로젝트를 담는 그릇
+   ───────────────────────────────────────────── */
+.project-card {
+  /* 전광판은 각지다. 둥근 카드 느낌을 걷어낸다 */
+  border-radius: var(--radius-sm);
+  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
+  background:
+    linear-gradient(180deg, var(--color-surface-alt), var(--color-surface));
+  box-shadow:
+    inset 0 0 0 1px oklch(0% 0 0 / 0.55),
+    0 12px 32px oklch(0% 0 0 / 0.45);
+}
+/* 표시창 제목 — 도트 전광판의 앰버 발광 */
+.project-name {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-phosphor);
+  text-shadow:
+    0 0 10px color-mix(in oklch, var(--color-phosphor) 55%, transparent),
+    0 0 26px color-mix(in oklch, var(--color-phosphor) 28%, transparent);
+}
+/* 등번호도 같은 램프로 */
+.project-index {
+  color: color-mix(in oklch, var(--color-phosphor) 40%, transparent);
+}
+@media (hover: hover) {
+  .project-card:hover .project-index {
+    color: var(--color-phosphor);
+  }
+}
+/* 스크린샷은 전광판에 끼운 표시창처럼 안으로 눌러 넣는다 */
+.project-thumb {
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 1px oklch(0% 0 0 / 0.6),
+    0 0 0 1px color-mix(in oklch, var(--color-stitch) 22%, transparent);
 }
