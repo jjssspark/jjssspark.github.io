@@ -10,6 +10,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <!-- 한글 본문·제목용. Space Grotesk와 DM Serif Display에는 한글 글리프가 없어
+       시스템 폰트로 떨어지고 있었다 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+  />
 
   <link rel="stylesheet" href="assets/css/tokens.css" />
   <link rel="stylesheet" href="assets/css/base.css" />
@@ -111,18 +118,30 @@
       <div class="project-grid project-grid--featured" id="featured-grid"></div>
     </section>
 
-    <section id="projects" class="section container" aria-labelledby="projects-heading">
-      <p class="section-kicker">03 · Lineup</p>
-      <h2 id="projects-heading" class="section-title reveal">타순</h2>
-      <p class="section-lead reveal">좌우로 넘겨 타순을 확인하세요.</p>
+    <!-- 타순 — 세로 스크롤이 필름 띠를 좌우로 흘린다.
+         무대(stage)를 길게 잡고 그 안의 sticky 판을 화면에 붙여둔 뒤,
+         무대를 지나는 진행률을 트랙의 가로 위치로 옮긴다 -->
+    <section id="projects" class="section lineup-section" aria-labelledby="projects-heading">
+      <div class="lineup-stage" id="lineup-stage">
+        <div class="lineup-sticky">
+          <div class="container">
+            <p class="section-kicker">03 · Lineup</p>
+            <h2 id="projects-heading" class="section-title reveal">타순</h2>
+            <p class="section-lead reveal">스크롤하면 타순이 한 명씩 넘어갑니다.</p>
+          </div>
 
-      <div class="lineup">
-        <div class="lineup__track" id="shipped-grid"></div>
-      </div>
-      <div class="lineup__nav">
-        <button class="lineup__btn" type="button" data-lineup="prev" aria-label="이전 타자">←</button>
-        <span class="lineup__count" id="lineup-count" aria-live="polite"></span>
-        <button class="lineup__btn" type="button" data-lineup="next" aria-label="다음 타자">→</button>
+          <div class="lineup">
+            <div class="lineup__track" id="shipped-grid"></div>
+          </div>
+
+          <div class="container">
+            <div class="lineup__nav">
+              <button class="lineup__btn" type="button" data-lineup="prev" aria-label="이전 타자">←</button>
+              <span class="lineup__count" id="lineup-count" aria-live="polite"></span>
+              <button class="lineup__btn" type="button" data-lineup="next" aria-label="다음 타자">→</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="sr-only" aria-live="polite" id="filter-status"></div>
     </section>

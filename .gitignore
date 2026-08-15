@@ -10,3 +10,6 @@ __pycache__/
 
 # 내부 기획/설계 문서 — 공개 포트폴리오 사이트에 올리지 않음
 docs/superpowers/
+
+# 트러블슈팅 기록 — 로컬 전용. 공개 저장소라 올리지 않는다
+TROUBLESHOOTING.md

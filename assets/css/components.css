@@ -1201,14 +1201,14 @@ footer {
   width: 116%;
   margin-left: -8%;
   padding-block: var(--space-16);
-  background-color: var(--color-paper);
-  /* 용지의 결 — 실밥과 같은 각도의 아주 옅은 사선 */
+  background-color: var(--color-turf);
+  /* 잔디 깎은 줄무늬 — 외야를 정면에서 본 결 */
   background-image: repeating-linear-gradient(
-    62deg,
-    color-mix(in oklch, var(--color-paper-edge) 70%, transparent) 0 1px,
-    transparent 1px 10px
+    90deg,
+    var(--color-turf-stripe) 0 46px,
+    transparent 46px 92px
   );
-  color: var(--color-ink);
+  color: var(--color-turf-text);
   transform: rotate(-2.2deg);
   box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
 }
@@ -1221,13 +1221,14 @@ footer {
    전역 토큰은 어두운 배경 기준이라 그대로 쓰면 대비가 무너진다 */
 .about-card .section-title,
 .about-card .about-lead {
-  color: var(--color-ink);
+  color: var(--color-turf-text);
 }
 .about-card .about-text {
-  color: var(--color-ink-muted);
+  color: var(--color-turf-text-muted);
 }
 .about-card .section-kicker {
-  color: var(--color-accent);
+  /* 잔디 위에서 크림슨은 대비가 죽는다 — 라인 마킹의 흰색으로 */
+  color: var(--color-turf-text);
 }
 
 /* 2단 조판 — 매거진 판형 */
@@ -1328,4 +1329,87 @@ footer {
   .about-card__inner {
     padding-inline: calc(var(--space-6) + 5%);
   }
+}
+
+/* ─────────────────────────────────────────────
+   한글 타이포 — 제목을 굵은 산세리프로 세운다
+   ───────────────────────────────────────────── */
+/* 섹션 제목은 전부 한글이다. 세리프 스택에는 한글 글리프가 없어
+   시스템 폰트로 떨어지면서 가늘고 흐리게 보이고 있었다 */
+.section-title,
+.about-lead,
+.cardback__title,
+.project-name,
+.principle-title {
+  font-family: var(--font-display-ko);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+/* 라틴 전용인 히어로 이름만 세리프를 유지한다 */
+.hero-name {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: var(--tracking-tight);
+}
+/* 본문도 한 단계 올린다 — 어두운 배경에서 얇은 글씨는 뭉개진다 */
+body {
+  font-weight: 500;
+}
+.about-text,
+.project-desc,
+.cardback__summary,
+.principle-body {
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────
+   타순 무대 — 세로 스크롤이 띠를 좌우로 흘린다
+   ───────────────────────────────────────────── */
+.lineup-section {
+  /* 무대가 자체 높이를 가지므로 섹션 패딩은 위쪽만 남긴다 */
+  padding-block: var(--space-section) 0;
+}
+.lineup-stage {
+  position: relative;
+  /* 카드 수만큼 스크롤 여유를 준다. JS가 --stage-steps를 채운다 */
+  height: calc(100vh + var(--stage-steps, 8) * 38vh);
+}
+.lineup-sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
+  padding-block: var(--space-8);
+}
+/* 스크롤이 위치를 지시하므로 스냅은 끈다 — 둘이 붙으면 서로를 되돌린다 */
+.js-scroll-driven .lineup__track {
+  scroll-snap-type: none;
+}
+
+@media (max-width: 48rem) {
+  /* 모바일에서 무대가 지나치게 길어지면 이 섹션만 한참 스크롤하게 된다 */
+  .lineup-stage {
+    height: calc(100vh + var(--stage-steps, 8) * 24vh);
+  }
+}
+
+/* 모션을 줄인 사용자에게는 무대를 걷어내고 원래의 수동 캐러셀로 되돌린다 */
+@media (prefers-reduced-motion: reduce) {
+  .lineup-stage {
+    height: auto;
+  }
+  .lineup-sticky {
+    position: static;
+    min-height: 0;
+  }
+}
+
+/* 무대 구조로 바꾸면서 .lineup이 .container 밖으로 나왔다.
+   컨테이너 패딩을 상쇄하려던 음수 마진이 이제 화면 밖으로 삐져나가
+   가로 오버플로 24px을 만든다 — 무대 안에서는 상쇄할 대상이 없으므로 없앤다 */
+.lineup-sticky > .lineup {
+  margin-inline: 0;
 }

@@ -354,9 +354,65 @@ function setupLineup() {
     counter.textContent = `${String(currentIndex() + 1).padStart(2, '0')} / ${total}`;
   };
 
+  // ── 스크롤 구동 ──────────────────────────────────────────────
+  // 레퍼런스는 화살표가 아니라 세로 스크롤이 띠를 좌우로 흘린다.
+  // 무대를 지나는 진행률(0~1)을 트랙의 가로 위치로 그대로 옮긴다.
+  const stage = document.getElementById('lineup-stage');
+  const scrollDriven = Boolean(stage) && !prefersReducedMotion;
+
+  if (stage) stage.style.setProperty('--stage-steps', String(frames.length));
+
+  /** 무대를 지나는 진행률. 0 = 무대 진입, 1 = 무대 이탈 */
+  const stageProgress = () => {
+    const rect = stage.getBoundingClientRect();
+    const travel = rect.height - window.innerHeight;
+    if (travel <= 0) return 0;
+    return Math.min(Math.max(-rect.top / travel, 0), 1);
+  };
+
+  if (scrollDriven) {
+    document.documentElement.classList.add('js-scroll-driven');
+
+    let queued = false;
+    const drive = () => {
+      queued = false;
+      const max = track.scrollWidth - track.clientWidth;
+      if (max <= 0) return;
+      const progress = stageProgress();
+      track.scrollLeft = progress * max;
+      const index = Math.min(Math.round(progress * (frames.length - 1)), frames.length - 1);
+      counter.textContent = `${String(index + 1).padStart(2, '0')} / ${total}`;
+    };
+    const schedule = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(drive);
+    };
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    // rAF에 맡기면 탭이 백그라운드일 때 첫 배치가 안 걸린다
+    drive();
+  }
+
   document.querySelectorAll('[data-lineup]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const dir = btn.dataset.lineup === 'next' ? 1 : -1;
+
+      if (scrollDriven) {
+        // 위치를 지시하는 주체가 페이지 스크롤이므로, 버튼도 페이지를 움직여야 한다.
+        // 트랙을 직접 밀면 다음 스크롤 프레임에 곧바로 되돌아간다.
+        const rect = stage.getBoundingClientRect();
+        const travel = rect.height - window.innerHeight;
+        const stageTop = window.scrollY + rect.top;
+        const next = Math.min(Math.max(currentIndex() + dir, 0), frames.length - 1);
+        window.scrollTo({
+          top: stageTop + (next / (frames.length - 1)) * travel,
+          behavior: 'smooth',
+        });
+        return;
+      }
+
       const next = Math.min(Math.max(currentIndex() + dir, 0), frames.length - 1);
       // scrollLeft 직접 대입 — 부드러움은 CSS scroll-behavior가 맡는다.
       // JS의 behavior:'smooth'는 scroll-snap과 얽혀 환경에 따라 무시된다.
@@ -366,8 +422,10 @@ function setupLineup() {
     });
   });
 
-  track.addEventListener('scroll', syncCounter, { passive: true });
-  syncCounter();
+  if (!scrollDriven) {
+    track.addEventListener('scroll', syncCounter, { passive: true });
+    syncCounter();
+  }
 }
 
 renderHero();
