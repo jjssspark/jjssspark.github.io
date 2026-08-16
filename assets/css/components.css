@@ -1185,42 +1185,43 @@ footer {
   width: 116%;
   margin-left: -8%;
   padding-block: var(--space-16);
-  /* 사진을 배경으로 깔지 않는다. 원본이 555x1200 세로라 가로 1754px 띠를
-     채우려면 3.2배 확대해야 하고, 그러면 무조건 뭉갠다.
-     판은 어둡게 두고 사진은 옆에 실제 크기 이하로 놓는다 */
-  background-image: linear-gradient(160deg, var(--color-surface-alt), var(--color-bg));
+  background-color: var(--color-surface);
+  background-image: linear-gradient(120deg, var(--color-surface-alt), var(--color-bg) 62%);
   overflow: hidden;
   color: var(--color-turf-text);
   transform: rotate(-2.2deg);
   box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
 }
 /* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
+/* 사진은 띠 오른쪽에 **원본 크기 그대로(1:1)** 붙인다.
+   background-size:cover로 깔면 555px 원본을 띠 폭(약 1980px)까지 3.5배
+   늘려야 해서 무조건 뭉갠다. 폭을 원본에 고정하면 확대가 없다.
+
+   왼쪽 경계는 마스크로 녹인다. 배경 그라디언트로 맞추려 하면 화면 폭이
+   바뀔 때마다 사진 시작점과 어긋나 딱딱한 세로선이 드러난다 */
+.about-card::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: 555px;
+  z-index: 0;
+  background-image: url('../img/intro_field_image.jpg');
+  background-size: auto;
+  background-position: right 72%;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, oklch(0% 0 0) 58%);
+  mask-image: linear-gradient(90deg, transparent 0%, oklch(0% 0 0) 58%);
+}
+
 .about-card__inner {
   transform: rotate(2.2deg);
-  display: grid;
-  /* 사진 칸을 원본 폭(555px)보다 좁게 잡아 항상 축소되게 만든다 */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-  gap: var(--space-12);
-  align-items: center;
 }
-.about-photo {
-  margin: 0;
-}
-.about-photo img {
-  display: block;
-  width: 100%;
-  /* 원본 세로가 1200이라 그대로 두면 판이 과하게 길어진다.
-     높이를 잡고 잘라내되, 배율은 max(352/555, 416/1200) = 0.63 —
-     여전히 축소라 선명하다. 확대만 피하면 된다 */
-  height: 26rem;
-  /* 원본 폭(555px)을 넘기지 않는다. 레이아웃이 어떻게 바뀌든 확대는 막는 하한선 */
-  max-width: 555px;
-  margin-inline: auto;
-  object-fit: cover;
-  object-position: center;
-  border-radius: var(--radius-sm);
-  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
-  box-shadow: 0 20px 50px oklch(0% 0 0 / 0.55);
+/* 사진이 오른쪽 555px를 차지한다. 글이 거기까지 뻗으면 겹쳐서 안 읽힌다.
+   컨테이너 자체는 가운데 정렬을 유지해야 하므로(안 그러면 판의 -8% 지점,
+   즉 화면 밖에서 시작한다) 자식 블록의 폭만 제한한다 */
+.about-card__inner > * {
+  max-width: 52rem;
 }
 
 /* 밝은 판 위에서는 색을 통째로 뒤집는다.
@@ -1256,14 +1257,18 @@ footer {
     columns: 1;
   }
 }
-/* 사진을 아래로 내린다. 태블릿 폭에서 2단을 유지하면 글칸이 먼저 무너진다 */
+/* 좁아지면 사진 555px가 화면 대부분을 덮어 글과 겹친다.
+   마스크를 세로로 돌려 글은 위, 사진은 아래쪽 질감으로 남긴다 */
 @media (max-width: 60rem) {
-  .about-card__inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-8);
+  .about-card::after {
+    width: 100%;
+    background-position: right 78%;
+    /* 최대 불투명도를 0.45로 눌러 흰 글씨가 잔디 위에서도 읽히게 한다 */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, oklch(0% 0 0 / 0.45) 62%);
+    mask-image: linear-gradient(180deg, transparent 0%, oklch(0% 0 0 / 0.45) 62%);
   }
-  .about-photo img {
-    height: 18rem;
+  .about-card__inner > * {
+    max-width: none;
   }
 }
 

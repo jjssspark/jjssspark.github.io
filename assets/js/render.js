@@ -1,5 +1,5 @@
 import { profile, projects, skills, principles } from './content.js';
-import { onScrollFrame } from './scroll-engine.js';
+import { onScrollFrame, ownsWheel, scrollToY } from './scroll-engine.js';
 
 /**
  * @param {string} str
@@ -346,6 +346,9 @@ function setupLineup() {
   track.addEventListener(
     'wheel',
     (event) => {
+      // 관성 엔진이 휠을 통째로 가로채는 환경에서는 브라우저의 기본 동작 자체가
+      // 일어나지 않으므로 여기서 손댈 게 없다. 두 번 처리하면 두 배로 움직인다
+      if (ownsWheel) return;
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
       // behavior를 명시하지 않으면 html의 scroll-behavior:smooth를 타서 휠마다 보간이 끼어 끈적해진다
@@ -424,10 +427,8 @@ function setupLineup() {
         const travel = rect.height - window.innerHeight;
         const stageTop = window.scrollY + rect.top;
         const next = Math.min(Math.max(currentIndex() + dir, 0), frames.length - 1);
-        window.scrollTo({
-          top: stageTop + (next / (frames.length - 1)) * travel,
-          behavior: 'smooth',
-        });
+        // 엔진을 거쳐야 휠로 굴릴 때와 같은 관성으로 이동한다
+        scrollToY(stageTop + (next / (frames.length - 1)) * travel);
         return;
       }
 
