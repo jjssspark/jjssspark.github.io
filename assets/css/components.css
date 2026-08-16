@@ -1459,3 +1459,142 @@ body {
     background-position: 62% 45%;
   }
 }
+
+
+/* ─────────────────────────────────────────────
+   하단 세 섹션을 전광판 패널 하나로 통일
+
+   Stack·Approach·Contact는 기본 목록 스타일이라 위쪽 섹션과 따로 놀았다.
+   새 모티프를 만들지 않고, 프로젝트 카드에서 이미 쓰는 전광판 언어
+   (각진 모서리 · 실밥색 테두리 · 인셋 그림자 · 발광 라벨)만 그대로 가져온다.
+   마크업은 건드리지 않는다 — 셀렉터가 전부 기존 것이다.
+   ───────────────────────────────────────────── */
+
+/* 패널 공통 값. 세 곳이 같은 그릇을 쓴다는 걸 한곳에 모아둔다 */
+.skill-list,
+.principle-item,
+.contact-list {
+  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--color-surface-alt), var(--color-surface));
+  box-shadow:
+    inset 0 0 0 1px oklch(0% 0 0 / 0.55),
+    0 12px 32px oklch(0% 0 0 / 0.45);
+}
+
+/* ── 04 Stack — 라인스코어 표 ── */
+.skill-list {
+  overflow: hidden;
+}
+.skill-row {
+  /* 칸 경계가 표를 만든다. 패딩은 칸 안쪽으로 옮긴다 */
+  grid-template-columns: minmax(7rem, 11rem) 1fr;
+  gap: 0;
+  padding: 0;
+  align-items: stretch;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
+}
+.skill-row:last-child {
+  border-bottom: none;
+}
+.skill-group {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  border-right: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
+  background: oklch(0% 0 0 / 0.28);
+  font-weight: 700;
+  color: var(--color-phosphor);
+  text-shadow: 0 0 12px color-mix(in oklch, var(--color-phosphor) 45%, transparent);
+}
+.skill-items {
+  padding: var(--space-4) var(--space-6);
+  align-items: center;
+}
+.skill-chip {
+  /* 전광판 칸이라 각진다. 알약 모양을 걷어낸다 */
+  border-radius: 2px;
+  border-color: color-mix(in oklch, var(--color-stitch) 24%, transparent);
+  background: oklch(0% 0 0 / 0.35);
+  padding: 0.3rem 0.65rem;
+}
+.skill-chip:hover {
+  border-color: var(--color-phosphor);
+  color: var(--color-phosphor);
+}
+
+/* ── 05 Approach — 이닝 번호가 붙은 패널 ── */
+.principle-list {
+  gap: var(--space-6);
+}
+.principle-item {
+  /* 위쪽 강조선 대신 패널 자체가 형태를 갖는다 */
+  border-top: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
+  padding: var(--space-6);
+}
+.principle-index {
+  font-size: var(--text-xl);
+  line-height: 1;
+  color: var(--color-phosphor);
+  text-shadow:
+    0 0 12px color-mix(in oklch, var(--color-phosphor) 50%, transparent),
+    0 0 28px color-mix(in oklch, var(--color-phosphor) 24%, transparent);
+  margin-bottom: var(--space-4);
+}
+
+/* ── 06 Contact — 같은 표 ── */
+.contact-list {
+  gap: 0;
+  overflow: hidden;
+}
+.contact-list li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) 1fr;
+  align-items: stretch;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
+}
+.contact-list li:last-child {
+  border-bottom: none;
+}
+.contact-label {
+  display: flex;
+  align-items: center;
+  width: auto;
+  padding: var(--space-4) var(--space-6);
+  border-right: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
+  background: oklch(0% 0 0 / 0.28);
+  color: var(--color-phosphor);
+  text-shadow: 0 0 12px color-mix(in oklch, var(--color-phosphor) 45%, transparent);
+}
+.contact-list li > a {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-6);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  /* 좁으면 표가 성립하지 않는다. 라벨을 칸 위로 올린다 */
+  .skill-row,
+  .contact-list li {
+    grid-template-columns: 1fr;
+  }
+  .skill-group,
+  .contact-label {
+    border-right: none;
+    padding-block: var(--space-3);
+  }
+  /* 스택은 라벨 아래가 칩이라 구분선이 있어야 묶음이 보인다 */
+  .skill-group {
+    border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
+  }
+  /* 연락처는 라벨도 값도 텍스트라, 같은 굵기 선을 넣으면
+     세 쌍이 여섯 행처럼 읽힌다. 쌍 안쪽 선은 빼고 붙여둔다 */
+  .contact-label {
+    padding-bottom: 0;
+  }
+  .contact-list li > a {
+    padding-top: var(--space-1);
+    padding-bottom: var(--space-3);
+  }
+}

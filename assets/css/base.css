@@ -79,9 +79,14 @@ ul {
 }
 
 .section {
-  padding-block: var(--space-section);
+  /* 위쪽만 띄운다. 상하 양쪽에 주면 섹션 사이가 두 배로 벌어져
+     내용 없는 빈 띠가 생긴다 — 마지막 섹션만 아래를 따로 채운다 */
+  padding-block: var(--space-section) 0;
   /* sticky header(~62px)에 포커스된 섹션 제목이 가려지지 않도록 여유를 둔다 */
   scroll-margin-top: calc(var(--space-16) + var(--space-2));
+}
+.section:last-of-type {
+  padding-bottom: var(--space-section);
 }
 
 .section-kicker {
