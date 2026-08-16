@@ -1246,33 +1246,68 @@ footer {
    "한 번 켜지고 끝"이 아니라 흐르는 인상을 만든다.
    ───────────────────────────────────────────── */
 
-/* 소개 띠 — 지나가는 동안 각도가 살짝 펴진다. 띠가 화면을 스치는 느낌 */
+/* 섹션마다 다른 종류의 움직임을 준다. 전부 같은 방식으로 떠오르면
+   스크롤이 아래로 내려가는 것 말고는 아무 일도 안 일어나는 것처럼 읽힌다. */
+
+/* 01 소개 — 띠가 기울기를 바꾸며 스쳐 지나간다 (회전) */
 .about-card {
-  rotate: calc((var(--p, 0.5) - 0.5) * -1.8deg);
+  rotate: calc((var(--p, 0.5) - 0.5) * -4.5deg);
+}
+/* 그 안의 잔디는 반대로 흘러 시차를 만든다 (가로 패럴랙스) */
+.about-card::after {
+  translate: calc((var(--p, 0.5) - 0.5) * -150px) 0;
 }
 
-/* 대표작 카드 — 올라오면서 자리를 잡는다. 짝수 번째를 늦춰 어긋나게 흐른다 */
+/* 02 대표 프로젝트 — 양옆에서 모여든다 (좌우 + 회전) */
 .project-grid--featured .project-card {
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 42px);
+  transition: none;
+}
+.project-grid--featured .project-card:nth-child(odd) {
+  translate: calc((0.5 - var(--p, 0.5)) * -120px) 0;
+  rotate: calc((0.5 - var(--p, 0.5)) * -5deg);
 }
 .project-grid--featured .project-card:nth-child(even) {
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 74px);
+  translate: calc((0.5 - var(--p, 0.5)) * 120px) 0;
+  rotate: calc((0.5 - var(--p, 0.5)) * 5deg);
 }
 
-/* 일하는 방식 — 세 판이 시차를 두고 솟는다 */
+/* 04 스택 — 표가 좌우 번갈아 맞물리며 채워진다 (지그재그) */
+.skill-row:nth-child(odd) {
+  translate: calc((0.5 - var(--p, 0.5)) * -110px) 0;
+}
+.skill-row:nth-child(even) {
+  translate: calc((0.5 - var(--p, 0.5)) * 110px) 0;
+}
+
+/* 05 일하는 방식 — 바닥에 누워 있다가 일어선다 (X축 3D 회전) */
+.principle-list {
+  perspective: 1200px;
+  perspective-origin: center 40%;
+}
 .principle-item {
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 34px);
-}
-.principle-item:nth-child(2) {
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 58px);
-}
-.principle-item:nth-child(3) {
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 82px);
+  transform-origin: center bottom;
+  rotate: x calc((0.5 - var(--p, 0.5)) * 34deg);
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 40px);
 }
 
-/* 스택 표 — 줄마다 아주 얕게. 크게 주면 표가 흔들려 읽기 힘들다 */
-.skill-row {
-  translate: calc((0.5 - var(--p, 0.5)) * 14px) 0;
+/* 좁은 화면에서는 가로 이동이 화면 밖으로 밀려 오버플로를 만든다.
+   방향은 유지하되 폭을 줄인다 */
+@media (max-width: 60rem) {
+  .project-grid--featured .project-card:nth-child(odd) {
+    translate: calc((0.5 - var(--p, 0.5)) * -36px) 0;
+  }
+  .project-grid--featured .project-card:nth-child(even) {
+    translate: calc((0.5 - var(--p, 0.5)) * 36px) 0;
+  }
+  .skill-row:nth-child(odd) {
+    translate: calc((0.5 - var(--p, 0.5)) * -34px) 0;
+  }
+  .skill-row:nth-child(even) {
+    translate: calc((0.5 - var(--p, 0.5)) * 34px) 0;
+  }
+  .principle-item {
+    rotate: x calc((0.5 - var(--p, 0.5)) * 22deg);
+  }
 }
 /* 잔디가 띠 전체에 깔리므로, 글은 마스크가 눌러둔 왼쪽 구간 안에서 끝나야 읽힌다.
    컨테이너 자체는 가운데 정렬을 유지해야 한다 — margin을 0으로 두면
