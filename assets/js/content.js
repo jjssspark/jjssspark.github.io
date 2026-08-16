@@ -31,7 +31,10 @@ export const profile = {
   links: {
     email: 'hsyoun585@gmail.com',
     github: 'https://github.com/jjssspark',
-    blog: 'https://qkrwltn.tistory.com',
+    // 티스토리에서 옮겼다. 공개 글이 1개뿐이고 그마저 보호글이라
+    // 방문자에게는 빈 블로그로 보였다. 노션에는 프로젝트 문서가 실제로 쌓여 있다
+    notion:
+      'https://app.notion.com/p/868f6f1e619a83718b4c811fd433b5ae?v=2aaf6f1e619a82bf9e0e08e665859a6a&source=copy_link',
   },
 };
 

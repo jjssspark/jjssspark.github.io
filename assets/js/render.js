@@ -1,4 +1,5 @@
 import { profile, projects, skills, principles } from './content.js';
+import { onScrollFrame } from './scroll-engine.js';
 
 /**
  * @param {string} str
@@ -174,7 +175,7 @@ function renderContact() {
   list.innerHTML = `
     <li><span class="contact-label">Email</span><a href="mailto:${escapeHtml(profile.links.email)}">${escapeHtml(profile.links.email)}</a></li>
     <li><span class="contact-label">GitHub</span><a href="${escapeHtml(profile.links.github)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.links.github.replace('https://', ''))}</a></li>
-    <li><span class="contact-label">Blog</span><a href="${escapeHtml(profile.links.blog)}" target="_blank" rel="noopener noreferrer">${escapeHtml(profile.links.blog.replace('https://', ''))}</a></li>
+    <li><span class="contact-label">Notion</span><a href="${escapeHtml(profile.links.notion)}" target="_blank" rel="noopener noreferrer">프로젝트 문서 모음</a></li>
   `;
 }
 
@@ -270,13 +271,16 @@ function setupCardBack() {
  * @param {HTMLElement[]} frames
  */
 function setupLineupWarp(track, frames) {
-  if (prefersReducedMotion) return;
+  if (prefersReducedMotion) return null;
 
   const maxDeg = 18;
   const maxDepth = 90;
   let queued = false;
 
-  function apply() {
+  /**
+   * @param {number} [skewDeg] 스크롤 속도에서 온 기울임. 빠르게 굴릴수록 칸이 눕는다
+   */
+  function apply(skewDeg = 0) {
     queued = false;
     const rect = track.getBoundingClientRect();
     if (!rect.width) return;
@@ -287,7 +291,10 @@ function setupLineupWarp(track, frames) {
       // -1(왼쪽 끝) ~ 0(정면) ~ 1(오른쪽 끝)
       const offset = Math.max(-1, Math.min(1, (box.left + box.width / 2 - center) / (rect.width / 2)));
       const distance = Math.abs(offset);
-      frame.style.transform = `rotateY(${(-offset * maxDeg).toFixed(2)}deg) translateZ(${(-distance * maxDepth).toFixed(1)}px)`;
+      frame.style.transform =
+        `rotateY(${(-offset * maxDeg).toFixed(2)}deg)` +
+        ` translateZ(${(-distance * maxDepth).toFixed(1)}px)` +
+        ` skewY(${skewDeg.toFixed(2)}deg)`;
       frame.style.opacity = (1 - distance * 0.4).toFixed(3);
     });
   }
@@ -295,13 +302,16 @@ function setupLineupWarp(track, frames) {
   function schedule() {
     if (queued) return;
     queued = true;
-    requestAnimationFrame(apply);
+    requestAnimationFrame(() => apply());
   }
 
   track.addEventListener('scroll', schedule, { passive: true });
   window.addEventListener('resize', schedule);
   // 초기 1회는 동기로 건다. rAF에 맡기면 탭이 백그라운드일 때 첫 배치가 영영 안 걸린다
   apply();
+  // 스크롤 구동 쪽에서 같은 프레임 안에 직접 부르기 위해 넘긴다.
+  // 트랙의 scroll 이벤트를 기다리면 휨이 한 프레임 늦어 띠가 따로 논다
+  return apply;
 }
 
 /**
@@ -328,7 +338,7 @@ function setupLineup() {
   );
   wake.observe(track);
 
-  setupLineupWarp(track, frames);
+  const warp = setupLineupWarp(track, frames);
 
   // Chrome은 가로로만 스크롤되는 요소 위의 세로 휠을 가로 스크롤로 돌려쓴다.
   // 그 이동량이 카드 절반에 못 미치면 mandatory 스냅이 원위치시켜, 세로도 가로도 안 움직인다.
@@ -362,37 +372,45 @@ function setupLineup() {
 
   if (stage) stage.style.setProperty('--stage-steps', String(frames.length));
 
-  /** 무대를 지나는 진행률. 0 = 무대 진입, 1 = 무대 이탈 */
-  const stageProgress = () => {
+  /**
+   * 무대를 지나는 진행률. 0 = 무대 진입, 1 = 무대 이탈
+   *
+   * 실제 스크롤 위치(rect.top)가 아니라 관성 엔진이 넘겨준 뒤따라오는 값을 쓴다.
+   * 그래서 띠가 손끝보다 반 박자 늦게 미끄러지고, 손을 떼면 스르르 안착한다.
+   *
+   * @param {number} y 보간된 세로 위치
+   */
+  const stageProgress = (y) => {
     const rect = stage.getBoundingClientRect();
+    // rect.top은 스크롤에 따라 변하므로 문서 기준 절대 위치로 되돌린다
+    const stageTop = window.scrollY + rect.top;
     const travel = rect.height - window.innerHeight;
     if (travel <= 0) return 0;
-    return Math.min(Math.max(-rect.top / travel, 0), 1);
+    return Math.min(Math.max((y - stageTop) / travel, 0), 1);
   };
 
   if (scrollDriven) {
     document.documentElement.classList.add('js-scroll-driven');
 
-    let queued = false;
-    const drive = () => {
-      queued = false;
+    let lastIndex = -1;
+    // 자체 rAF 루프를 돌리지 않는다. 관성 엔진의 프레임에 얹어야
+    // 띠 이동과 원근 휨이 같은 프레임에서 계산돼 서로 어긋나지 않는다
+    onScrollFrame((y, velocity) => {
       const max = track.scrollWidth - track.clientWidth;
       if (max <= 0) return;
-      const progress = stageProgress();
-      track.scrollLeft = progress * max;
-      const index = Math.min(Math.round(progress * (frames.length - 1)), frames.length - 1);
-      counter.textContent = `${String(index + 1).padStart(2, '0')} / ${total}`;
-    };
-    const schedule = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(drive);
-    };
 
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    // rAF에 맡기면 탭이 백그라운드일 때 첫 배치가 안 걸린다
-    drive();
+      const progress = stageProgress(y);
+      track.scrollLeft = progress * max;
+
+      const index = Math.min(Math.round(progress * (frames.length - 1)), frames.length - 1);
+      // 매 프레임 텍스트를 다시 쓰면 aria-live가 쉴 새 없이 읽는다. 바뀔 때만 갱신
+      if (index !== lastIndex) {
+        lastIndex = index;
+        counter.textContent = `${String(index + 1).padStart(2, '0')} / ${total}`;
+      }
+
+      warp?.(Math.max(-4, Math.min(4, velocity * 0.05)));
+    });
   }
 
   document.querySelectorAll('[data-lineup]').forEach((btn) => {

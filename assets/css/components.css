@@ -80,9 +80,11 @@ nav {
   z-index: 0;
   top: 50%;
   left: 50%;
+  /* 패럴랙스는 --py로만 들어온다(motion.js). JS가 transform을 통째로 덮으면
+     아래 중앙 정렬이 사라져 다이아몬드가 화면 밖으로 튄다 */
   width: min(75vh, 700px);
   height: min(75vh, 700px);
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-50% + var(--py, 0px)));
   pointer-events: none;
   animation: diamond-pulse 4s var(--ease-in-out) infinite;
 }
@@ -135,6 +137,8 @@ nav {
   margin-inline: auto;
   padding-inline: var(--space-6);
   width: 100%;
+  /* 배경보다 훨씬 느리게 따라와 깊이가 생긴다(motion.js가 --py 기록) */
+  transform: translate3d(0, var(--py, 0px), 0);
 }
 .hero-spotlight {
   position: absolute;
@@ -1181,21 +1185,10 @@ footer {
   width: 116%;
   margin-left: -8%;
   padding-block: var(--space-16);
-  background-color: var(--color-turf);
-  /* 실제 구장 사진. 원본이 폰 스크린샷(714px)이라 넓은 화면에서는 확대되어
-     다소 부드럽게 보인다 — 위에 어두운 스크림을 깔아 글자 대비를 확보한다 */
-  background-image:
-    linear-gradient(
-      90deg,
-      oklch(0% 0 0 / 0.78) 0%,
-      oklch(0% 0 0 / 0.62) 42%,
-      oklch(0% 0 0 / 0.22) 72%,
-      oklch(0% 0 0 / 0.1) 100%
-    ),
-    url('../img/about-field.jpg');
-  background-size: cover;
-  background-position: center 40%;
-  background-repeat: no-repeat;
+  /* 사진을 배경으로 깔지 않는다. 원본이 555x1200 세로라 가로 1754px 띠를
+     채우려면 3.2배 확대해야 하고, 그러면 무조건 뭉갠다.
+     판은 어둡게 두고 사진은 옆에 실제 크기 이하로 놓는다 */
+  background-image: linear-gradient(160deg, var(--color-surface-alt), var(--color-bg));
   overflow: hidden;
   color: var(--color-turf-text);
   transform: rotate(-2.2deg);
@@ -1204,6 +1197,30 @@ footer {
 /* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
 .about-card__inner {
   transform: rotate(2.2deg);
+  display: grid;
+  /* 사진 칸을 원본 폭(555px)보다 좁게 잡아 항상 축소되게 만든다 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: var(--space-12);
+  align-items: center;
+}
+.about-photo {
+  margin: 0;
+}
+.about-photo img {
+  display: block;
+  width: 100%;
+  /* 원본 세로가 1200이라 그대로 두면 판이 과하게 길어진다.
+     높이를 잡고 잘라내되, 배율은 max(352/555, 416/1200) = 0.63 —
+     여전히 축소라 선명하다. 확대만 피하면 된다 */
+  height: 26rem;
+  /* 원본 폭(555px)을 넘기지 않는다. 레이아웃이 어떻게 바뀌든 확대는 막는 하한선 */
+  max-width: 555px;
+  margin-inline: auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--radius-sm);
+  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
+  box-shadow: 0 20px 50px oklch(0% 0 0 / 0.55);
 }
 
 /* 밝은 판 위에서는 색을 통째로 뒤집는다.
@@ -1230,6 +1247,24 @@ footer {
   /* 문단이 단 경계에서 쪼개지면 읽는 흐름이 끊긴다 */
   break-inside: avoid;
   max-width: none;
+}
+
+/* 사진이 옆칸을 차지해 글 폭이 줄었다. 좁아진 칸에서 2단은 한 줄에 서너 어절밖에
+   안 들어가 읽기가 끊긴다 */
+@media (max-width: 75rem) {
+  .about-cols {
+    columns: 1;
+  }
+}
+/* 사진을 아래로 내린다. 태블릿 폭에서 2단을 유지하면 글칸이 먼저 무너진다 */
+@media (max-width: 60rem) {
+  .about-card__inner {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .about-photo img {
+    height: 18rem;
+  }
 }
 
 @media (max-width: 48rem) {
@@ -1445,19 +1480,11 @@ body {
     0 0 0 1px color-mix(in oklch, var(--color-stitch) 22%, transparent);
 }
 
-/* 잔디 위 흰 글씨가 뭉개지지 않도록 바닥 그림자를 깐다 */
 .about-card__inner {
   position: relative;
   z-index: 1;
-  text-shadow: 0 2px 10px oklch(0% 0 0 / 0.55);
-}
-
-@media (max-width: 48rem) {
-  /* 좁은 화면에서는 장비가 본문을 덮는다 */
-  /* 좁은 화면에서는 사진의 세로 구도가 더 많이 보이도록 초점을 옮긴다 */
-  .about-card {
-    background-position: 62% 45%;
-  }
+  /* 글자가 사진 위에 있을 때 필요했던 바닥 그림자는 뺐다.
+     이제 어두운 판 위라 그림자가 획을 뭉개기만 한다 */
 }
 
 

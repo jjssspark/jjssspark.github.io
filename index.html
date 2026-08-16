@@ -44,7 +44,7 @@
 
   <header>
     <nav class="container" aria-label="주 메뉴">
-      <a class="logo" href="#top">jjssspark</a>
+      <a class="logo" href="#top">JSPARK</a>
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
         <li><a href="#featured">Featured</a></li>
@@ -70,7 +70,9 @@
       <div class="hero-spotlight" aria-hidden="true"></div>
       <div class="hero-inner">
         <p class="section-kicker">Developer Portfolio</p>
-        <h1 id="hero-heading" class="hero-name" data-hero="name"></h1>
+        <!-- reveal은 마스크를 열어주는 스위치다. 이 클래스가 없으면
+             motion.js가 감싼 마스크가 영영 안 열려 이름이 안 보인다 -->
+        <h1 id="hero-heading" class="hero-name reveal" data-hero="name"></h1>
         <p class="hero-tagline" data-hero="tagline"></p>
         <dl class="stat-line" id="hero-stats"></dl>
         <div class="hero-cta">
@@ -89,6 +91,7 @@
     <section id="about" class="section about" aria-labelledby="about-heading">
       <div class="about-card">
         <div class="about-card__inner container">
+          <div class="about-body">
           <p class="section-kicker">01 · About</p>
           <h2 id="about-heading" class="section-title reveal">소개</h2>
           <p class="about-lead reveal">
@@ -105,6 +108,20 @@
               푼 문제는 원인과 실패한 시도까지 기록으로 남깁니다.
             </p>
           </div>
+          </div>
+
+          <!-- 세로 사진이라 띠 배경으로 깔면 3배 넘게 확대돼 뭉갠다.
+               원본(555x1200)보다 작게 놓아야 선명하다 -->
+          <figure class="about-photo reveal" style="--delay:180ms">
+            <img
+              src="assets/img/intro_field_image.jpg"
+              alt=""
+              width="555"
+              height="1200"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
       </div>
     </section>
