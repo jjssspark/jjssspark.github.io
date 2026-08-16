@@ -1203,25 +1203,86 @@ footer {
   content: '';
   position: absolute;
   inset-block: 0;
-  right: 0;
-  width: 555px;
+  /* 좌우로 흘릴 여유. 스크롤에 따라 미끄러져도 가장자리가 비지 않는다 */
+  left: -60px;
+  right: -60px;
   z-index: 0;
-  background-image: url('../img/intro_field_image.jpg');
+  background-image: url('../img/intro_field_band.jpg');
+  /* 원본 1900x555를 1:1로 쓴다. cover로 늘리면 뭉갠다 */
   background-size: auto;
-  background-position: right 72%;
+  background-position: right center;
   background-repeat: no-repeat;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, oklch(0% 0 0) 58%);
-  mask-image: linear-gradient(90deg, transparent 0%, oklch(0% 0 0) 58%);
+  /* 잔디가 띠 전체에 깔리되 글이 앉는 왼쪽만 옅게 눌러 대비를 만든다.
+     완전히 지워버리면 "띠"가 아니라 오른쪽 사진 한 장이 된다 */
+  /* 46%까지는 옅게 눌러 둔다 — 글이 앉는 구간이다.
+     거기서부터 살아나 오른쪽 끝(공·배트)은 온전히 보인다 */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    oklch(0% 0 0 / 0.14) 0%,
+    oklch(0% 0 0 / 0.2) 46%,
+    oklch(0% 0 0 / 0.78) 68%,
+    oklch(0% 0 0) 84%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    oklch(0% 0 0 / 0.14) 0%,
+    oklch(0% 0 0 / 0.2) 46%,
+    oklch(0% 0 0 / 0.78) 68%,
+    oklch(0% 0 0) 84%
+  );
+  /* 스크롤 진행률(--p)에 따라 잔디가 옆으로 흐른다.
+     띠가 화면을 지나가는 동안 계속 움직여야 "흐른다"는 인상이 생긴다 */
+  translate: calc((var(--p, 0.5) - 0.5) * -70px) 0;
 }
 
 .about-card__inner {
   transform: rotate(2.2deg);
 }
-/* 사진이 오른쪽 555px를 차지한다. 글이 거기까지 뻗으면 겹쳐서 안 읽힌다.
-   컨테이너 자체는 가운데 정렬을 유지해야 하므로(안 그러면 판의 -8% 지점,
-   즉 화면 밖에서 시작한다) 자식 블록의 폭만 제한한다 */
+
+/* ─────────────────────────────────────────────
+   스크롤 진행률 모션 — motion.js가 --p(0~1)를 매 프레임 기록한다.
+   전부 translate/rotate/scale 개별 속성이라 transform(리빌·hover 틸트)과
+   충돌하지 않는다. 요소가 화면에 머무는 내내 계속 움직여서
+   "한 번 켜지고 끝"이 아니라 흐르는 인상을 만든다.
+   ───────────────────────────────────────────── */
+
+/* 소개 띠 — 지나가는 동안 각도가 살짝 펴진다. 띠가 화면을 스치는 느낌 */
+.about-card {
+  rotate: calc((var(--p, 0.5) - 0.5) * -1.8deg);
+}
+
+/* 대표작 카드 — 올라오면서 자리를 잡는다. 짝수 번째를 늦춰 어긋나게 흐른다 */
+.project-grid--featured .project-card {
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 42px);
+}
+.project-grid--featured .project-card:nth-child(even) {
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 74px);
+}
+
+/* 일하는 방식 — 세 판이 시차를 두고 솟는다 */
+.principle-item {
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 34px);
+}
+.principle-item:nth-child(2) {
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 58px);
+}
+.principle-item:nth-child(3) {
+  translate: 0 calc((0.5 - var(--p, 0.5)) * 82px);
+}
+
+/* 스택 표 — 줄마다 아주 얕게. 크게 주면 표가 흔들려 읽기 힘들다 */
+.skill-row {
+  translate: calc((0.5 - var(--p, 0.5)) * 14px) 0;
+}
+/* 잔디가 띠 전체에 깔리므로, 글은 마스크가 눌러둔 왼쪽 구간 안에서 끝나야 읽힌다.
+   컨테이너 자체는 가운데 정렬을 유지해야 한다 — margin을 0으로 두면
+   판의 -8% 지점, 즉 화면 밖에서 시작한다. 그래서 자식 블록의 폭만 제한한다 */
 .about-card__inner > * {
-  max-width: 52rem;
+  max-width: 34rem;
+}
+/* 잔디 위 흰 글씨의 획이 뭉개지지 않게 바닥을 깐다 */
+.about-card__inner {
+  text-shadow: 0 1px 12px oklch(0% 0 0 / 0.75);
 }
 
 /* 밝은 판 위에서는 색을 통째로 뒤집는다.
@@ -1240,7 +1301,9 @@ footer {
 
 /* 2단 조판 — 매거진 판형 */
 .about-cols {
-  columns: 2;
+  /* 글칸이 34rem으로 좁아졌다. 여기서 2단으로 쪼개면 한 줄에 서너 어절뿐이라
+     읽는 흐름이 끊긴다 */
+  columns: 1;
   column-gap: var(--space-12);
   margin-top: var(--space-8);
 }
@@ -1260,12 +1323,22 @@ footer {
 /* 좁아지면 사진 555px가 화면 대부분을 덮어 글과 겹친다.
    마스크를 세로로 돌려 글은 위, 사진은 아래쪽 질감으로 남긴다 */
 @media (max-width: 60rem) {
+  /* 좁은 화면에서는 1900px 띠의 오른쪽 끝(공·배트)만 보인다.
+     마스크를 세로로 돌려 글은 위, 잔디는 아래쪽 바닥으로 남긴다 */
   .about-card::after {
-    width: 100%;
-    background-position: right 78%;
-    /* 최대 불투명도를 0.45로 눌러 흰 글씨가 잔디 위에서도 읽히게 한다 */
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, oklch(0% 0 0 / 0.45) 62%);
-    mask-image: linear-gradient(180deg, transparent 0%, oklch(0% 0 0 / 0.45) 62%);
+    background-position: right center;
+    -webkit-mask-image: linear-gradient(
+      180deg,
+      oklch(0% 0 0 / 0.1) 0%,
+      oklch(0% 0 0 / 0.18) 45%,
+      oklch(0% 0 0 / 0.5) 100%
+    );
+    mask-image: linear-gradient(
+      180deg,
+      oklch(0% 0 0 / 0.1) 0%,
+      oklch(0% 0 0 / 0.18) 45%,
+      oklch(0% 0 0 / 0.5) 100%
+    );
   }
   .about-card__inner > * {
     max-width: none;
