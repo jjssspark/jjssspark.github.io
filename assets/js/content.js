@@ -64,7 +64,7 @@ export const projects = [
     id: 'jivis',
     name: 'JIVIS',
     tier: 'featured',
-    status: 'shipped',
+    status: 'in-play',
     summary:
       '카카오톡 스타일 UI로 대화하는 Claude 기반 개인 AI 비서. 이름과 말투를 기억하고, 대화를 이어받는다.',
     role: '기획부터 구현까지 단독 완결',
@@ -175,7 +175,7 @@ export const projects = [
     id: 'onque',
     name: 'OnQue',
     tier: 'shipped',
-    status: 'shipped',
+    status: 'in-play',
     summary:
       '회의록을 LLM으로 요약하고, 오간 대화에서 「누가 언제까지 무엇을」에 해당하는 약속을 뽑아 추적하는 팀 협업 워크스페이스. @비서 봇에게 물으면 그동안의 기록을 근거로 답한다.',
     role: '컴퓨터공학 캡스톤디자인 3인 팀 — FastAPI 백엔드와 Next.js 프론트 전 구간, JWT 인증·권한, Render/Vercel 배포',
