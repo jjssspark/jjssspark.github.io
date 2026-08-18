@@ -1815,90 +1815,49 @@ body {
   }
 }
 
-/* ── 야구 장면 ───────────────────────────────────
-   장면이 섹션의 제목을 대신한다. 라벨도 번호도 없다 —
-   공이 지나가며 글자를 놓고, 그 글자가 그대로 본문으로 이어진다.
+/* ── 무대 ───────────────────────────────────────
+   페이지 전체가 이 한 컷 안에서 흘러간다. 화면에 고정되어 본문 뒤에
+   계속 떠 있고, 카메라만 스크롤을 따라 움직인다.
    ───────────────────────────────────────────── */
-.scene {
+.film {
   --lamp: var(--color-phosphor);
-  --lamp-off: var(--ink-800);
-  padding-block: 0;
-}
-.scene .pin-stage {
-  position: relative;
-  height: calc(100vh + var(--pin-travel, 150vh));
-  overflow-x: clip;
-}
-.scene .pin-sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  /* 정렬을 브라우저와 협상하지 않는다. 틀 안이 전부 absolute라 폭이 0으로
-     무너지는 함정을 여러 번 밟았다 — 여기서는 크기를 못 박는다 */
-  display: block;
-  padding: 0;
-}
-/* 카메라 틀 — 화면 전체가 한 컷이다.
-   판을 상자에 가두면 위젯으로 읽힌다. 관객은 경기장 안에 있어야 한다 */
-.scene__frame {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  display: block;
-  padding: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity var(--duration-reveal) var(--ease-out-expo);
-}
-/* 전광판이 화면을 통째로 채운다. 테두리 대신 비네트가 가장자리를 눌러
-   "판"이 아니라 "안에 들어와 있다"로 읽히게 한다 */
-.scene__panel {
-  position: absolute;
-  inset: 0;
-  /* 꺼진 도트를 화면 전체에 깐다. 간격(--dot)은 JS가 캔버스와 맞춰 넣는다.
-     밝으면 실루엣과 대비가 죽어 판이 뿌예진다 — 아주 어둡게 */
-  background-color: color-mix(in oklch, var(--color-bg) 88%, black);
+  z-index: 0;
+  /* 꺼진 도트를 화면 전체에 깐다. 밝으면 실루엣과 대비가 죽어 판이 뿌예진다 */
+  background-color: color-mix(in oklch, var(--color-bg) 90%, black);
   background-image: radial-gradient(
     circle,
-    color-mix(in oklch, var(--lamp-off) 55%, transparent) 0 21%,
+    color-mix(in oklch, var(--ink-800) 46%, transparent) 0 21%,
     transparent 22%
   );
-  background-size: var(--dot, 8px) var(--dot, 8px);
+  background-size: 9px 9px;
+  /* 가장자리를 눌러 "판을 본다"가 아니라 "안에 들어와 있다"로 만든다 */
   box-shadow:
-    inset 0 0 clamp(6rem, 20vw, 20rem) oklch(0% 0 0 / 0.8),
-    inset 0 0 clamp(2rem, 6vw, 6rem) oklch(0% 0 0 / 0.5);
-  overflow: hidden;
+    inset 0 0 clamp(6rem, 20vw, 20rem) oklch(0% 0 0 / 0.72),
+    inset 0 0 clamp(2rem, 6vw, 6rem) oklch(0% 0 0 / 0.45);
+  /* 밝기는 JS가 스크롤에서 뽑아 --on으로 넣는다. 전환 시간을 주면
+     되감을 때 값이 뒤늦게 따라와 판이 히어로 위로 새어 나온다 */
+  opacity: 0;
+  pointer-events: none;
 }
-.scene.is-ready .scene__frame {
-  opacity: 1;
+.film.is-ready {
+  opacity: var(--on, 0);
 }
-.scene__board {
-  position: absolute;
-  inset-block: 0;
-  left: 50%;
-  height: 100%;
-  display: block;
-  /* 줌 기준점을 살짝 아래로. 화면 한가운데를 잡으면 발이 먼저 잘린다.
-     JS의 ORIGIN_Y와 같은 값이어야 공이 손에서 안 떨어진다 */
-  transform-origin: 50% 58%;
-  translate: calc(-50% + var(--pan, 0px)) 0;
-  scale: var(--cam, 1);
-}
-/* 궤적선 — 공이 간 만큼만 그려진다. 꺼진 도트 위에서 타야 선이 산다 */
-.scene__arc {
+.film__stage {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  mix-blend-mode: screen;
-  pointer-events: none;
 }
 
-/* 야구공 — 실밥은 공보다 큰 원 두 개를 좌우에 겹쳐 가장자리 호만 남긴다 */
-.scene__ball {
+/* 야구공 — 실밥은 공보다 큰 원 두 개를 좌우에 겹쳐 가장자리 호만 남긴다.
+   지름은 JS가 월드 크기 × 카메라 배율로 넣는다. 손으로 정하지 않는다 */
+.film__ball {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: clamp(26px, 2.4vw, 44px);
+  left: 0;
+  top: 0;
+  width: var(--bd, 30px);
   aspect-ratio: 1;
   border-radius: var(--radius-full);
   background: radial-gradient(
@@ -1908,175 +1867,43 @@ body {
     oklch(78% 0.01 100) 100%
   );
   box-shadow:
-    0 0 26px 6px color-mix(in oklch, var(--lamp) 55%, transparent),
-    inset -3px -4px 7px oklch(0% 0 0 / 0.22);
-  translate: calc(-50% + var(--bx, 0px)) calc(-50% + var(--by, 0px));
+    0 0 calc(var(--bd, 30px) * 0.7) calc(var(--bd, 30px) * 0.14)
+      color-mix(in oklch, var(--lamp) 55%, transparent),
+    inset -0.1em -0.13em 0.22em oklch(0% 0 0 / 0.22);
+  translate: calc(var(--bx, 0px) - 50%) calc(var(--by, 0px) - 50%);
   rotate: var(--brot, 0deg);
-  /* 배트에 맞는 순간 화면 가득 커졌다가 멀어지며 줄어든다.
-     느리게 출발하는 이징과 합쳐져 슬로우모션으로 읽힌다 */
-  scale: var(--bs, 1);
   opacity: var(--bo, 0);
   overflow: hidden;
-  pointer-events: none;
 }
-.scene__ball::before,
-.scene__ball::after {
+.film__ball::before,
+.film__ball::after {
   content: '';
   position: absolute;
   inset-block: -26%;
   width: 118%;
   border-radius: var(--radius-full);
   /* 점선이 그대로 실밥이 된다 */
-  border: 2px dashed var(--lg-red-600);
+  border: max(1px, 0.06em) dashed var(--lg-red-600);
 }
-.scene__ball::before {
+.film__ball::before {
   inset-inline-start: -84%;
 }
-.scene__ball::after {
+.film__ball::after {
   inset-inline-end: -84%;
 }
 
-/* 궤적 위 글자. 자리는 JS가 px로 넣는다 — 공과 같은 좌표계라
-   공이 지나간 자리에 글자가 그대로 떨어진다 */
-.scene__trail {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.scene__trail span {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  font-family: var(--font-display-ko);
-  /* 크기는 JS가 줄마다 다르게 준다. 앞줄이 크고 뒤로 갈수록 멀어진다 */
-  font-size: var(--fs, 3rem);
-  font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: var(--tracking-tight);
-  color: var(--color-text);
-  white-space: nowrap;
-  /* 도트 판 위에 얹히므로 뒤를 눌러줘야 읽힌다. 한 겹으로는 밝은 도트를
-     못 이긴다 — 좁은 그림자부터 넓은 것까지 겹쳐 후광을 만든다 */
-  text-shadow:
-    0 0 0.22em oklch(0% 0 0 / 0.98),
-    0 0 0.55em oklch(0% 0 0 / 0.95),
-    0 0 1.3em oklch(0% 0 0 / 0.88),
-    0 0 2.6em oklch(0% 0 0 / 0.75);
-  opacity: 0;
-  /* 공이 지나간 방향에서 미끄러져 들어온다. 아래에서 뜨는 것보다
-     "공이 놓고 갔다"가 분명해진다 */
-  translate: calc(var(--tx, 0px) + 2.6em) var(--ty, 0px);
-  transition:
-    opacity var(--duration-reveal) var(--ease-out-expo),
-    translate var(--duration-reveal) var(--ease-out-expo);
-}
-.scene__trail span.is-on {
-  opacity: 1;
-  translate: var(--tx, 0px) var(--ty, 0px);
-}
-/* 숫자는 전광판 램프다. 라벨과 다른 서체·색을 줘야 "몇 개"가 먼저 읽힌다 */
-.scene__trail em {
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-weight: 700;
-  font-size: 1.15em;
-  margin-inline-start: 0.42em;
-  color: var(--color-phosphor);
-  text-shadow:
-    0 0 0.18em oklch(0% 0 0 / 0.9),
-    0 0 0.5em color-mix(in oklch, var(--color-phosphor) 60%, transparent),
-    0 0 1.2em color-mix(in oklch, var(--color-phosphor) 34%, transparent);
-}
-/* 공이 없는 장면은 글자가 실루엣 한가운데에 얹힌다. 후광만으로는 모자라
-   판을 눌러줘야 한다 — 가장자리는 그대로 두고 가운데만 */
-.scene.is-fall .scene__trail::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 60% 32% at 50% 47%,
-    oklch(0% 0 0 / 0.88) 0%,
-    oklch(0% 0 0 / 0.62) 46%,
-    transparent 74%
-  );
+/* 본문은 무대 위를 지나간다 */
+.film ~ * {
+  position: relative;
+  z-index: 1;
 }
 
-/* 관중석 — 화면 위쪽을 가로지르는 띠. 홈런이 나오면 물결치며 일어난다 */
-.scene__crowd {
-  position: absolute;
-  inset-inline: 0;
-  inset-block-start: clamp(4rem, 9vh, 7rem);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  height: 2.4vh;
-  padding-inline: clamp(1rem, 4vw, 4rem);
-  pointer-events: none;
-}
-.scene__crowd span {
-  width: clamp(4px, 0.5vw, 9px);
-  aspect-ratio: 1;
-  border-radius: var(--radius-full);
-  background: color-mix(in oklch, var(--lamp) 40%, var(--lamp-off));
-  opacity: 0.42;
-}
-.scene__crowd.is-cheering span {
-  animation: crowd-wave 900ms var(--ease-in-out) infinite;
-  /* 한 줄이 통째로 뛰면 파도가 아니라 깜빡임이다. 옆으로 번지게 늦춘다 */
-  animation-delay: calc(var(--i) * 24ms);
-}
-@keyframes crowd-wave {
-  0%,
-  100% {
-    translate: 0 0;
-    opacity: 0.5;
-    background: var(--lamp-off);
-  }
-  45% {
-    translate: 0 -1vh;
-    opacity: 1;
-    background: var(--lamp);
-  }
-}
-
-/* 좁은 화면·모션 최소화에서는 핀을 풀고 한 장면을 한 장으로 보여준다 */
-@media (max-width: 60rem) {
-  /* 핀을 풀면 무대가 접힌다 — 안쪽이 전부 absolute라 높이를 못 박아야 한다 */
-  .scene .pin-stage {
-    height: min(52vh, 460px);
-  }
-  .scene .pin-sticky {
-    position: static;
-    min-height: 0;
-  }
-  .scene__frame {
-    height: 100%;
-  }
-  .scene__ball,
-  .scene__arc,
-  .scene__crowd {
-    display: none;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  /* 핀을 풀면 무대가 접힌다 — 안쪽이 전부 absolute라 높이를 못 박아야 한다 */
-  .scene .pin-stage {
-    height: min(52vh, 460px);
-  }
-  .scene .pin-sticky {
-    position: static;
-    min-height: 0;
-  }
-  .scene__frame {
-    height: 100%;
-  }
-  .scene__ball,
-  .scene__arc,
-  .scene__crowd {
-    display: none;
+  .film.is-ready {
+    /* 움직이지 않는 판 하나로 남는다. 스크롤 훅이 안 도니 값을 못 받는다 */
+    opacity: 1;
   }
 }
-
 /* ── Stack 본문 — 장면이 서 있던 그 전광판을 그대로 이어받는다 ─────────
    앞 장면이 화면 가득 큰 글씨로 "Language 4"를 말하고 나면, 본문이
    가운데 놓인 작은 박스로 같은 말을 반복했다. 판이 바뀐 것처럼 보여
@@ -2087,15 +1914,6 @@ body {
      장면보다 안쪽에서 끝나 세로 리듬이 어긋난다 */
   max-width: none;
   padding-inline: 4vw;
-  /* 장면과 같은 LED 격자. 간격은 타자 시트(세로 110칸)를 화면 높이에
-     맞춘 값이라 앞뒤 화면에서 도트 크기가 안 튄다 */
-  --dot: calc(100vh / 110);
-  background-image: radial-gradient(
-    circle,
-    color-mix(in oklch, var(--ink-800) 42%, transparent) 0 21%,
-    transparent 22%
-  );
-  background-size: var(--dot) var(--dot);
 }
 #skills .skill-list {
   /* 카드 껍데기를 걷어낸다. 판 위에 얹힌 표지, 판 위에 놓인 상자가 아니다 */
@@ -2176,4 +1994,59 @@ html.js #skills .skill-row.reveal {
 }
 html.js #skills .skill-row.reveal.is-visible {
   transform: none;
+}
+
+/* ── 동작이 본문을 켠다 ──────────────────────────────────────────
+   화면에 들어오면 뜨는 방식은 릴리스든 임팩트든 상관하지 않는다. 그래서
+   장면과 본문이 따로 놀았다. film.js가 흘려보내는 --story(이야기 시간)를
+   기준선(--cue)과 비교해서, 공이 손을 떠나는 순간 소개가 뜨고 배트에 맞는
+   순간 프로젝트가 뜨게 한다.
+
+   비교는 calc으로 한다 — (지금 - 기준) × 기울기를 0~1로 자르면 그게 곧
+   그 줄의 밝기다. 줄마다 --i가 달라서 차례로 번져 나간다.
+   ───────────────────────────────────────────────────────────── */
+html.js .film ~ #about .about-card__inner > *,
+html.js .film ~ #featured .project-card {
+  --lit: clamp(0, (var(--story, 0) - var(--cue, 0)) * 26, 1);
+  opacity: var(--lit);
+  /* 공이 지나간 쪽에서 끌려 들어온다 */
+  transform: translateX(calc((1 - var(--lit)) * 3.5rem));
+  transition: none;
+}
+
+/* 릴리스(0.11)에서 시작해 공이 날아가는 동안 한 줄씩 */
+#about .about-card__inner > * {
+  --cue: calc(0.11 + var(--i, 0) * 0.035);
+}
+#about .about-card__inner > *:nth-child(2) {
+  --i: 1;
+}
+#about .about-card__inner > *:nth-child(3) {
+  --i: 2;
+}
+#about .about-card__inner > *:nth-child(4) {
+  --i: 3;
+}
+
+/* 임팩트(0.345)에서 프로젝트가 튀어나온다 */
+#featured .project-card {
+  --cue: calc(0.345 + var(--i, 0) * 0.03);
+}
+#featured .project-card:nth-child(2) {
+  --i: 1;
+}
+#featured .project-card:nth-child(3) {
+  --i: 2;
+}
+#featured .project-card:nth-child(4) {
+  --i: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .film ~ #about .about-card__inner > *,
+  html.js .film ~ #featured .project-card {
+    /* 스크롤 훅이 안 도니 --story가 안 온다. 그냥 보여준다 */
+    opacity: 1;
+    transform: none;
+  }
 }

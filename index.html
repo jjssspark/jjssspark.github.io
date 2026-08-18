@@ -57,6 +57,11 @@
   </header>
 
   <main id="main">
+    <!-- 무대 — 페이지 전체가 이 한 컷 안에서 흘러간다. 본문이 그 위를 지나간다 -->
+    <div class="film" aria-hidden="true">
+      <canvas class="film__stage"></canvas>
+      <span class="film__ball"></span>
+    </div>
     <section id="top" class="hero" aria-labelledby="hero-heading">
       <svg class="hero-diamond" aria-hidden="true" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
         <rect class="hero-diamond__infield" x="100" y="100" width="200" height="200" transform="rotate(45 200 200)" />
@@ -86,24 +91,6 @@
       </div>
     </section>
 
-    <!-- 장면 — 라벨도 번호도 없다. 공이 글자를 놓고 그대로 본문으로 이어진다 -->
-    <div class="scene" data-scene="lead" aria-hidden="true">
-      <div class="pin-stage" style="--pin-travel: 150vh">
-        <div class="pin-sticky">
-          <div class="scene__frame">
-            <div class="scene__panel">
-              <div class="scene__crowd"></div>
-              <canvas class="scene__board" data-board="pitch"></canvas>
-            </div>
-            <div class="scene__trail"></div>
-            <canvas class="scene__arc"></canvas>
-            <span class="scene__ball"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
     <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
          어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
     <section id="about" class="section about pin-section" aria-labelledby="about-heading">
@@ -131,23 +118,6 @@
       </div>
      </div>
     </section>
-
-    <!-- 장면 — 라벨도 번호도 없다. 공이 글자를 놓고 그대로 본문으로 이어진다 -->
-    <div class="scene" data-scene="swing" aria-hidden="true">
-      <div class="pin-stage" style="--pin-travel: 150vh">
-        <div class="pin-sticky">
-          <div class="scene__frame">
-            <div class="scene__panel">
-              <div class="scene__crowd"></div>
-              <canvas class="scene__board" data-board="bat"></canvas>
-            </div>
-            <div class="scene__trail"></div>
-            <canvas class="scene__arc"></canvas>
-            <span class="scene__ball"></span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <section id="featured" class="section pin-section" aria-labelledby="featured-heading">
      <div class="pin-stage" style="--pin-travel: 90vh">
@@ -185,23 +155,6 @@
       <div class="sr-only" aria-live="polite" id="filter-status"></div>
     </section>
 
-    <!-- 장면 — 라벨도 번호도 없다. 공이 글자를 놓고 그대로 본문으로 이어진다 -->
-    <div class="scene" data-scene="gone" aria-hidden="true">
-      <div class="pin-stage" style="--pin-travel: 170vh">
-        <div class="pin-sticky">
-          <div class="scene__frame">
-            <div class="scene__panel">
-              <div class="scene__crowd"></div>
-              <canvas class="scene__board" data-board="bat"></canvas>
-            </div>
-            <div class="scene__trail"></div>
-            <canvas class="scene__arc"></canvas>
-            <span class="scene__ball"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <section id="skills" class="section pin-section" aria-labelledby="skills-heading">
      <div class="pin-stage" style="--pin-travel: 70vh">
       <div class="pin-sticky container">
@@ -211,23 +164,6 @@
      </div>
     </section>
 
-    <!-- 장면 — 라벨도 번호도 없다. 공이 글자를 놓고 그대로 본문으로 이어진다 -->
-    <div class="scene" data-scene="roar" aria-hidden="true">
-      <div class="pin-stage" style="--pin-travel: 130vh">
-        <div class="pin-sticky">
-          <div class="scene__frame">
-            <div class="scene__panel">
-              <div class="scene__crowd"></div>
-              <canvas class="scene__board" data-board="bat"></canvas>
-            </div>
-            <div class="scene__trail"></div>
-            <canvas class="scene__arc"></canvas>
-            <span class="scene__ball"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <section id="principles" class="section pin-section" aria-labelledby="principles-heading">
      <div class="pin-stage" style="--pin-travel: 70vh">
       <div class="pin-sticky container">
@@ -236,23 +172,6 @@
       </div>
      </div>
     </section>
-
-    <!-- 장면 — 라벨도 번호도 없다. 공이 글자를 놓고 그대로 본문으로 이어진다 -->
-    <div class="scene" data-scene="trophy" aria-hidden="true">
-      <div class="pin-stage" style="--pin-travel: 130vh">
-        <div class="pin-sticky">
-          <div class="scene__frame">
-            <div class="scene__panel">
-              <div class="scene__crowd"></div>
-              <canvas class="scene__board" data-board="trophy"></canvas>
-            </div>
-            <div class="scene__trail"></div>
-            <canvas class="scene__arc"></canvas>
-            <span class="scene__ball"></span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <section id="contact" class="section container" aria-labelledby="contact-heading">
       <h2 id="contact-heading" class="section-title reveal sr-only">연락처</h2>
@@ -282,7 +201,7 @@
   <script type="module" src="assets/js/viz/trajectory.js"></script>
   <script type="module" src="assets/js/viz/heatmap.js"></script>
   <script type="module" src="assets/js/motion.js"></script>
-  <script type="module" src="assets/js/scenes.js"></script>
+  <script type="module" src="assets/js/film.js"></script>
   <script type="module" src="assets/js/interactions.js"></script>
 </body>
 </html>
