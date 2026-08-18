@@ -320,11 +320,10 @@ function setupLineupWarp(track, frames) {
 }
 
 /**
- * 타순이 한 바퀴 돈 자리에 세우는 구분 칸.
+ * 타순이 한 바퀴 돈 자리에 세우는 빈 칸.
  *
- * 무한 루프라 07 다음이 곧바로 01이다. 표시가 없으면 어디가 처음이고 어디가
- * 끝인지 알 수 없어 계속 같은 데를 도는 느낌이 든다. 야구에서 타순이 한 바퀴
- * 돌아 1번 타자로 돌아오는 그 지점이라, 스트라이크존과 홈플레이트로 세운다.
+ * 무한 루프라 07 다음이 곧바로 01이다. 사이를 한 칸 비워두면 어디서 한 바퀴가
+ * 끝났는지가 눈으로 보인다. 그림을 넣으면 그것도 카드처럼 읽혀서 비워둔다.
  *
  * 폭은 카드와 같게 둔다 — 원근 휨과 루프 계산이 둘 다 칸 폭이 균일하다고 보고
  * 산술로 자리를 낸다. 여기만 좁으면 그 뒤로 전부 어긋난다.
@@ -333,17 +332,7 @@ function makeLineupTurn() {
   const frame = document.createElement('div');
   frame.className = 'lineup__frame lineup__turn';
   frame.dataset.turn = '';
-  frame.innerHTML = `
-    <div class="turn-card">
-      <p class="turn-card__kicker">07 → 01</p>
-      <div class="turn-zone" aria-hidden="true">
-        ${'<span></span>'.repeat(9)}
-      </div>
-      <span class="turn-plate" aria-hidden="true"></span>
-      <p class="turn-card__label">타순 한 바퀴</p>
-      <p class="turn-card__note">다시 1번 타자부터</p>
-    </div>
-  `;
+  frame.setAttribute('aria-hidden', 'true');
   return frame;
 }
 
