@@ -1772,7 +1772,7 @@ body {
   overflow: hidden;
   /* 마지막 장면에 트로피가 화면 한가운데 선다. 표가 투명하면 도트 위에
      주소가 얹혀 못 읽는다 — 여기만은 판을 깔아야 한다 */
-  background: oklch(0% 0 0 / 0.88);
+  background: oklch(0% 0 0 / 0.93);
 }
 .contact-list li {
   display: grid;
@@ -1998,14 +1998,6 @@ body {
   translate: calc((0.5 - var(--p, 0.5)) * 40px) 0;
 }
 
-/* 스택 표도 같은 규칙으로 들어온다. 장면에서 글자가 옆으로 미끄러져 나왔으니
-   본문만 아래에서 뜨면 두 동작이 따로 논다 */
-html.js #skills .skill-row.reveal {
-  transform: translateX(4rem);
-}
-html.js #skills .skill-row.reveal.is-visible {
-  transform: none;
-}
 
 /* ── 동작이 본문을 켠다 ──────────────────────────────────────────
    화면에 들어오면 뜨는 방식은 릴리스든 임팩트든 상관하지 않는다. 그래서
@@ -2053,9 +2045,64 @@ html.js .film ~ #featured .project-card {
   --i: 3;
 }
 
+/* 타구가 외야로 뻗는 동안 스택이 한 줄씩 채워진다 */
+html.js .film ~ #skills .skill-row {
+  --cue: calc(0.655 + var(--i, 0) * 0.021);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  /* 표는 이미 --p로 좌우 지그재그를 탄다. 여기서 크게 밀면 두 움직임이
+     싸운다 — 방향만 맞춰 살짝 끌려 들어오게 둔다 */
+  transform: translateX(calc((1 - var(--lit)) * 2.5rem));
+  transition: none;
+}
+
+/* 공이 담장을 넘어가는 구간. 일하는 방식은 서면서 켜진다 */
+html.js .film ~ #principles .principle-item {
+  --cue: calc(0.815 + var(--i, 0) * 0.038);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  /* 이 섹션만 세로다. 바닥에 누웠다 일어서는 --p 회전과 같은 축이라야
+     한 동작으로 읽힌다 */
+  transform: translateY(calc((1 - var(--lit)) * 2rem));
+  transition: none;
+}
+
+/* 트로피가 올라오는 0.9~1 사이에 연락처가 켜진다 */
+html.js .film ~ #contact .contact-list li {
+  --cue: calc(0.9 + var(--i, 0) * 0.018);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  transform: translateX(calc((1 - var(--lit)) * 2.5rem));
+  transition: none;
+}
+
+/* 줄 번호. calc이 nth-child를 못 읽어서 한 줄씩 적어준다 */
+#skills .skill-row:nth-child(2),
+#principles .principle-item:nth-child(2),
+#contact .contact-list li:nth-child(2) {
+  --i: 1;
+}
+#skills .skill-row:nth-child(3),
+#principles .principle-item:nth-child(3),
+#contact .contact-list li:nth-child(3) {
+  --i: 2;
+}
+#skills .skill-row:nth-child(4) {
+  --i: 3;
+}
+#skills .skill-row:nth-child(5) {
+  --i: 4;
+}
+#skills .skill-row:nth-child(6) {
+  --i: 5;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html.js .film ~ #about .about-card__inner > *,
-  html.js .film ~ #featured .project-card {
+  html.js .film ~ #featured .project-card,
+  html.js .film ~ #skills .skill-row,
+  html.js .film ~ #principles .principle-item,
+  html.js .film ~ #contact .contact-list li {
     /* 스크롤 훅이 안 도니 --story가 안 온다. 그냥 보여준다 */
     opacity: 1;
     transform: none;

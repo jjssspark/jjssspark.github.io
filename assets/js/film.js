@@ -400,6 +400,13 @@ if (root && canvas) {
       const el = document.querySelector(sel);
       return { top: el ? el.getBoundingClientRect().top + window.scrollY : 0, s };
     }).sort((a, b) => a.top - b.top);
+
+    // 마지막 섹션의 머리는 문서 끝보다 아래에 있을 수 있다. 그대로 두면
+    // 끝까지 내려도 이야기가 1에 못 닿아서 트로피가 영영 안 올라온다
+    if (marks.length < 2) return;
+    const floor = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const last = marks[marks.length - 1];
+    last.top = Math.max(marks[marks.length - 2].top + 1, Math.min(last.top, floor));
   }
 
   /** 스크롤 위치를 이야기 시간 0~1로 옮긴다 */
