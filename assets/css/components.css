@@ -750,7 +750,6 @@ footer {
   /* scroll-behavior:smooth를 두면 스냅과 얽혀 프로그램 스크롤이 통째로 취소된다.
      이동은 JS가 scrollLeft 직접 대입으로 처리하고, 스냅이 착지를 정리한다. */
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--space-6);
   /* 위아래 실밥 띠를 카드가 밟지 않도록 띄운다 */
   padding-block: var(--space-8);
   scrollbar-width: none;
@@ -774,8 +773,10 @@ footer {
 .lineup__track::-webkit-scrollbar {
   display: none;
 }
+/* 가운데 정렬이어야 모든 카드가 한 번씩 화면 한가운데로 온다.
+   start로 두면 왼쪽 끝에 붙고, 마지막 몇 장은 가운데까지 오지도 못한다 */
 .lineup__track > * {
-  scroll-snap-align: start;
+  scroll-snap-align: center;
 }
 .lineup__nav {
   display: flex;

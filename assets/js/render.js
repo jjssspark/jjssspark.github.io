@@ -282,14 +282,19 @@ function setupLineupWarp(track, frames) {
    */
   function apply(skewDeg = 0) {
     queued = false;
-    const rect = track.getBoundingClientRect();
-    if (!rect.width) return;
-    const center = rect.left + rect.width / 2;
+    // 칸마다 getBoundingClientRect를 부르고 바로 transform을 쓰면 읽기·쓰기가
+    // 번갈아 들어가 칸 수만큼 레이아웃을 다시 계산한다. 루프로 칸이 세 배가
+    // 되면서 이게 그대로 세 배가 됐다. 칸 폭이 균일하니 위치는 산술로 낸다
+    const width = track.clientWidth;
+    if (!width) return;
+    const cardW = frames[0].offsetWidth;
+    const stride = cardW + 24;
+    const left = track.scrollLeft;
+    const half = width / 2;
 
-    frames.forEach((frame) => {
-      const box = frame.getBoundingClientRect();
-      // -1(왼쪽 끝) ~ 0(정면) ~ 1(오른쪽 끝)
-      const offset = Math.max(-1, Math.min(1, (box.left + box.width / 2 - center) / (rect.width / 2)));
+    frames.forEach((frame, index) => {
+      // 스크롤포트 가운데를 0으로 두고 -1(왼쪽 끝) ~ 1(오른쪽 끝)
+      const offset = Math.max(-1, Math.min(1, (index * stride + cardW / 2 - left - half) / half));
       const distance = Math.abs(offset);
       frame.style.transform =
         `rotateY(${(-offset * maxDeg).toFixed(2)}deg)` +
@@ -312,6 +317,63 @@ function setupLineupWarp(track, frames) {
   // 스크롤 구동 쪽에서 같은 프레임 안에 직접 부르기 위해 넘긴다.
   // 트랙의 scroll 이벤트를 기다리면 휨이 한 프레임 늦어 띠가 따로 논다
   return apply;
+}
+
+/**
+ * 트랙을 끝없이 돌게 만든다.
+ *
+ * 같은 카드 묶음을 앞뒤로 한 벌씩 더 붙여 세 벌로 만들고, 가운데 벌에서
+ * 반 벌 이상 벗어나면 정확히 한 벌만큼 scrollLeft를 옮긴다. 내용이 한 벌
+ * 주기로 똑같이 반복되므로 화면에는 아무 변화가 없고, 사용자는 끝을 못 만난다.
+ *
+ * 복제본은 스크린리더와 탭 순서에서 뺀다 — 안 그러면 같은 프로젝트를 세 번씩
+ * 읽고 지나간다. 마우스 클릭은 살려둔다(보이는데 안 눌리면 그게 더 이상하다).
+ *
+ * @param {HTMLElement} track
+ * @param {Element[]} real 원본 칸
+ * @param {() => number} step 칸 하나가 차지하는 가로 폭
+ */
+function setupLineupLoop(track, real, step) {
+  const copies = () =>
+    real.map((frame) => {
+      const copy = frame.cloneNode(true);
+      copy.setAttribute('aria-hidden', 'true');
+      copy.dataset.clone = '';
+      copy.querySelectorAll('a, button, [tabindex]').forEach((el) => {
+        el.tabIndex = -1;
+      });
+      return copy;
+    });
+
+  track.prepend(...copies());
+  track.append(...copies());
+
+  const unit = () => real.length * step();
+  /** 가운데 벌의 첫 칸이 화면 한가운데 올 때의 scrollLeft */
+  const base = () => real.length * step() + (step() - 24) / 2 - track.clientWidth / 2;
+
+  function wrap() {
+    const span = unit();
+    if (span <= 0) return;
+    const rel = track.scrollLeft - base();
+    const shift = rel > span * 0.5 ? -span : rel < span * -0.5 ? span : 0;
+    if (!shift) return;
+    // 옮긴 자리가 스크롤 범위를 벗어나면 브라우저가 잘라서 되돌리고,
+    // 그러면 다음 scroll에서 반대로 튀어 앞뒤로 진동한다. 범위 안일 때만 옮긴다
+    const target = track.scrollLeft + shift;
+    if (target < 0 || target > track.scrollWidth - track.clientWidth) return;
+    track.scrollLeft = target;
+  }
+
+  const reset = () => {
+    track.scrollLeft = base();
+  };
+
+  reset();
+  track.addEventListener('scroll', wrap, { passive: true });
+  window.addEventListener('resize', reset);
+
+  return { base, unit };
 }
 
 /**
@@ -399,8 +461,20 @@ function setupLineup() {
   const counter = document.getElementById('lineup-count');
   if (!track || !counter) return;
 
-  const frames = Array.from(track.children);
-  if (!frames.length) return;
+  const real = Array.from(track.children);
+  if (!real.length) return;
+
+  // 세로 구동(film.html)은 무대 진행률을 그대로 가로 위치로 쓴다. 복제하면 어긋난다
+  const stage = document.getElementById('lineup-stage');
+  const scrollDriven = Boolean(stage) && !prefersReducedMotion;
+
+  // offsetWidth를 쓴다. getBoundingClientRect()는 원근 휨(rotateY)이 적용된
+  // 폭이라 카드가 기울수록 줄어들고, 그러면 칸 번호가 한 칸씩 어긋난다
+  const step = () => real[0].offsetWidth + 24;
+  const loop = scrollDriven || real.length < 3 ? null : setupLineupLoop(track, real, step);
+
+  // 원근 휨은 복제본에도 걸려야 한다 — 안 그러면 이어지는 자리에서 툭 끊긴다
+  const frames = loop ? Array.from(track.children) : real;
 
   // 가로 캐러셀 안의 카드는 뷰포트와 교차하지 않아 IntersectionObserver가 영영 안 깨운다.
   // 트랙이 화면에 들어오는 시점에 전부 한 번에 드러낸다.
@@ -433,24 +507,22 @@ function setupLineup() {
     { passive: false }
   );
 
-  // offsetWidth를 쓴다. getBoundingClientRect()는 원근 휨(rotateY)이 적용된
-  // 폭이라 카드가 기울수록 줄어들고, 그러면 칸 번호가 한 칸씩 어긋난다
-  const step = () => frames[0].offsetWidth + 24;
-  const total = String(frames.length).padStart(2, '0');
+  const total = String(real.length).padStart(2, '0');
 
-  const currentIndex = () =>
-    Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), frames.length - 1);
+  const currentIndex = () => {
+    if (!loop) return Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), real.length - 1);
+    // 복제본 위에 있어도 원본 몇 번인지로 되돌린다
+    const n = real.length;
+    return ((Math.round((track.scrollLeft - loop.base()) / step()) % n) + n) % n;
+  };
 
   const syncCounter = () => {
     counter.textContent = `${String(currentIndex() + 1).padStart(2, '0')} / ${total}`;
   };
 
   // ── 스크롤 구동 ──────────────────────────────────────────────
-  // 레퍼런스는 화살표가 아니라 세로 스크롤이 띠를 좌우로 흘린다.
+  // film.html에서는 화살표가 아니라 세로 스크롤이 띠를 좌우로 흘린다.
   // 무대를 지나는 진행률(0~1)을 트랙의 가로 위치로 그대로 옮긴다.
-  const stage = document.getElementById('lineup-stage');
-  const scrollDriven = Boolean(stage) && !prefersReducedMotion;
-
   if (stage) stage.style.setProperty('--stage-steps', String(frames.length));
 
   /**
@@ -510,12 +582,10 @@ function setupLineup() {
         return;
       }
 
-      const next = Math.min(Math.max(currentIndex() + dir, 0), frames.length - 1);
-      // scrollLeft 직접 대입 — 부드러움은 CSS scroll-behavior가 맡는다.
-      // JS의 behavior:'smooth'는 scroll-snap과 얽혀 환경에 따라 무시된다.
-      track.scrollLeft = next * step();
-      // 스냅이 착지 위치를 미세 조정하므로 인덱스는 계산값으로 직접 표기한다
-      counter.textContent = `${String(next + 1).padStart(2, '0')} / ${total}`;
+      // 절대 위치가 아니라 한 칸씩 상대 이동한다 — 루프에서는 "몇 번째 칸"이
+      // 트랙 좌표로 고정돼 있지 않다. 착지는 스냅이 가운데로 정리한다
+      track.scrollLeft += dir * step();
+      syncCounter();
     });
   });
 
