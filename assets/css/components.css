@@ -1182,70 +1182,16 @@ footer {
      clip은 컨테이너를 만들지 않으면서 자르기만 한다 */
   overflow: clip;
 }
+/* 판에서 잔디 사진·기울기·그림자를 전부 걷어냈다. 소개 글이 공 궤적 위로
+   올라가면서 글을 받칠 판이 필요 없어졌고, 판을 남기면 그 뒤에서 던지는
+   투수를 다시 가린다. 지금 이 요소는 글 자리를 잡아주는 상자일 뿐이다 */
 .about-card {
   position: relative;
-  /* 기울였을 때 좌우 끝이 비지 않도록 화면보다 넓게 */
-  width: 116%;
-  margin-left: -8%;
   padding-block: var(--space-16);
-  /* 판은 더 이상 불투명한 사진이 아니다. 뒤에서 투수가 던지고 있는데
-     판이 화면 가운데를 막으면 상체가 통째로 잘려 모션이 안 보인다.
-     바닥을 비우고 잔디만 얹어 필름 위에 겹치는 한 겹으로 만든다 */
-  background-color: transparent;
-  overflow: hidden;
   color: var(--color-turf-text);
-  transform: rotate(-2.2deg);
-}
-/* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
-/* 사진은 띠 오른쪽에 **원본 크기 그대로(1:1)** 붙인다.
-   background-size:cover로 깔면 555px 원본을 띠 폭(약 1980px)까지 3.5배
-   늘려야 해서 무조건 뭉갠다. 폭을 원본에 고정하면 확대가 없다.
-
-   왼쪽 경계는 마스크로 녹인다. 배경 그라디언트로 맞추려 하면 화면 폭이
-   바뀔 때마다 사진 시작점과 어긋나 딱딱한 세로선이 드러난다 */
-.about-card::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  /* 좌우로 흘릴 여유. 스크롤에 따라 미끄러져도 가장자리가 비지 않는다 */
-  left: -60px;
-  right: -60px;
-  z-index: 0;
-  background-image: url('../img/intro_field_band.jpg');
-  /* 원본 1900x555를 1:1로 쓴다. cover로 늘리면 뭉갠다 */
-  background-size: auto;
-  background-position: right center;
-  background-repeat: no-repeat;
-  /* 잔디가 띠 전체에 깔리되 글이 앉는 왼쪽만 옅게 눌러 대비를 만든다.
-     완전히 지워버리면 "띠"가 아니라 오른쪽 사진 한 장이 된다 */
-  /* 46%까지는 옅게 눌러 둔다 — 글이 앉는 구간이다.
-     거기서부터 살아나 오른쪽 끝(공·배트)은 온전히 보인다 */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  /* 스크롤 진행률(--p)에 따라 잔디가 옆으로 흐른다.
-     띠가 화면을 지나가는 동안 계속 움직여야 "흐른다"는 인상이 생긴다 */
-  translate: calc((var(--p, 0.5) - 0.5) * -70px) 0;
-  /* screen은 어두운 픽셀을 투명처럼 통과시킨다. 뒤의 붉은 점이 잔디를 뚫고
-     올라와서, 가리는 사진이 아니라 겹쳐 찍힌 한 컷으로 읽힌다 */
-  opacity: 0.42;
-  mix-blend-mode: screen;
 }
 
-.about-card__inner {
-  transform: rotate(2.2deg);
-}
+
 
 /* ─────────────────────────────────────────────
    스크롤 진행률 모션 — motion.js가 --p(0~1)를 매 프레임 기록한다.
@@ -1256,15 +1202,6 @@ footer {
 
 /* 섹션마다 다른 종류의 움직임을 준다. 전부 같은 방식으로 떠오르면
    스크롤이 아래로 내려가는 것 말고는 아무 일도 안 일어나는 것처럼 읽힌다. */
-
-/* 01 소개 — 띠가 기울기를 바꾸며 스쳐 지나간다 (회전) */
-.about-card {
-  rotate: calc((var(--p, 0.5) - 0.5) * -4.5deg);
-}
-/* 그 안의 잔디는 반대로 흘러 시차를 만든다 (가로 패럴랙스) */
-.about-card::after {
-  translate: calc((var(--p, 0.5) - 0.5) * -150px) 0;
-}
 
 /* 02 대표 프로젝트 — 양옆에서 모여든다 (좌우 + 회전) */
 .project-grid--featured .project-card {
@@ -1366,26 +1303,7 @@ footer {
     columns: 1;
   }
 }
-/* 좁아지면 사진 555px가 화면 대부분을 덮어 글과 겹친다.
-   마스크를 세로로 돌려 글은 위, 사진은 아래쪽 질감으로 남긴다 */
 @media (max-width: 60rem) {
-  /* 좁은 화면에서는 1900px 띠의 오른쪽 끝(공·배트)만 보인다.
-     마스크를 세로로 돌려 글은 위, 잔디는 아래쪽 바닥으로 남긴다 */
-  .about-card::after {
-    background-position: right center;
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-    mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-  }
   .about-card__inner > * {
     max-width: none;
   }
@@ -1395,15 +1313,8 @@ footer {
   .about-cols {
     columns: 1;
   }
-  /* 좁은 화면에서 각도가 크면 글줄이 눈에 띄게 기운다 */
   .about-card {
-    transform: rotate(-1deg);
-    width: 108%;
-    margin-left: -4%;
     padding-block: var(--space-12);
-  }
-  .about-card__inner {
-    transform: rotate(1deg);
   }
 }
 
@@ -1864,10 +1775,13 @@ body {
 
 /* 야구공 — 실밥은 공보다 큰 원 두 개를 좌우에 겹쳐 가장자리 호만 남긴다.
    지름은 JS가 월드 크기 × 카메라 배율로 넣는다. 손으로 정하지 않는다 */
-.film__ball {
-  position: absolute;
+.film ~ .film__ball {
+  /* 본문(z-index 1) 위, 헤더(50) 아래. 타구가 카드 위를 넘어간다 */
+  position: fixed;
+  z-index: 3;
   left: 0;
   top: 0;
+  pointer-events: none;
   width: var(--bd, 30px);
   aspect-ratio: 1;
   border-radius: var(--radius-full);
@@ -2008,7 +1922,6 @@ body {
    비교는 calc으로 한다 — (지금 - 기준) × 기울기를 0~1로 자르면 그게 곧
    그 줄의 밝기다. 줄마다 --i가 달라서 차례로 번져 나간다.
    ───────────────────────────────────────────────────────────── */
-html.js .film ~ #about .about-card__inner > *,
 html.js .film ~ #featured .project-card {
   --lit: clamp(0, (var(--story, 0) - var(--cue, 0)) * 26, 1);
   opacity: var(--lit);
@@ -2017,18 +1930,26 @@ html.js .film ~ #featured .project-card {
   transition: none;
 }
 
-/* 릴리스(0.11)에서 시작해 공이 날아가는 동안 한 줄씩 */
-#about .about-card__inner > * {
-  --cue: calc(0.11 + var(--i, 0) * 0.035);
+/* 소개 글은 공 궤적 위에 앉는다. 자리도 밝기도 film.js가 매 프레임 잡는다 —
+   본문 흐름에서 빼고 화면에 직접 건다. 좁은 화면에서는 이 클래스가 안 붙어
+   평범한 본문으로 남는다(.reveal이 그대로 처리한다) */
+html.js .reveal.about-flown {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: min(27rem, 40vw);
+  margin: 0;
+  /* 궤적선 바로 아래에 깔린다 */
+  padding-top: 0.6rem;
+  opacity: var(--lit, 0);
+  transition: none;
+  pointer-events: none;
+  /* 자리가 매 프레임 바뀐다 — 합성기에 올려둔다 */
+  will-change: transform;
 }
-#about .about-card__inner > *:nth-child(2) {
-  --i: 1;
-}
-#about .about-card__inner > *:nth-child(3) {
-  --i: 2;
-}
-#about .about-card__inner > *:nth-child(4) {
-  --i: 3;
+html.js .reveal.about-flown.about-lead {
+  width: min(30rem, 44vw);
 }
 
 /* 임팩트(0.345)에서 프로젝트가 튀어나온다 */
@@ -2098,7 +2019,6 @@ html.js .film ~ #contact .contact-list li {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js .film ~ #about .about-card__inner > *,
   html.js .film ~ #featured .project-card,
   html.js .film ~ #skills .skill-row,
   html.js .film ~ #principles .principle-item,

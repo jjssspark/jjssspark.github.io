@@ -43,6 +43,12 @@ const ACTORS = [
     sheet: 'pitch',
     x: 0,
     h: 0.96,
+    // 시트의 투수는 왼쪽으로 던진다 — 팔을 오른쪽으로 젖혔다가 넘기고
+    // 뒷다리가 오른쪽으로 차올라간다. 타석은 오른쪽이니 돌려세운다
+    flip: true,
+    // 뒤집고 나면 손끝이 오른쪽이다. flip과 face는 별개다 —
+    // 타자는 뒤집은 뒤에도 마운드(왼쪽)를 보고 선다
+    face: 1,
     beats: [
       { s: 0, u: 0 },
       { s: 0.045, u: 0.2 },
@@ -62,9 +68,10 @@ const ACTORS = [
     sheet: 'bat',
     x: 2.62,
     h: 1,
-    // 시트의 타자는 투수와 같은 쪽을 본다. 그대로 두면 공이 등으로 들어간다.
+    // 시트의 타자는 오른쪽을 본다. 그대로 두면 공이 등으로 들어간다.
     // 좌우를 뒤집어 마운드를 마주 보게 세운다
     flip: true,
+    face: -1,
     beats: [
       { s: 0.16, u: 0 },
       { s: 0.27, u: 0.26 },
@@ -107,25 +114,31 @@ const ACTORS = [
  * 세로로 긴 화면에서 배우가 통째로 화면 밖으로 밀려난다.
  */
 const CAMERA = [
-  // 소개 구간은 넓게 잡는다. 투수를 화면 가운데 꽉 채우면 소개 글과 정면으로
-  // 겹쳐서 둘 다 안 읽힌다. 왼쪽은 글자리, 오른쪽은 마운드로 나눠 쓴다
-  { s: 0, x: 0, off: 0.28, y: -0.45, z: 0.6 },
-  { s: 0.11, x: 0, off: 0.28, y: -0.46, z: 0.68 },
+  // 소개 구간은 넓게 잡는다. 투수를 화면 가운데 꽉 채우면 뒤이어 깔리는
+  // 소개 글과 겹친다. 던지는 쪽(오른쪽)을 비워두고 왼쪽에 세운다
+  { s: 0, x: 0, off: -0.16, y: -0.46, z: 0.76 },
+  { s: 0.11, x: 0, off: -0.16, y: -0.48, z: 0.84 },
   // 릴리스 직후 카메라가 공을 따라 오른쪽으로 채간다. 투수가 화면에 남아
   // 천천히 밀려나면 소개 본문 위를 가로지르며 글을 덮는다
-  { s: 0.16, x: 0.95, off: 0, y: -0.48, z: 0.78 },
-  { s: 0.22, x: 1.55, off: 0, y: -0.49, z: 0.87 },
-  { s: 0.3, x: 2.3, off: 0, y: -0.5, z: 1.02 },
-  { s: 0.345, x: 2.66, off: 0, y: -0.58, z: 1.9 },
+  { s: 0.16, x: 0.72, off: 0, y: -0.5, z: 0.86 },
+  // 공이 날아가는 동안은 중견수 카메라처럼 넓게 물고 거의 서 있는다.
+  // 여기서 카메라가 공을 바짝 쫓으면, 그라운드에 깔린 소개 글도 같은 속도로
+  // 흘러나가 한 줄도 못 읽는다
+  { s: 0.22, x: 1.3, off: 0, y: -0.5, z: 0.8 },
+  { s: 0.3, x: 1.78, off: 0, y: -0.52, z: 0.84 },
+  { s: 0.345, x: 2.66, off: 0, y: -0.6, z: 2.05 },
   // 임팩트 뒤로는 카메라가 타구를 따라 되돌아간다. 실제 중계가 그렇다 —
   // 들어오는 공을 따라갔다가, 맞는 순간 반대로 채서 외야를 좇는다
-  { s: 0.42, x: 2.09, off: 0, y: -0.78, z: 1.15 },
-  { s: 0.52, x: 0.6, off: 0, y: -1.05, z: 0.66 },
+  // 여기 x·y는 TRACK이 공에서 뽑는 값과 거의 같게 맞춰뒀다. 어긋나 있으면
+  // 따라가기를 놓는 순간 카메라가 덜컥 되돌아간다
+  { s: 0.42, x: 0.73, off: 0, y: -1.28, z: 0.85 },
+  { s: 0.52, x: -2.76, off: 0, y: -2.33, z: 0.62 },
+  { s: 0.58, x: -4.5, off: 0, y: -2.3, z: 0.6 },
   // 이 구간은 타구가 이미 사라진 외야다. 카메라를 올려두면 관중석까지
   // 화면 밖으로 나가서 무대가 통째로 비어 보인다
-  { s: 0.64, x: -1.2, off: 0, y: -1.24, z: 0.6 },
-  { s: 0.8, x: -3.0, off: 0, y: -0.98, z: 0.78 },
-  { s: 1, x: -4.57, off: 0, y: -0.48, z: 1.12 },
+  { s: 0.66, x: -5.5, off: 0, y: -2.05, z: 0.6 },
+  { s: 0.8, x: -4.95, off: 0, y: -1.3, z: 0.72 },
+  { s: 1, x: -4.57, off: 0, y: -0.48, z: 1.05 },
 ];
 
 /**
@@ -146,11 +159,38 @@ const ANCHORS = [
   ['#contact', 1],
 ];
 
-/** 공 지름(월드). 실제 야구공 7.3cm를 키 1.9m로 나눈 값이다 */
-const BALL_D = 0.038;
+/**
+ * 공 지름(월드). 실제 비율은 7.3cm / 키 1.9m = 0.038인데, 그대로 두면
+ * 도트 실루엣 옆에서 점 하나로 보인다. 중계도 공만 따로 크게 잡는다
+ */
+const BALL_D = 0.056;
 
 /** 관중석 — 월드 가로 구간과 높이 */
 const CROWD = { x0: -6.0, x1: 5.0, y: -1.62, count: 175 };
+
+/**
+ * 소개 글이 앉을 지점. 공이 손을 떠나 배트까지 가는 사이의 이야기 시간이다.
+ * 공이 이 지점을 지나가면 그 자리에 한 줄이 깔린다.
+ */
+const LINE_CUES = [0.135, 0.185, 0.235];
+
+/** 궤적 위에 글을 앉히려면 가로 폭이 있어야 한다. 좁으면 본문 흐름으로 둔다 */
+const FLOWN_MIN_W = 860;
+
+/**
+ * 임팩트 이후 카메라가 타구를 따라가는 정도.
+ *
+ * 손으로 찍은 좌표만으로는 이 속도를 못 쫓아간다 — 맞는 순간 배율이 두 배로
+ * 뛰는데 공은 월드 초속 6.6으로 나가서, 한 프레임 만에 화면 밖이었다.
+ * w는 공을 따라가는 비중, dx·dy는 공에서 얼마나 떨어져 볼지다.
+ * dy가 양수면 카메라가 공보다 아래를 보므로 타구가 화면 위쪽에 뜬다.
+ */
+const TRACK = [
+  { s: 0.345, w: 0, dx: 0, dy: 0 },
+  { s: 0.4, w: 1, dx: -0.25, dy: 0.3 },
+  { s: 0.55, w: 1, dx: -0.55, dy: 0.55 },
+  { s: 0.66, w: 0, dx: 0, dy: 0 },
+];
 
 /** 이야기 구간 — 릴리스, 임팩트, 타구가 끝나는 지점 */
 const RELEASE = 0.11;
@@ -324,7 +364,8 @@ function makeTrophy() {
 
 const root = document.querySelector('.film');
 const canvas = root && root.querySelector('.film__stage');
-const ball = root && root.querySelector('.film__ball');
+// 공은 판 밖에 있다 — 판 안에 두면 쌓임 맥락에 갇혀 본문 뒤로 들어간다
+const ball = document.querySelector('.film__ball');
 
 if (root && canvas) {
   const ctx = canvas.getContext('2d');
@@ -334,6 +375,13 @@ if (root && canvas) {
   let W = 0;
   let H = 0;
   let dpr = 1;
+  /** 릴리스·임팩트 지점(월드). 배우가 실린 뒤 한 번만 푼다 */
+  let ends = null;
+  /** 소개 글이 앉을 궤적 위 지점(월드) */
+  let linePts = [];
+  /** 궤적에 앉힌 소개 글 */
+  let lines = [];
+
   /** 화면 비율 보정 — measure()가 갱신한다 */
   let fit = 1;
   let side = 1;
@@ -442,7 +490,7 @@ if (root && canvas) {
     if (!actor || !actor.frames.length) return { x: 0, y: -0.5 };
     const spec = ACTORS[index];
     const f = actor.frames[Math.min(actor.frames.length - 1, Math.round(frameAt * (actor.frames.length - 1)))];
-    const { gx, gy } = frontPoint(f, actor.grid.gw, actor.grid.gh, zone, spec.flip ? -1 : 1);
+    const { gx, gy } = frontPoint(f, actor.grid.gw, actor.grid.gh, zone, spec.face || 1);
     const scale = spec.h / actor.grid.gh;
     // 몸이 실려 나간 만큼 손끝도 같이 간다. 안 더하면 공이 허공에서 출발한다
     const dx = spec.drift ? alongKeys(spec.drift, atStory, 'x') : 0;
@@ -462,9 +510,20 @@ if (root && canvas) {
    */
   function ballAt(s) {
     // 손을 떠나는 순간·배트에 맞는 순간의 자세로 고정해서 잡는다.
-    // 지금 프레임으로 잡으면 팔로스루를 따라 시작점이 뒤로 밀린다
-    const release = actorPoint(0, RELEASE, 0.72, [0, 0.5]);
-    const contact = actorPoint(1, CONTACT, 0.66, [0, 0.5]);
+    // 지금 프레임으로 잡으면 팔로스루를 따라 시작점이 뒤로 밀린다.
+    //
+    // 두 점 다 월드 좌표라 카메라와 무관하다. 그런데 잔상이 한 프레임에
+    // 이 함수를 스무 번 넘게 부르고, 한 번마다 도트 수천 칸을 훑는다.
+    // 배우가 실린 뒤 한 번만 풀어 들고 있는다
+    if (!ends) {
+      ends = {
+        // 위 절반을 그냥 훑으면 팔로스루 자세에서 가장 앞선 점이 머리 꼭대기다.
+        // 어깨~손 높이로 띠를 좁혀야 손끝에서 공이 나간다
+        release: actorPoint(0, RELEASE, 0.66, [0.28, 0.6]),
+        contact: actorPoint(1, CONTACT, 0.66, [0, 0.5]),
+      };
+    }
+    const { release, contact } = ends;
 
     if (s < RELEASE) return { p: release, shown: 0 };
 
@@ -491,7 +550,7 @@ if (root && canvas) {
     const t = u * 1.15;
     return {
       p: { x: contact.x + vx * t, y: contact.y + vy * t + 0.5 * g * t * t },
-      shown: 1 - clamp01((u - 0.82) / 0.18),
+      shown: 1 - clamp01((u - 0.88) / 0.12),
     };
   }
 
@@ -538,6 +597,42 @@ if (root && canvas) {
     }
     stamp(actor.frames[i0], gw, origin.x, origin.y, pitch, 1 - f * 0.8);
     stamp(actor.frames[i0 + 1], gw, origin.x, origin.y, pitch, 0.2 + f * 0.8);
+  }
+
+  /**
+   * 소개 글을 공 궤적 위에 깐다.
+   *
+   * 본문 흐름에 두면 판 위에 얹힌 자막이지 장면의 일부가 아니다. 지점을
+   * **월드 좌표**로 잡고 매 프레임 카메라를 통과시키면, 카메라가 공을 따라갈 때
+   * 글도 같이 흘러간다 — 잔디에 써놓은 글씨를 지나가는 것처럼 보인다.
+   */
+  function layLines(s) {
+    if (!lines.length || !linePts.length) return;
+    // 카메라가 오른쪽으로 가니 깔린 글은 알아서 왼쪽으로 빠진다. 마지막 줄만
+    // 타석 근처에 남는데, 임팩트에서 배율이 튀면 글자가 튀어 나가므로 그전에 걷는다
+    const gone = 1 - smoothstep(s, CONTACT - 0.012, CONTACT + 0.004);
+    const step = Math.min(96, H * 0.1);
+    for (let i = 0; i < lines.length; i += 1) {
+      const el = lines[i];
+      const lit = clamp01((s - LINE_CUES[i]) * 30) * gone;
+      el.style.setProperty('--lit', lit.toFixed(3));
+      if (lit <= 0.002) continue;
+      const spot = toScreen(linePts[i].x, linePts[i].y);
+      // 궤적이 거의 수평이라 가로로만 늘어놓으면 줄끼리 겹친다.
+      // 한 칸씩 내려 계단으로 깐다
+      el.style.transform = `translate3d(${spot.x.toFixed(1)}px, ${(spot.y + i * step).toFixed(1)}px, 0)`;
+    }
+  }
+
+  /** 좁은 화면에서는 궤적 위에 글을 놓을 자리가 없다. 본문 흐름으로 되돌린다 */
+  function updateFlown() {
+    const on = !prefersReducedMotion && W >= FLOWN_MIN_W && linePts.length > 0;
+    for (const el of lines) {
+      el.classList.toggle('about-flown', on);
+      if (on) continue;
+      el.style.transform = '';
+      el.style.removeProperty('--lit');
+    }
   }
 
   function drawCrowd(s) {
@@ -620,9 +715,18 @@ if (root && canvas) {
     cam.z = alongKeys(CAMERA, s, 'z') * fit;
     cam.x = alongKeys(CAMERA, s, 'x') - alongKeys(CAMERA, s, 'off') * side * (W / (cam.z * H));
 
+    // 타구 구간에서는 공에서 좌표를 뽑아 섞는다. 안 그러면 맞자마자 사라진다
+    const chase = alongKeys(TRACK, s, 'w');
+    if (chase > 0.001) {
+      const p = ballAt(s).p;
+      cam.x += (p.x + alongKeys(TRACK, s, 'dx') - cam.x) * chase;
+      cam.y += (p.y + alongKeys(TRACK, s, 'dy') - cam.y) * chase;
+    }
+
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
 
+    layLines(s);
     drawCrowd(s);
     for (let i = 0; i < ACTORS.length; i += 1) drawActor(i, s);
     drawTrail(s);
@@ -655,6 +759,13 @@ if (root && canvas) {
       cast = loaded;
       measure();
       remark();
+      // 지점은 월드 좌표라 화면이 바뀌어도 그대로다. 한 번만 푼다
+      linePts = LINE_CUES.map((t) => ballAt(t).p);
+      lines = [...document.querySelectorAll('#about .about-lead, #about .about-text')].slice(
+        0,
+        LINE_CUES.length
+      );
+      updateFlown();
       root.classList.add('is-ready');
       frame(window.scrollY);
       if (prefersReducedMotion) return;
@@ -662,6 +773,7 @@ if (root && canvas) {
       window.addEventListener('resize', () => {
         measure();
         remark();
+        updateFlown();
         frame(window.scrollY);
       });
     })

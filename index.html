@@ -60,8 +60,10 @@
     <!-- 무대 — 페이지 전체가 이 한 컷 안에서 흘러간다. 본문이 그 위를 지나간다 -->
     <div class="film" aria-hidden="true">
       <canvas class="film__stage"></canvas>
-      <span class="film__ball"></span>
     </div>
+    <!-- 공은 판 밖에 둔다. 판 안에 있으면 그 쌓임 맥락에 갇혀서
+         프로젝트 카드 뒤로 들어가 임팩트 뒤 타구가 통째로 안 보인다 -->
+    <span class="film__ball" aria-hidden="true"></span>
     <section id="top" class="hero" aria-labelledby="hero-heading">
       <svg class="hero-diamond" aria-hidden="true" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
         <rect class="hero-diamond__infield" x="100" y="100" width="200" height="200" transform="rotate(45 200 200)" />
@@ -94,7 +96,9 @@
     <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
          어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
     <section id="about" class="section about pin-section" aria-labelledby="about-heading">
-     <div class="pin-stage" style="--pin-travel: 80vh">
+     <!-- 소개 글이 공 궤적 위에 깔린다. 무대가 짧으면 카메라가 공을 쫓는 속도로
+          글이 흘러가 읽을 틈이 없다 — 이 구간만 길게 잡는다 -->
+     <div class="pin-stage" style="--pin-travel: 160vh">
       <div class="pin-sticky">
       <div class="about-card">
         <div class="about-card__inner container">
