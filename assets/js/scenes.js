@@ -85,8 +85,8 @@ const SCENES = {
     board: 'bat',
     frames: [0.86, 1],
     camera: [
-      { p: 0, z: 1.0, x: 0 },
-      { p: 1, z: 1.16, x: 0 },
+      { p: 0, z: 1.0, x: -13 },
+      { p: 1, z: 1.16, x: -16 },
     ],
     text: () => principles.map((p) => p.title),
     cheer: [0, 1],
@@ -97,8 +97,8 @@ const SCENES = {
     board: 'trophy',
     frames: [0, 1],
     camera: [
-      { p: 0, z: 0.92, x: 0 },
-      { p: 1, z: 1.24, x: 0 },
+      { p: 0, z: 0.92, x: -11 },
+      { p: 1, z: 1.24, x: -14 },
     ],
     text: () => ['GITHUB · jjssspark', `EMAIL · ${profile.links.email}`, 'NOTION · 프로젝트 문서'],
     cheer: [0, 0.4],
@@ -432,7 +432,7 @@ function createScene(root) {
     board.resize();
     // 꺼진 도트를 캔버스와 같은 간격으로 화면 전체에 깐다
     if (panel) panel.style.setProperty('--dot', `${board.pitch.toFixed(3)}px`);
-    fitChips();
+    layoutChips();
   }
 
   /**
@@ -461,14 +461,11 @@ function createScene(root) {
     return { x: point.x * frameW, y: point.y * frameH };
   }
 
-  /**
-   * 구간 위 t 지점. `linear`는 글자를 놓을 때 쓴다 — 공은 가속하지만 글자까지
-   * 그 곡선을 따르면 앞쪽이 눌려 서로 겹친다.
-   */
-  function at(t, cam, panPct, linear) {
+  /** 구간 위 t 지점 */
+  function at(t, cam, panPct) {
     const a = resolve(spec.ball.a, cam, panPct);
     const b = resolve(spec.ball.b, cam, panPct);
-    const e = !linear && spec.ball.ease === 'accel' ? t * t : t;
+    const e = spec.ball.ease === 'accel' ? t * t : t;
     // 살짝 띄워 포물선으로 만든다. 직선이면 그냥 미끄러지는 것으로 보인다
     const lift = Math.sin(Math.PI * e) * frameH * 0.1;
     return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e - lift };
@@ -514,55 +511,51 @@ function createScene(root) {
   }
 
   /**
-   * 줄 크기를 정한다. 앞줄이 크고 뒤로 갈수록 작아져 한 줄씩 멀어져 보인다.
-   * 한 줄로 붙여 쓰므로 화면을 넘치면 그만큼 줄인다 — 넘친 채로 두면
-   * 오른쪽이 잘려 문장이 끊긴다.
+   * 글자의 크기와 자리를 정한다.
+   *
+   * 오른쪽 끝을 맞춘다. 한글은 줄마다 길이가 들쭉날쭉해서 왼쪽을 맞추면
+   * 오른쪽이 너덜너덜해지고, 폭이 바뀔 때마다 어떤 줄은 계단으로 어떤 줄은
+   * 정렬로 나와 화면 크기마다 다른 디자인이 된다. 실루엣이 왼쪽에 있으니
+   * 오른쪽 정렬이 여백을 가운데로 모아 구도도 안정된다. 계단감은 자리가
+   * 아니라 줄마다 다른 크기가 만든다.
+   *
+   * 자리가 카메라와 무관하므로 스크롤마다 다시 잴 이유가 없다. 크기가
+   * 바뀔 때만 부른다 — offsetWidth를 매 프레임 읽으면 스크롤이 끊긴다.
    */
-  function fitChips() {
+  function layoutChips() {
+    if (!chips.length) return;
+    const n = chips.length;
     const base = Math.min(frameH * 0.075, frameW * 0.045);
-    const room = frameW * 0.46;
+    const right = frameW * 0.46;
+    const left = -frameW * 0.48;
+
     chipFs = chips.map((chip, i) => {
       let fs = base * Math.max(0.55, 1 - i * 0.14);
       chip.style.setProperty('--fs', `${fs.toFixed(1)}px`);
-      const w = chip.offsetWidth;
-      if (w > room) {
-        fs *= room / w;
+      // 넘친 채로 두면 오른쪽이 잘려 문장이 끊긴다
+      const wide = chip.offsetWidth;
+      if (wide > right - left) {
+        fs *= (right - left) / wide;
         chip.style.setProperty('--fs', `${fs.toFixed(1)}px`);
       }
       chipW[i] = chip.offsetWidth;
       return fs;
     });
-  }
 
-  /**
-   * 글자를 궤적 위에 앉힌다.
-   *
-   * 공이 지나간 자리 바로 아래에 줄이 놓인다. 공이 없는 장면(환호·트로피)은
-   * 궤적이 없으니 가운데에 계단으로 쌓는다.
-   */
-  function placeChips(cam, panPct) {
-    if (!chips.length) return;
-    const n = chips.length;
-    const edge = frameW * 0.5 - frameW * 0.04;
+    // 줄 간격은 앞줄 크기를 누적해서 쌓는다. i * fs로 잡으면 뒤로 갈수록
+    // 글자가 작아지는 만큼 간격도 같이 줄어 마지막 줄들이 서로 붙는다
+    const gaps = [0];
+    for (let i = 1; i < n; i += 1) gaps[i] = gaps[i - 1] + chipFs[i - 1] * 1.35;
+    // 줄이 많으면 화면 아래로 밀려 마지막 줄이 잘린다. 블록 전체를 끌어올린다
+    const blockH = gaps[n - 1] + chipFs[n - 1];
+    const top = Math.min(
+      spec.ball ? frameH * 0.07 : -blockH / 2,
+      frameH * 0.45 - blockH
+    );
+
     chips.forEach((chip, i) => {
-      const fs = chipFs[i] || 32;
-      let x;
-      let y;
-      if (spec.ball) {
-        // x만 궤적에서 가져온다. y까지 따라가면 궤적이 오르는 만큼 줄이 위로
-        // 올라가 순서가 거꾸로 읽힌다 — 읽는 순서가 먼저다
-        const u = n === 1 ? 0.34 : 0.12 + (i / (n - 1)) * 0.4;
-        x = at(u, cam, panPct, true).x;
-        y = frameH * 0.07 + i * fs * 1.35;
-      } else {
-        x = -frameW * 0.22;
-        y = (i - (n - 1) / 2) * fs * 1.5;
-      }
-      // 오른쪽으로 넘치면 끌어당긴다. 줄이 잘리면 궤적이고 뭐고 안 읽힌다
-      x = Math.min(x, edge - (chipW[i] || 0));
-      x = Math.max(x, -edge);
-      chip.style.setProperty('--tx', `${x.toFixed(1)}px`);
-      chip.style.setProperty('--ty', `${y.toFixed(1)}px`);
+      chip.style.setProperty('--tx', `${Math.max(left, right - chipW[i]).toFixed(1)}px`);
+      chip.style.setProperty('--ty', `${(top + gaps[i]).toFixed(1)}px`);
     });
   }
 
@@ -570,7 +563,6 @@ function createScene(root) {
     const travel = stage.offsetHeight - window.innerHeight;
     if (!pinned || travel <= 0) {
       board.seek(0.6);
-      placeChips(1, 0);
       chips.forEach((c) => c.classList.add('is-on'));
       canvas.style.removeProperty('--cam');
       canvas.style.removeProperty('--pan');
@@ -601,8 +593,6 @@ function createScene(root) {
       ball.style.setProperty('--bo', alpha.toFixed(3));
       drawArc(inside ? t : p > to ? 1 : 0, cam, panPct);
     }
-
-    placeChips(cam, panPct);
 
     chips.forEach((chip, i) => {
       const slot = i / chips.length;
@@ -644,11 +634,15 @@ if (roots.length) {
         live.forEach((s) => s.apply(window.scrollY));
         return;
       }
-      onScrollFrame((y) => live.forEach((s) => s.apply(y)));
-      window.addEventListener('resize', () => {
+      const relayout = () => {
         live.forEach((s) => s.measure());
         live.forEach((s) => s.apply(window.scrollY));
-      });
+      };
+      onScrollFrame((y) => live.forEach((s) => s.apply(y)));
+      window.addEventListener('resize', relayout);
+      // 오른쪽 정렬이라 글자 폭이 곧 자리다. 웹폰트가 늦게 오면 폴백 폭으로
+      // 잡은 자리가 그대로 굳는다
+      if (document.fonts) document.fonts.ready.then(relayout);
     })
     .catch((error) => {
       // 조용히 삼키지 않는다 — 시트 경로가 어긋났을 때 원인이 안 보인다
