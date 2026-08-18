@@ -320,6 +320,34 @@ function setupLineupWarp(track, frames) {
 }
 
 /**
+ * 타순이 한 바퀴 돈 자리에 세우는 구분 칸.
+ *
+ * 무한 루프라 07 다음이 곧바로 01이다. 표시가 없으면 어디가 처음이고 어디가
+ * 끝인지 알 수 없어 계속 같은 데를 도는 느낌이 든다. 야구에서 타순이 한 바퀴
+ * 돌아 1번 타자로 돌아오는 그 지점이라, 스트라이크존과 홈플레이트로 세운다.
+ *
+ * 폭은 카드와 같게 둔다 — 원근 휨과 루프 계산이 둘 다 칸 폭이 균일하다고 보고
+ * 산술로 자리를 낸다. 여기만 좁으면 그 뒤로 전부 어긋난다.
+ */
+function makeLineupTurn() {
+  const frame = document.createElement('div');
+  frame.className = 'lineup__frame lineup__turn';
+  frame.dataset.turn = '';
+  frame.innerHTML = `
+    <div class="turn-card">
+      <p class="turn-card__kicker">07 → 01</p>
+      <div class="turn-zone" aria-hidden="true">
+        ${'<span></span>'.repeat(9)}
+      </div>
+      <span class="turn-plate" aria-hidden="true"></span>
+      <p class="turn-card__label">타순 한 바퀴</p>
+      <p class="turn-card__note">다시 1번 타자부터</p>
+    </div>
+  `;
+  return frame;
+}
+
+/**
  * 트랙을 끝없이 돌게 만든다.
  *
  * 같은 카드 묶음을 앞뒤로 한 벌씩 더 붙여 세 벌로 만들고, 가운데 벌에서
@@ -330,12 +358,14 @@ function setupLineupWarp(track, frames) {
  * 읽고 지나간다. 마우스 클릭은 살려둔다(보이는데 안 눌리면 그게 더 이상하다).
  *
  * @param {HTMLElement} track
- * @param {Element[]} real 원본 칸
- * @param {() => number} step 칸 하나가 차지하는 가로 폭
+ * @param {number} count 원본 칸 수
+ * @param {{pitch: () => number, centerFor: (i: number) => number}} geom
+ *   칸 간격과 "칸 i가 한가운데 올 때의 scrollLeft". 둘 다 요소의 실제 배치에서
+ *   읽는다 — 폭을 손으로 더해 만들면 스냅 착지점과 어긋나 번호가 튄다
  */
-function setupLineupLoop(track, real, step) {
+function setupLineupLoop(track, count, geom) {
   const copies = () =>
-    real.map((frame) => {
+    Array.from(track.children).map((frame) => {
       const copy = frame.cloneNode(true);
       copy.setAttribute('aria-hidden', 'true');
       copy.dataset.clone = '';
@@ -345,14 +375,22 @@ function setupLineupLoop(track, real, step) {
       return copy;
     });
 
-  track.prepend(...copies());
-  track.append(...copies());
+  const head = copies();
+  const tail = copies();
+  track.prepend(...head);
+  track.append(...tail);
 
-  const unit = () => real.length * step();
+  const unit = () => count * geom.pitch();
   /** 가운데 벌의 첫 칸이 화면 한가운데 올 때의 scrollLeft */
-  const base = () => real.length * step() + (step() - 24) / 2 - track.clientWidth / 2;
+  const base = () => geom.centerFor(count);
+
+  let wrapping = false;
+  let idle = 0;
 
   function wrap() {
+    // scroll 안에서 scrollLeft를 쓰면 그 자리에서 scroll이 또 걸린다.
+    // 조건이 계속 참인 상황(스냅이 되돌리는 등)에서는 이게 안 끝난다
+    if (wrapping) return;
     const span = unit();
     if (span <= 0) return;
     const rel = track.scrollLeft - base();
@@ -362,7 +400,12 @@ function setupLineupLoop(track, real, step) {
     // 그러면 다음 scroll에서 반대로 튀어 앞뒤로 진동한다. 범위 안일 때만 옮긴다
     const target = track.scrollLeft + shift;
     if (target < 0 || target > track.scrollWidth - track.clientWidth) return;
+    wrapping = true;
     track.scrollLeft = target;
+    // rAF는 백그라운드 탭에서 안 돌아 플래그가 영영 안 풀린다
+    setTimeout(() => {
+      wrapping = false;
+    }, 0);
   }
 
   const reset = () => {
@@ -370,10 +413,20 @@ function setupLineupLoop(track, real, step) {
   };
 
   reset();
-  track.addEventListener('scroll', wrap, { passive: true });
+  // 스크롤이 멎은 뒤에만 옮긴다. 굴러가는 중에 자리를 바꾸면 관성이 끊기고,
+  // 매 프레임 쓰기가 들어가 카운터의 배치 읽기와 번갈아 부딪힌다.
+  // 세 벌이라 한 벌치 여유가 있어 늦게 옮겨도 끝에 닿지 않는다
+  track.addEventListener(
+    'scroll',
+    () => {
+      clearTimeout(idle);
+      idle = setTimeout(wrap, 120);
+    },
+    { passive: true }
+  );
   window.addEventListener('resize', reset);
 
-  return { base, unit };
+  return { base, unit, wrap };
 }
 
 /**
@@ -461,27 +514,51 @@ function setupLineup() {
   const counter = document.getElementById('lineup-count');
   if (!track || !counter) return;
 
-  const real = Array.from(track.children);
-  if (!real.length) return;
+  const cards = Array.from(track.children);
+  if (!cards.length) return;
 
   // 세로 구동(film.html)은 무대 진행률을 그대로 가로 위치로 쓴다. 복제하면 어긋난다
   const stage = document.getElementById('lineup-stage');
   const scrollDriven = Boolean(stage) && !prefersReducedMotion;
+  const looping = !scrollDriven && cards.length >= 3;
 
-  // offsetWidth를 쓴다. getBoundingClientRect()는 원근 휨(rotateY)이 적용된
-  // 폭이라 카드가 기울수록 줄어들고, 그러면 칸 번호가 한 칸씩 어긋난다
-  const step = () => real[0].offsetWidth + 24;
-  const loop = scrollDriven || real.length < 3 ? null : setupLineupLoop(track, real, step);
+  // 마지막 카드 뒤에 세운다. 루프에서 07 다음이 01이 되는 그 자리다
+  const turn = looping ? makeLineupTurn() : null;
+  if (turn) track.append(turn);
+
+  // 칸(slot)에는 구분 칸도 들어간다. 폭·루프 계산은 이걸 기준으로 한다
+  const slots = Array.from(track.children);
+
+  // 자리 계산은 전부 요소의 실제 배치(offsetLeft/offsetWidth)에서 읽는다.
+  // getBoundingClientRect()는 원근 휨(rotateY)이 적용된 값이라 카드가 기울수록
+  // 줄어들고, 폭에 gap을 손으로 더하면 스냅 착지점과 몇 px씩 어긋나 번호가 튄다
+  const pitch = () => {
+    const [a, b] = track.children;
+    return b ? b.offsetLeft - a.offsetLeft : a.offsetWidth;
+  };
+  /** 칸 i가 화면 한가운데 올 때의 scrollLeft */
+  const centerFor = (i) => {
+    const el = track.children[Math.max(0, Math.min(track.children.length - 1, i))];
+    return el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
+  };
+  /** 지금 한가운데 있는 칸 (복제본 포함 전체 기준) */
+  const centerIndex = () => {
+    const first = track.children[0];
+    if (!first) return 0;
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    return Math.round((mid - first.offsetLeft - first.offsetWidth / 2) / pitch());
+  };
+  const loop = looping ? setupLineupLoop(track, slots.length, { pitch, centerFor }) : null;
 
   // 원근 휨은 복제본에도 걸려야 한다 — 안 그러면 이어지는 자리에서 툭 끊긴다
-  const frames = loop ? Array.from(track.children) : real;
+  const frames = loop ? Array.from(track.children) : slots;
 
   // 가로 캐러셀 안의 카드는 뷰포트와 교차하지 않아 IntersectionObserver가 영영 안 깨운다.
   // 트랙이 화면에 들어오는 시점에 전부 한 번에 드러낸다.
   const wake = new IntersectionObserver(
     (entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
-      frames.forEach((frame) => frame.querySelector('.project-card')?.classList.add('is-visible'));
+      cards.forEach((frame) => frame.querySelector('.project-card')?.classList.add('is-visible'));
       wake.disconnect();
     },
     { rootMargin: '0px 0px -10% 0px' }
@@ -507,17 +584,20 @@ function setupLineup() {
     { passive: false }
   );
 
-  const total = String(real.length).padStart(2, '0');
+  const total = String(cards.length).padStart(2, '0');
 
+  /** 지금 가운데 있는 칸 번호. 복제본 위에 있어도 원본 자리로 되돌린다 */
   const currentIndex = () => {
-    if (!loop) return Math.min(Math.max(Math.round(track.scrollLeft / step()), 0), real.length - 1);
-    // 복제본 위에 있어도 원본 몇 번인지로 되돌린다
-    const n = real.length;
-    return ((Math.round((track.scrollLeft - loop.base()) / step()) % n) + n) % n;
+    const n = slots.length;
+    const i = centerIndex();
+    return loop ? ((i % n) + n) % n : Math.min(Math.max(i, 0), n - 1);
   };
 
   const syncCounter = () => {
-    counter.textContent = `${String(currentIndex() + 1).padStart(2, '0')} / ${total}`;
+    const index = currentIndex();
+    // 구분 칸은 프로젝트가 아니라 타순이 넘어가는 자리다
+    counter.textContent =
+      slots[index] === turn ? '타순 교대' : `${String(index + 1).padStart(2, '0')} / ${total}`;
   };
 
   // ── 스크롤 구동 ──────────────────────────────────────────────
@@ -582,9 +662,9 @@ function setupLineup() {
         return;
       }
 
-      // 절대 위치가 아니라 한 칸씩 상대 이동한다 — 루프에서는 "몇 번째 칸"이
-      // 트랙 좌표로 고정돼 있지 않다. 착지는 스냅이 가운데로 정리한다
-      track.scrollLeft += dir * step();
+      // 옆 칸을 정확히 가운데로 데려간다. scrollLeft에 폭을 더하는 식으로 하면
+      // 스냅이 매번 조금씩 되돌려서 몇 번 누르면 한 칸씩 밀린다
+      track.scrollLeft = centerFor(centerIndex() + dir);
       syncCounter();
     });
   });

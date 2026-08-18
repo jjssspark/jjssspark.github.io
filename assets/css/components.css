@@ -773,6 +773,67 @@ footer {
 .lineup__track::-webkit-scrollbar {
   display: none;
 }
+/* ── 타순 교대 칸 ────────────────────────────────────────────
+   무한 루프라 07 다음이 곧바로 01이다. 표시가 없으면 처음과 끝이 구분되지
+   않아 계속 같은 데를 도는 느낌만 남는다. 카드가 아니라 사이에 낀 표지라는 게
+   한눈에 보여야 해서, 판 없이 선으로만 세운다 */
+.lineup__turn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.turn-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+.turn-card__kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-phosphor);
+  text-shadow: 0 0 14px color-mix(in oklch, var(--color-phosphor) 45%, transparent);
+}
+/* 스트라이크존 — 3×3. 가운데 칸만 밝혀 한복판을 표시한다 */
+.turn-zone {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  width: clamp(5rem, 22vw, 7rem);
+  aspect-ratio: 3 / 4;
+  padding: 2px;
+  border: 1px solid color-mix(in oklch, var(--color-stitch) 55%, transparent);
+}
+.turn-zone span {
+  border: 1px dashed color-mix(in oklch, var(--color-stitch) 26%, transparent);
+}
+.turn-zone span:nth-child(5) {
+  border-style: solid;
+  background: color-mix(in oklch, var(--color-phosphor) 16%, transparent);
+  border-color: color-mix(in oklch, var(--color-phosphor) 55%, transparent);
+}
+/* 홈플레이트 — 오각형. 존 바로 아래에 눕는다 */
+.turn-plate {
+  width: clamp(3rem, 13vw, 4rem);
+  aspect-ratio: 2 / 1;
+  background: color-mix(in oklch, var(--chalk) 72%, transparent);
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 50% 100%, 0 45%);
+}
+.turn-card__label {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.turn-card__note {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+}
+
 /* 가운데 정렬이어야 모든 카드가 한 번씩 화면 한가운데로 온다.
    start로 두면 왼쪽 끝에 붙고, 마지막 몇 장은 가운데까지 오지도 못한다 */
 .lineup__track > * {
