@@ -1500,48 +1500,26 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   타순 무대 — 세로 스크롤이 띠를 좌우로 흘린다
+   타순 — 옆으로 미는 캐러셀
+
+   전에는 세로 스크롤이 띠를 좌우로 흘렸다. 8개를 넘기려면 무대를 네 화면쯤
+   내려야 했고, 그동안 페이지가 안 내려가는 것처럼 읽혔다. 지금은 트랙이
+   자기 스크롤을 갖고, 페이지는 이 구간을 평범하게 지나간다.
    ───────────────────────────────────────────── */
 .lineup-section {
-  /* 무대가 자체 높이를 가지므로 섹션 패딩은 위쪽만 남긴다 */
-  padding-block: var(--space-section) 0;
+  padding-block: var(--space-section);
 }
 .lineup-stage {
   position: relative;
-  /* 카드 수만큼 스크롤 여유를 준다. JS가 --stage-steps를 채운다 */
-  height: calc(100vh + var(--stage-steps, 8) * 38vh);
 }
 .lineup-sticky {
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: var(--space-6);
-  padding-block: var(--space-8);
 }
-/* 스크롤이 위치를 지시하므로 스냅은 끈다 — 둘이 붙으면 서로를 되돌린다 */
+/* 스크롤이 위치를 지시하던 시절의 규칙. 지금은 스냅이 착지를 맡는다 */
 .js-scroll-driven .lineup__track {
   scroll-snap-type: none;
-}
-
-@media (max-width: 48rem) {
-  /* 모바일에서 무대가 지나치게 길어지면 이 섹션만 한참 스크롤하게 된다 */
-  .lineup-stage {
-    height: calc(100vh + var(--stage-steps, 8) * 24vh);
-  }
-}
-
-/* 모션을 줄인 사용자에게는 무대를 걷어내고 원래의 수동 캐러셀로 되돌린다 */
-@media (prefers-reduced-motion: reduce) {
-  .lineup-stage {
-    height: auto;
-  }
-  .lineup-sticky {
-    position: static;
-    min-height: 0;
-  }
 }
 
 /* 무대 구조로 바꾸면서 .lineup이 .container 밖으로 나왔다.

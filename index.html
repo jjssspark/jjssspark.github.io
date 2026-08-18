@@ -117,16 +117,16 @@
       <div class="project-grid project-grid--featured" id="featured-grid"></div>
     </section>
 
-    <!-- 프로젝트 — 세로 스크롤이 필름 띠를 좌우로 흘린다.
-         무대(stage)를 길게 잡고 그 안의 sticky 판을 화면에 붙여둔 뒤,
-         무대를 지나는 진행률을 트랙의 가로 위치로 옮긴다 -->
+    <!-- 프로젝트 — 옆으로 미는 캐러셀.
+         무대 id를 떼면 render.js가 세로 스크롤 구동 대신 트랙 자체 스크롤로 간다.
+         트랙에 scroll-snap이 걸려 있어 카드 단위로 착지한다 -->
     <section id="projects" class="section lineup-section" aria-labelledby="projects-heading">
-      <div class="lineup-stage" id="lineup-stage">
+      <div class="lineup-stage">
         <div class="lineup-sticky">
           <div class="container">
             <p class="section-kicker">03 · Projects</p>
             <h2 id="projects-heading" class="section-title reveal">프로젝트</h2>
-            <p class="section-lead reveal">스크롤하면 하나씩 넘어갑니다.</p>
+            <p class="section-lead reveal">옆으로 넘겨서 봅니다. 화살표로도 넘어갑니다.</p>
           </div>
 
           <div class="lineup">

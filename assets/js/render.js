@@ -357,7 +357,9 @@ function setupLineup() {
     { passive: false }
   );
 
-  const step = () => frames[0].getBoundingClientRect().width + 24;
+  // offsetWidth를 쓴다. getBoundingClientRect()는 원근 휨(rotateY)이 적용된
+  // 폭이라 카드가 기울수록 줄어들고, 그러면 칸 번호가 한 칸씩 어긋난다
+  const step = () => frames[0].offsetWidth + 24;
   const total = String(frames.length).padStart(2, '0');
 
   const currentIndex = () =>
