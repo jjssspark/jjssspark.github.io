@@ -126,6 +126,18 @@ if (ownsWheel) {
       if (event.ctrlKey || event.metaKey) return; // 확대 제스처
       if (document.querySelector('dialog[open]')) return; // 모달 내부 스크롤 존중
 
+      // 가로로 굴리는 제스처는 가로 스크롤러에게 넘긴다.
+      // 이 엔진은 deltaY만 쓰는데 preventDefault는 이벤트 전체에 걸리므로,
+      // 막아버리면 트랙 위에서 좌우로 밀어도 아무 일도 안 일어난다.
+      // 가로 스크롤러 위가 아닐 때는 그대로 막는다 — macOS에서 두 손가락
+      // 좌우 스와이프가 뒤로 가기로 새는 걸 막아야 한다
+      if (
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) &&
+        event.target?.closest?.('[data-hscroll]')
+      ) {
+        return;
+      }
+
       event.preventDefault();
       target = clamp(target + pixelDelta(event) * WHEEL_GAIN, 0, maxScroll());
       start();

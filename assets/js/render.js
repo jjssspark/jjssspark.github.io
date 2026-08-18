@@ -315,6 +315,82 @@ function setupLineupWarp(track, frames) {
 }
 
 /**
+ * 마우스로 트랙을 끌어 넘긴다.
+ *
+ * 네이티브 가로 스크롤 컨테이너는 마우스로 끌리지 않는다. 터치는 브라우저가
+ * 알아서 밀어주지만 데스크톱에는 가로 휠조차 없는 입력이 흔해서, 버튼 말고는
+ * 넘길 방법이 없었다.
+ *
+ * @param {HTMLElement} track
+ */
+function setupLineupDrag(track) {
+  let active = null;
+  let startX = 0;
+  let startLeft = 0;
+  let dragging = false;
+  // 끌고 놓은 직후의 click 한 번만 막는다. dragging을 그대로 쓰면
+  // 다음 클릭까지 계속 막혀서 카드 링크가 죽는다
+  let swallowClick = false;
+
+  track.addEventListener('pointerdown', (event) => {
+    // 터치는 브라우저의 관성 패닝이 이미 더 낫다. 겹치면 두 배로 움직인다
+    if (event.pointerType === 'touch' || event.button !== 0) return;
+    active = event.pointerId;
+    startX = event.clientX;
+    startLeft = track.scrollLeft;
+    dragging = false;
+    swallowClick = false;
+  });
+
+  track.addEventListener('pointermove', (event) => {
+    if (event.pointerId !== active) return;
+    const dx = event.clientX - startX;
+    if (!dragging) {
+      // 클릭과 구분되는 문턱. 이게 없으면 링크를 누를 때마다 끌린 것으로 친다
+      if (Math.abs(dx) < 6) return;
+      dragging = true;
+      // 포인터가 이미 놓였거나 캡처를 못 잡는 상황에서 던진다.
+      // 여기서 예외가 나면 이 핸들러가 통째로 멈춰 드래그가 안 된다
+      try {
+        track.setPointerCapture(active);
+      } catch {
+        /* 캡처 없이도 트랙 위에서는 끌린다 */
+      }
+      // 스냅이 켜져 있으면 매 프레임 착지점으로 되돌려 끌리지 않는다
+      track.classList.add('is-dragging');
+    }
+    track.scrollLeft = startLeft - dx;
+  });
+
+  const release = (event) => {
+    if (event.pointerId !== active) return;
+    try {
+      if (track.hasPointerCapture(active)) track.releasePointerCapture(active);
+    } catch {
+      /* 이미 풀렸다 */
+    }
+    track.classList.remove('is-dragging');
+    swallowClick = dragging;
+    dragging = false;
+    active = null;
+  };
+  track.addEventListener('pointerup', release);
+  track.addEventListener('pointercancel', release);
+
+  // 끌고 놓은 자리에서 링크가 열리면 안 된다. 캡처 단계에서 먼저 자른다
+  track.addEventListener(
+    'click',
+    (event) => {
+      if (!swallowClick) return;
+      swallowClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    true
+  );
+}
+
+/**
  * 타순 캐러셀. 스크롤 스냅이 이동을 담당하고 버튼은 scrollBy만 호출한다 —
  * 터치 스와이프·키보드 스크롤이 공짜로 따라온다.
  */
@@ -444,6 +520,7 @@ function setupLineup() {
   });
 
   if (!scrollDriven) {
+    setupLineupDrag(track);
     track.addEventListener('scroll', syncCounter, { passive: true });
     syncCounter();
   }
