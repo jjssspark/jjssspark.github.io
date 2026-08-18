@@ -3,7 +3,6 @@
  * @property {string|null} repo
  * @property {string|null} demo
  * @property {string|null} [notion]
- * @property {string|null} [video] - 시연 영상 URL
  */
 
 /**
@@ -55,7 +54,6 @@ export const projects = [
     links: {
       repo: 'https://github.com/jjssspark/WorkFlow_AI',
       demo: 'https://t3-workflow-ai.site',
-      video: 'https://youtu.be/D5jy2qbKh7g',
       notion:
         'https://app.notion.com/p/WorkFlow_AI-3b1f6f1e619a803a9e5cf884f8d23c05?source=copy_link',
     },
@@ -82,7 +80,12 @@ export const projects = [
     role: null,
     stack: ['Python', 'TensorFlow', 'YOLOv8', 'Streamlit'],
     viz: 'trajectory',
-    links: { repo: 'https://github.com/jjssspark/DL_Pitcher', demo: null },
+    links: {
+      repo: 'https://github.com/jjssspark/DL_Pitcher',
+      demo: 'https://pitchiq-dlpitcher.streamlit.app/',
+      notion:
+        'https://app.notion.com/p/PitchIQ-DL_Pitcher-7dff6f1e619a82dcaeaf01f184626090?source=copy_link',
+    },
   },
   {
     id: 'stovelens-ai',
@@ -97,8 +100,9 @@ export const projects = [
     image: 'assets/img/salarycast-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/SalaryCast_AI',
-      demo: null,
-      notion: 'https://app.notion.com/p/SalaryCast_AI-00af6f1e619a82c4b882016d34088dd1?source=copy_link',
+      demo: 'https://stovelens-ai.streamlit.app/',
+      notion:
+        'https://app.notion.com/p/SalaryCast_AI-00af6f1e619a82c4b882016d34088dd1?source=copy_link',
     },
   },
   {
@@ -114,8 +118,9 @@ export const projects = [
     image: 'assets/img/truthlens-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/TruthLens',
-      demo: null,
-      notion: 'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
+      demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app',
+      notion:
+        'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
     },
   },
   {
@@ -184,6 +189,8 @@ export const projects = [
     links: {
       repo: 'https://github.com/jjssspark/OnQue',
       demo: 'https://onque-frontend.vercel.app',
+      notion:
+        'https://app.notion.com/p/OnQue-3b1f6f1e619a80d5ac93df593519521c?source=copy_link',
     },
   },
   {

@@ -63,9 +63,6 @@ function projectCardHtml(project, index) {
   const notionHtml = project.links.notion
     ? ` · <a class="project-link" href="${escapeHtml(project.links.notion)}" target="_blank" rel="noopener noreferrer">Notion <span aria-hidden="true">↗</span></a>`
     : '';
-  const videoHtml = project.links.video
-    ? ` · <a class="project-link" href="${escapeHtml(project.links.video)}" target="_blank" rel="noopener noreferrer">시연 영상 <span aria-hidden="true">↗</span></a>`
-    : '';
   const statusHtml =
     project.status === 'in-play'
       ? '<span class="status-badge">IN PLAY</span>'
@@ -94,7 +91,7 @@ function projectCardHtml(project, index) {
       : '';
 
   // 링크 줄을 따로 감싼다 — 내용 길이가 달라도 하단선이 맞는다(.project-foot { margin-top: auto })
-  const footHtml = `<div class="project-foot"><span class="project-foot__links">${linkHtml}${demoHtml}${videoHtml}${notionHtml}</span>${backHtml}</div>`;
+  const footHtml = `<div class="project-foot"><span class="project-foot__links">${linkHtml}${demoHtml}${notionHtml}</span>${backHtml}</div>`;
 
   if (project.image) {
     return `
@@ -210,7 +207,6 @@ function setupCardBack() {
     const links = [
       project.links.repo ? ['Repository', project.links.repo] : null,
       project.links.demo ? ['Demo', project.links.demo] : null,
-      project.links.video ? ['시연 영상', project.links.video] : null,
       project.links.notion ? ['Notion', project.links.notion] : null,
     ].filter(Boolean);
 
