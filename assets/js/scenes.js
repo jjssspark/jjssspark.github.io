@@ -53,6 +53,7 @@ const SCENES = {
       { p: 1, z: 1.1, x: -24 },
     ],
     ball: { from: 0.5, to: 1, a: { anchor: 'front', at: 0.5 }, b: OFF.right, fade: 'hold' },
+    scale: [1.15, 0.82],
     text: () => [profile.role, ...profile.tagline.split(', ')],
   },
   swing: {
@@ -63,9 +64,16 @@ const SCENES = {
       { p: 0.7, z: 1.12, x: -15 },
       { p: 1, z: 1.24, x: -17 },
     ],
-    ball: { from: 0, to: 1, a: OFF.right, b: { anchor: 'front', at: 1 }, fade: 'in' },
+    ball: {
+      from: 0,
+      to: 1,
+      a: OFF.right,
+      b: { anchor: 'front', at: 1, zone: [0, 0.45] },
+      fade: 'in',
+    },
+    scale: [0.5, 2.4],
     text: () => [
-      `PROJECTS ${projects.length}`,
+      { k: 'PROJECTS', v: projects.length },
       ...projects.filter((p) => p.tier === 'featured').map((p) => p.name),
     ],
   },
@@ -77,8 +85,17 @@ const SCENES = {
       { p: 0.18, z: 0.86, x: -12 },
       { p: 1, z: 0.96, x: -10 },
     ],
-    ball: { from: 0, to: 0.8, a: { anchor: 'front', at: 0 }, b: OFF.far, fade: 'out', ease: 'accel' },
-    text: () => skills.map((g) => `${g.group} ${g.items.length}`),
+    ball: {
+      from: 0,
+      to: 0.8,
+      a: { anchor: 'front', at: 0, zone: [0, 0.45] },
+      b: OFF.far,
+      fade: 'out',
+      ease: 'accel',
+    },
+    /** 배트에 맞는 순간이 제일 크다. 멀어지며 빠르게 줄어든다 */
+    scale: [2.8, 0.4],
+    text: () => skills.map((g) => ({ k: g.group, v: g.items.length })),
     cheer: [0.3, 1],
   },
   roar: {
@@ -156,16 +173,33 @@ function litList(sample, gw, gh) {
   return { pos: Uint16Array.from(pos), val: Uint8Array.from(val) };
 }
 
-/** 한 프레임에서 가장 앞으로 나온 점. 투수는 공을 쥔 손, 타자는 배트 끝이다 */
-function frontPoint(frame, gw) {
+/**
+ * 한 프레임에서 가장 앞으로 나온 점. 투수는 공을 쥔 손, 타자는 배트 끝이다.
+ *
+ * `zone`으로 훑을 세로 구간을 좁힐 수 있다. 타자의 팔로스루 프레임은 뒷다리가
+ * 배트 끝보다 오른쪽에 있어서, 그냥 최대 x를 잡으면 공이 몸 뒤에서 나온다.
+ *
+ * @param {{pos: Uint16Array}} frame
+ * @param {number} gw
+ * @param {number} gh
+ * @param {[number, number]} [zone] 격자 세로 비율 구간
+ */
+function frontPoint(frame, gw, gh, zone) {
+  const y0 = zone ? zone[0] * gh : 0;
+  const y1 = zone ? zone[1] * gh : gh;
   let best = -1;
-  let cell = 0;
+  let cell = -1;
   for (let k = 0; k < frame.pos.length; k += 1) {
     const x = frame.pos[k] % gw;
     if (x <= best) continue;
+    const y = (frame.pos[k] - x) / gw;
+    if (y < y0 || y > y1) continue;
     best = x;
     cell = frame.pos[k];
   }
+  // 구간 안이 비면 규칙을 좁힌 쪽이 틀린 것이다. 조용히 0,0을 주면
+  // 공이 화면 구석에서 튀어나와 원인을 못 찾는다
+  if (cell < 0) return frontPoint(frame, gw, gh);
   const x = cell % gw;
   return { cx: x, cy: (cell - x) / gw };
 }
@@ -390,7 +424,13 @@ function createScene(root) {
 
   const lines = spec.text();
   if (trail) {
-    trail.innerHTML = lines.map((text, i) => `<span style="--i:${i}">${text}</span>`).join('');
+    trail.innerHTML = lines
+      .map((line, i) => {
+        const body =
+          typeof line === 'string' ? line : `${line.k}<em>${line.v}</em>`;
+        return `<span style="--i:${i}">${body}</span>`;
+      })
+      .join('');
   }
   const chips = trail ? [...trail.children] : [];
 
@@ -406,6 +446,8 @@ function createScene(root) {
   let panelDy = 0;
   let panelH = 0;
   let pinned = false;
+  /** 무대가 화면 밖으로 나가 끝값에 고정된 상태 */
+  let idle = false;
   /** @type {number[]} */
   let chipFs = [];
   /** @type {number[]} */
@@ -422,7 +464,8 @@ function createScene(root) {
       panelH = pr.height;
     }
     if (arc) {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      // 획 하나뿐이라 2배 해상도가 필요 없다. 매 프레임 지우는 픽셀이 곧 비용이다
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
       arc.width = Math.round(frameW * dpr);
       arc.height = Math.round(frameH * dpr);
     }
@@ -456,7 +499,7 @@ function createScene(root) {
     if (point.anchor === 'front') {
       const f = board.frameAt(point.at);
       if (!f) return { x: 0, y: 0 };
-      return toScreen(frontPoint(f, grid.gw), cam, panPct);
+      return toScreen(frontPoint(f, grid.gw, grid.gh, point.zone), cam, panPct);
     }
     return { x: point.x * frameW, y: point.y * frameH };
   }
@@ -465,7 +508,7 @@ function createScene(root) {
   function at(t, cam, panPct) {
     const a = resolve(spec.ball.a, cam, panPct);
     const b = resolve(spec.ball.b, cam, panPct);
-    const e = spec.ball.ease === 'accel' ? t * t : t;
+    const e = spec.ball.ease === 'accel' ? t * t * t : t;
     // 살짝 띄워 포물선으로 만든다. 직선이면 그냥 미끄러지는 것으로 보인다
     const lift = Math.sin(Math.PI * e) * frameH * 0.1;
     return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e - lift };
@@ -486,27 +529,27 @@ function createScene(root) {
 
     const lamp = getComputedStyle(arc).getPropertyValue('--lamp').trim() || '#c0392b';
     const head = Math.max(2, frameH * 0.006);
-    const steps = 72;
+    const steps = 40;
     actx.lineCap = 'round';
     actx.strokeStyle = lamp;
-    actx.shadowColor = lamp;
 
-    let prev = at(0, cam, panPct);
-    for (let i = 1; i <= steps; i += 1) {
-      const u = i / steps;
-      const spot = at(u * t, cam, panPct);
-      // 꼬리는 지수로 죽인다. 선형이면 시작점까지 또렷해 잔상이 안 생긴다
-      const fade = u * u;
-      actx.globalAlpha = 0.1 + fade * 0.75;
-      actx.lineWidth = head * (0.25 + fade * 0.9);
-      actx.shadowBlur = head * fade * 5;
-      actx.beginPath();
-      actx.moveTo(prev.x, prev.y);
-      actx.lineTo(spot.x, spot.y);
-      actx.stroke();
-      prev = spot;
+    // 좌표를 한 번만 풀어 두 번 쓴다. 넓고 옅은 획이 번짐, 좁고 진한 획이 심지다.
+    // canvas의 shadowBlur는 획마다 화면 밖 버퍼를 새로 만들어서 못 쓴다
+    const pts = [];
+    for (let i = 0; i <= steps; i += 1) pts.push(at((i / steps) * t, cam, panPct));
+
+    for (const pass of [0, 1]) {
+      for (let i = 1; i <= steps; i += 1) {
+        // 꼬리는 지수로 죽인다. 선형이면 시작점까지 또렷해 잔상이 안 생긴다
+        const fade = (i / steps) ** 2;
+        actx.globalAlpha = pass ? 0.12 + fade * 0.5 : 0.15 + fade * 0.8;
+        actx.lineWidth = head * (pass ? 1.2 + fade * 3.2 : 0.25 + fade * 0.9);
+        actx.beginPath();
+        actx.moveTo(pts[i - 1].x, pts[i - 1].y);
+        actx.lineTo(pts[i].x, pts[i].y);
+        actx.stroke();
+      }
     }
-    actx.shadowBlur = 0;
     actx.globalAlpha = 1;
   }
 
@@ -560,6 +603,13 @@ function createScene(root) {
   }
 
   function apply(y) {
+    // 무대가 화면에서 완전히 벗어나면 계산할 게 없다. 벗어나는 순간 한 번만
+    // 끝값으로 맞춰두고 그 뒤로는 건너뛴다
+    const box = stage.getBoundingClientRect();
+    const away = box.bottom < -200 || box.top > window.innerHeight + 200;
+    if (away && idle) return;
+    idle = away;
+
     const travel = stage.offsetHeight - window.innerHeight;
     if (!pinned || travel <= 0) {
       board.seek(0.6);
@@ -570,7 +620,7 @@ function createScene(root) {
       if (actx) actx.clearRect(0, 0, arc.width, arc.height);
       return;
     }
-    const top = window.scrollY + stage.getBoundingClientRect().top;
+    const top = window.scrollY + box.top;
     const p = Math.min(1, Math.max(0, (y - top) / travel));
 
     const cam = alongKeys(spec.camera, p, 'z');
@@ -589,6 +639,8 @@ function createScene(root) {
       ball.style.setProperty('--bx', `${spot.x.toFixed(1)}px`);
       ball.style.setProperty('--by', `${spot.y.toFixed(1)}px`);
       ball.style.setProperty('--brot', `${(p * 1600).toFixed(0)}deg`);
+      const [s0, s1] = spec.scale || [1, 1];
+      ball.style.setProperty('--bs', (s0 + (s1 - s0) * t).toFixed(3));
       const alpha = !inside ? 0 : fade === 'in' ? t : fade === 'out' ? 1 - t * t : 1;
       ball.style.setProperty('--bo', alpha.toFixed(3));
       drawArc(inside ? t : p > to ? 1 : 0, cam, panPct);

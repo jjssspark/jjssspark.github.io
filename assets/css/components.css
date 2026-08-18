@@ -1912,6 +1912,9 @@ body {
     inset -3px -4px 7px oklch(0% 0 0 / 0.22);
   translate: calc(-50% + var(--bx, 0px)) calc(-50% + var(--by, 0px));
   rotate: var(--brot, 0deg);
+  /* 배트에 맞는 순간 화면 가득 커졌다가 멀어지며 줄어든다.
+     느리게 출발하는 이징과 합쳐져 슬로우모션으로 읽힌다 */
+  scale: var(--bs, 1);
   opacity: var(--bo, 0);
   overflow: hidden;
   pointer-events: none;
@@ -1960,8 +1963,9 @@ body {
     0 0 1.3em oklch(0% 0 0 / 0.88),
     0 0 2.6em oklch(0% 0 0 / 0.75);
   opacity: 0;
-  /* 공이 놓고 간 자리에서 살짝 뒤로 흘러내린다 */
-  translate: calc(var(--tx, 0px) - 1.2em) calc(var(--ty, 0px) + 0.5em);
+  /* 공이 지나간 방향에서 미끄러져 들어온다. 아래에서 뜨는 것보다
+     "공이 놓고 갔다"가 분명해진다 */
+  translate: calc(var(--tx, 0px) + 2.6em) var(--ty, 0px);
   transition:
     opacity var(--duration-reveal) var(--ease-out-expo),
     translate var(--duration-reveal) var(--ease-out-expo);
@@ -1969,6 +1973,19 @@ body {
 .scene__trail span.is-on {
   opacity: 1;
   translate: var(--tx, 0px) var(--ty, 0px);
+}
+/* 숫자는 전광판 램프다. 라벨과 다른 서체·색을 줘야 "몇 개"가 먼저 읽힌다 */
+.scene__trail em {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.15em;
+  margin-inline-start: 0.42em;
+  color: var(--color-phosphor);
+  text-shadow:
+    0 0 0.18em oklch(0% 0 0 / 0.9),
+    0 0 0.5em color-mix(in oklch, var(--color-phosphor) 60%, transparent),
+    0 0 1.2em color-mix(in oklch, var(--color-phosphor) 34%, transparent);
 }
 /* 공이 없는 장면은 글자가 실루엣 한가운데에 얹힌다. 후광만으로는 모자라
    판을 눌러줘야 한다 — 가장자리는 그대로 두고 가운데만 */
@@ -2058,4 +2075,105 @@ body {
   .scene__crowd {
     display: none;
   }
+}
+
+/* ── Stack 본문 — 장면이 서 있던 그 전광판을 그대로 이어받는다 ─────────
+   앞 장면이 화면 가득 큰 글씨로 "Language 4"를 말하고 나면, 본문이
+   가운데 놓인 작은 박스로 같은 말을 반복했다. 판이 바뀐 것처럼 보여
+   흐름이 끊긴다. 같은 도트 판 위에서 숫자 대신 안을 펼치는 쪽으로 바꾼다.
+   ───────────────────────────────────────────────────────────── */
+#skills .pin-sticky {
+  /* 장면 글자와 같은 여백에 오른쪽 끝을 맞춘다. 72rem 컨테이너에 가두면
+     장면보다 안쪽에서 끝나 세로 리듬이 어긋난다 */
+  max-width: none;
+  padding-inline: 4vw;
+  /* 장면과 같은 LED 격자. 간격은 타자 시트(세로 110칸)를 화면 높이에
+     맞춘 값이라 앞뒤 화면에서 도트 크기가 안 튄다 */
+  --dot: calc(100vh / 110);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--ink-800) 42%, transparent) 0 21%,
+    transparent 22%
+  );
+  background-size: var(--dot) var(--dot);
+}
+#skills .skill-list {
+  /* 카드 껍데기를 걷어낸다. 판 위에 얹힌 표지, 판 위에 놓인 상자가 아니다 */
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-block: 1px solid color-mix(in oklch, var(--color-stitch) 34%, transparent);
+  /* 둥근 모서리를 자르려고 걸어둔 것이다. 모서리가 사라졌으니 풀어야
+     한다 — 안 풀면 행이 좌우로 밀릴 때 라벨 첫 글자가 잘린다 */
+  overflow: visible;
+}
+#skills .skill-row {
+  grid-template-columns: minmax(10rem, 20rem) 1fr;
+}
+#skills .skill-group {
+  background: none;
+  padding-inline: 0 var(--space-8);
+  border-right-color: color-mix(in oklch, var(--color-stitch) 22%, transparent);
+  font-size: clamp(0.875rem, 0.6rem + 0.7vw, 1.25rem);
+}
+#skills .skill-items {
+  padding-block: clamp(0.9rem, 1.4vh, 1.5rem);
+  padding-inline: var(--space-8) 0;
+  gap: var(--space-3);
+}
+#skills .skill-chip {
+  /* 작은 모노 알약은 장면의 대형 타이포 옆에서 각주처럼 읽힌다.
+     테두리를 지우고 글자 자체를 키워 항목이 주인공이 되게 한다 */
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 0.7rem + 0.85vw, 1.65rem);
+  font-weight: 500;
+  color: var(--color-text);
+  text-shadow: 0 0 0.5em oklch(0% 0 0 / 0.85);
+}
+/* 항목 사이를 점으로 끊는다. 칩 테두리가 하던 일을 글자 한 칸이 대신한다 */
+#skills .skill-chip + .skill-chip::before {
+  content: '·';
+  margin-inline-end: var(--space-3);
+  color: color-mix(in oklch, var(--color-phosphor) 55%, transparent);
+}
+#skills .skill-chip:hover {
+  color: var(--color-phosphor);
+}
+
+@media (max-width: 60rem) {
+  #skills .pin-sticky {
+    padding-inline: var(--space-6);
+  }
+  #skills .skill-row {
+    grid-template-columns: 1fr;
+  }
+  #skills .skill-group {
+    border-right: 0;
+    padding-inline: 0;
+  }
+  #skills .skill-items {
+    padding-inline: 0;
+  }
+}
+
+/* 표가 화면 끝까지 차면서 좌우 여유가 사라졌다. 밀리는 폭이 그대로면
+   왼쪽 라벨이 화면 밖으로 잘린다. 방향은 두고 폭만 줄인다 */
+#skills .skill-row:nth-child(odd) {
+  translate: calc((0.5 - var(--p, 0.5)) * -40px) 0;
+}
+#skills .skill-row:nth-child(even) {
+  translate: calc((0.5 - var(--p, 0.5)) * 40px) 0;
+}
+
+/* 스택 표도 같은 규칙으로 들어온다. 장면에서 글자가 옆으로 미끄러져 나왔으니
+   본문만 아래에서 뜨면 두 동작이 따로 논다 */
+html.js #skills .skill-row.reveal {
+  transform: translateX(4rem);
+}
+html.js #skills .skill-row.reveal.is-visible {
+  transform: none;
 }

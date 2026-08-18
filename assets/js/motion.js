@@ -168,16 +168,25 @@ function setupScrollProgress() {
   measure();
   window.addEventListener('resize', measure);
 
+  // 화면 밖 무대는 끝값에 고정돼 있다. 매 프레임 다시 써봐야 값이 그대로인데
+  // 커스텀 속성 한 번이 그 아래 전체 스타일을 무효화한다
+  const idle = stages.map(() => false);
+
   onScrollFrame((y) => {
     const viewport = window.innerHeight;
     stages.forEach((stage, index) => {
+      const box = stage.getBoundingClientRect();
+      const away = box.bottom < -200 || box.top > viewport + 200;
+      if (away && idle[index]) return;
+      idle[index] = away;
+
       if (!pinned[index]) {
         stage.style.setProperty('--p', '0.5');
         return;
       }
       // rect는 실제 스크롤 기준, y는 보간된 값이다. 절대 좌표로 바꿔서 뺀다 —
       // 터치 환경처럼 둘이 어긋나는 경우에도 진행률이 튀지 않는다
-      const stageTop = window.scrollY + stage.getBoundingClientRect().top;
+      const stageTop = window.scrollY + box.top;
       const travel = stage.offsetHeight - viewport;
       if (travel <= 0) {
         stage.style.setProperty('--p', '0.5');
