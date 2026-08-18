@@ -503,6 +503,15 @@ html.js .project-card.reveal.is-visible {
 .project-card--media {
   z-index: 1;
 }
+/* 대표 카드는 hover를 기다리지 않는다. 여기 담당 줄이 그 카드를 대표로
+   올린 이유라서, 마우스를 올려야 보이면 올린 의미가 없다.
+   터치 기기에는 hover가 아예 없기도 하다 */
+.project-card--featured.project-card--media .project-more {
+  max-height: none;
+  opacity: 1;
+  overflow: visible;
+  margin-top: var(--space-3);
+}
 .project-card--media .project-more {
   max-height: 0;
   opacity: 0;

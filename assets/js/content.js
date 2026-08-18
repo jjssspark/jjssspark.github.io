@@ -189,7 +189,7 @@ export const projects = [
   {
     id: 'zoner',
     name: 'Zoner',
-    tier: 'shipped',
+    tier: 'featured',
     status: 'shipped',
     summary:
       '웹캠으로 학습 집중도를 5초마다 판정하고, 세션이 끝나면 언제 무너졌는지·무엇이 방해했는지를 근거와 함께 리포트로 돌려주는 웹앱. 영상은 서버로 보내지 않고 브라우저 안에서만 추론한다.',
