@@ -62,25 +62,32 @@ const ACTORS = [
     sheet: 'bat',
     x: 2.62,
     h: 1,
+    // 시트의 타자는 투수와 같은 쪽을 본다. 그대로 두면 공이 등으로 들어간다.
+    // 좌우를 뒤집어 마운드를 마주 보게 세운다
+    flip: true,
     beats: [
       { s: 0.16, u: 0 },
-      { s: 0.27, u: 0.18 },
-      { s: 0.318, u: 0.34 },
-      // 시트의 절반이 배트에 맞는 순간이다. 이 값이 어긋나면 공이 허공에서 튄다
-      { s: 0.345, u: 0.5 },
-      { s: 0.375, u: 0.72 },
+      { s: 0.27, u: 0.26 },
+      { s: 0.318, u: 0.44 },
+      // 임팩트 직전에만 프레임 간격을 좁힌다 — 배트가 터져 나오는 대목이다
+      { s: 0.335, u: 0.55 },
+      // 31프레임이 배트를 완전히 뻗은 자세다. 이 값이 어긋나면 공이 허공에서 튄다
+      { s: 0.345, u: 0.66 },
+      { s: 0.375, u: 0.82 },
       { s: 0.44, u: 1 },
     ],
-    // 뒷발에 실었다가 앞으로 넘긴다
+    // 뒷발에 실었다가 앞으로 넘긴다. 마운드 쪽이 앞이라 부호가 반대다
     drift: [
-      { s: 0.16, x: 0.02, y: 0 },
-      { s: 0.318, x: -0.012, y: 0.004 },
-      { s: 0.44, x: 0.05, y: 0 },
+      { s: 0.16, x: -0.02, y: 0 },
+      { s: 0.318, x: 0.012, y: 0.004 },
+      { s: 0.44, x: -0.05, y: 0 },
     ],
   },
   {
     sheet: 'trophy',
-    x: 6.4,
+    // 타구는 투수 머리 위를 넘어 되돌아간다. 트로피는 그 타구가 떨어지는
+    // 자리, 중견수 뒤 담장 너머에 선다. 가까이 두면 1회부터 화면에 남는다
+    x: -4.55,
     h: 0.86,
     beats: [
       { s: 0.9, u: 0 },
@@ -94,17 +101,31 @@ const ACTORS = [
  *
  * z는 배율이다. 1이면 키 1인 배우가 화면 높이를 꽉 채운다. 값이 끊기지 않게
  * 이어져야 컷이 안 생긴다 — 구간 사이를 부드럽게 잇는 건 alongKeys가 한다.
+ *
+ * x는 화면 가운데에 둘 월드 지점이고, off는 거기서 **화면 폭 비율만큼**
+ * 옆으로 밀어내는 값이다. 옆으로 미는 걸 x에 바로 적어 넣으면 세로 기준이라,
+ * 세로로 긴 화면에서 배우가 통째로 화면 밖으로 밀려난다.
  */
 const CAMERA = [
-  { s: 0, x: 0.02, y: -0.45, z: 1.02 },
-  { s: 0.16, x: 0.24, y: -0.46, z: 1.14 },
-  { s: 0.3, x: 2.3, y: -0.5, z: 1.2 },
-  { s: 0.345, x: 2.66, y: -0.58, z: 2.15 },
-  { s: 0.42, x: 3.15, y: -0.78, z: 1.15 },
-  { s: 0.52, x: 3.9, y: -1.05, z: 0.66 },
-  { s: 0.64, x: 4.7, y: -0.95, z: 0.6 },
-  { s: 0.8, x: 5.6, y: -0.62, z: 0.78 },
-  { s: 1, x: 6.42, y: -0.48, z: 1.12 },
+  // 소개 구간은 넓게 잡는다. 투수를 화면 가운데 꽉 채우면 소개 글과 정면으로
+  // 겹쳐서 둘 다 안 읽힌다. 왼쪽은 글자리, 오른쪽은 마운드로 나눠 쓴다
+  { s: 0, x: 0, off: 0.28, y: -0.45, z: 0.6 },
+  { s: 0.11, x: 0, off: 0.28, y: -0.46, z: 0.68 },
+  // 릴리스 직후 카메라가 공을 따라 오른쪽으로 채간다. 투수가 화면에 남아
+  // 천천히 밀려나면 소개 본문 위를 가로지르며 글을 덮는다
+  { s: 0.16, x: 0.95, off: 0, y: -0.48, z: 0.78 },
+  { s: 0.22, x: 1.55, off: 0, y: -0.49, z: 0.87 },
+  { s: 0.3, x: 2.3, off: 0, y: -0.5, z: 1.02 },
+  { s: 0.345, x: 2.66, off: 0, y: -0.58, z: 1.9 },
+  // 임팩트 뒤로는 카메라가 타구를 따라 되돌아간다. 실제 중계가 그렇다 —
+  // 들어오는 공을 따라갔다가, 맞는 순간 반대로 채서 외야를 좇는다
+  { s: 0.42, x: 2.09, off: 0, y: -0.78, z: 1.15 },
+  { s: 0.52, x: 0.6, off: 0, y: -1.05, z: 0.66 },
+  // 이 구간은 타구가 이미 사라진 외야다. 카메라를 올려두면 관중석까지
+  // 화면 밖으로 나가서 무대가 통째로 비어 보인다
+  { s: 0.64, x: -1.2, off: 0, y: -1.24, z: 0.6 },
+  { s: 0.8, x: -3.0, off: 0, y: -0.98, z: 0.78 },
+  { s: 1, x: -4.57, off: 0, y: -0.48, z: 1.12 },
 ];
 
 /**
@@ -129,7 +150,7 @@ const ANCHORS = [
 const BALL_D = 0.038;
 
 /** 관중석 — 월드 가로 구간과 높이 */
-const CROWD = { x0: -1.4, x1: 8.2, y: -1.62, count: 150 };
+const CROWD = { x0: -6.0, x1: 5.0, y: -1.62, count: 175 };
 
 /** 이야기 구간 — 릴리스, 임팩트, 타구가 끝나는 지점 */
 const RELEASE = 0.11;
@@ -177,22 +198,41 @@ function litList(sample, gw, gh) {
  * `zone`으로 훑을 세로 구간을 좁힌다. 타자의 팔로스루는 뒷다리가 배트보다
  * 오른쪽에 있어서, 그냥 최대 x를 잡으면 공이 몸 뒤에서 나온다.
  */
-function frontPoint(pos, gw, gh, zone) {
+function frontPoint(pos, gw, gh, zone, dir) {
   const y0 = zone ? zone[0] * gh : 0;
   const y1 = zone ? zone[1] * gh : gh;
-  let best = -1;
+  // 투수는 오른쪽을, 타자는 왼쪽을 본다. 한 방향으로만 훑으면
+  // 한쪽은 손끝 대신 등 뒤가 잡힌다
+  const left = dir < 0;
+  let best = left ? gw : -1;
   let cell = -1;
   for (let k = 0; k < pos.length; k += 1) {
     const x = pos[k] % gw;
-    if (x <= best) continue;
+    if (left ? x >= best : x <= best) continue;
     const y = (pos[k] - x) / gw;
     if (y < y0 || y > y1) continue;
     best = x;
     cell = pos[k];
   }
-  if (cell < 0) return frontPoint(pos, gw, gh);
+  if (cell < 0) return frontPoint(pos, gw, gh, null, dir);
   const x = cell % gw;
   return { gx: x, gy: (cell - x) / gw };
+}
+
+/**
+ * 켜진 칸 목록을 좌우로 뒤집는다.
+ *
+ * 캔버스를 scale(-1,1) 하는 쪽이 짧아 보이지만, 그러면 도트를 찍을 때마다
+ * 변환이 걸리고 frontPoint가 보는 격자와 화면이 어긋나 손끝 좌표가 틀어진다.
+ * 목록 자체를 뒤집으면 아래 코드가 전부 그대로 돈다.
+ */
+function mirrorFrames(frames, gw) {
+  return frames.map((pos) =>
+    pos.map((cell) => {
+      const x = cell % gw;
+      return cell - x + (gw - 1 - x);
+    })
+  );
 }
 
 /** @type {Map<string, Promise<Uint16Array[]>>} */
@@ -294,6 +334,9 @@ if (root && canvas) {
   let W = 0;
   let H = 0;
   let dpr = 1;
+  /** 화면 비율 보정 — measure()가 갱신한다 */
+  let fit = 1;
+  let side = 1;
   /** 도트 한 알을 미리 그려둔다. 매 프레임 arc를 수천 번 부르면 못 버틴다 */
   const lamp = document.createElement('canvas');
   let lampHalf = 0;
@@ -338,6 +381,13 @@ if (root && canvas) {
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
     lampPitch = 0;
+
+    // 키프레임은 가로가 넉넉한 화면 기준으로 짰다. 세로로 긴 화면에서는
+    // 사람 한 명 폭이 화면보다 넓어지므로 배율을 줄이고, 옆으로 밀어내는
+    // 연출은 놓을 자리가 없으니 접는다
+    const aspect = W / H;
+    fit = Math.min(1, 0.55 + (0.45 * aspect) / 1.8);
+    side = clamp01((aspect - 0.85) / 0.75);
   }
 
   /* ── 이야기 시간 ───────────────────────────────────────────── */
@@ -385,7 +435,7 @@ if (root && canvas) {
     if (!actor || !actor.frames.length) return { x: 0, y: -0.5 };
     const spec = ACTORS[index];
     const f = actor.frames[Math.min(actor.frames.length - 1, Math.round(frameAt * (actor.frames.length - 1)))];
-    const { gx, gy } = frontPoint(f, actor.grid.gw, actor.grid.gh, zone);
+    const { gx, gy } = frontPoint(f, actor.grid.gw, actor.grid.gh, zone, spec.flip ? -1 : 1);
     const scale = spec.h / actor.grid.gh;
     // 몸이 실려 나간 만큼 손끝도 같이 간다. 안 더하면 공이 허공에서 출발한다
     const dx = spec.drift ? alongKeys(spec.drift, atStory, 'x') : 0;
@@ -407,7 +457,7 @@ if (root && canvas) {
     // 손을 떠나는 순간·배트에 맞는 순간의 자세로 고정해서 잡는다.
     // 지금 프레임으로 잡으면 팔로스루를 따라 시작점이 뒤로 밀린다
     const release = actorPoint(0, RELEASE, 0.72, [0, 0.5]);
-    const contact = actorPoint(1, CONTACT, 0.5, [0, 0.45]);
+    const contact = actorPoint(1, CONTACT, 0.66, [0, 0.5]);
 
     if (s < RELEASE) return { p: release, shown: 0 };
 
@@ -427,7 +477,8 @@ if (root && canvas) {
     const u = clamp01((s - CONTACT) / (LANDING - CONTACT));
     // 발사각과 초속에서 궤적을 만든다. 끝점을 정해두고 그 사이를 잇는 것보다
     // 중력을 직접 먹이는 쪽이 타구답게 휜다
-    const vx = 6.6;
+    // 마운드를 마주 보고 쳤으니 타구는 투수 쪽으로 되돌아간다
+    const vx = -6.6;
     const vy = -5.4;
     const g = 6.2;
     const t = u * 1.15;
@@ -558,9 +609,9 @@ if (root && canvas) {
     // 프로젝트가 뜨는 건 스크롤 위치가 아니라 동작이 정하는 일이다
     document.documentElement.style.setProperty('--story', s.toFixed(4));
 
-    cam.x = alongKeys(CAMERA, s, 'x');
     cam.y = alongKeys(CAMERA, s, 'y');
-    cam.z = alongKeys(CAMERA, s, 'z');
+    cam.z = alongKeys(CAMERA, s, 'z') * fit;
+    cam.x = alongKeys(CAMERA, s, 'x') - alongKeys(CAMERA, s, 'off') * side * (W / (cam.z * H));
 
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
@@ -587,7 +638,10 @@ if (root && canvas) {
     ACTORS.map((a) =>
       a.sheet === 'trophy'
         ? Promise.resolve({ frames: makeTrophy(), grid: TROPHY })
-        : loadSheet(a.sheet).then((frames) => ({ frames, grid: SHEETS[a.sheet] }))
+        : loadSheet(a.sheet).then((frames) => ({
+            frames: a.flip ? mirrorFrames(frames, SHEETS[a.sheet].gw) : frames,
+            grid: SHEETS[a.sheet],
+          }))
     )
   )
     .then((loaded) => {

@@ -1188,12 +1188,13 @@ footer {
   width: 116%;
   margin-left: -8%;
   padding-block: var(--space-16);
-  background-color: var(--color-surface);
-  background-image: linear-gradient(120deg, var(--color-surface-alt), var(--color-bg) 62%);
+  /* 판은 더 이상 불투명한 사진이 아니다. 뒤에서 투수가 던지고 있는데
+     판이 화면 가운데를 막으면 상체가 통째로 잘려 모션이 안 보인다.
+     바닥을 비우고 잔디만 얹어 필름 위에 겹치는 한 겹으로 만든다 */
+  background-color: transparent;
   overflow: hidden;
   color: var(--color-turf-text);
   transform: rotate(-2.2deg);
-  box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
 }
 /* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
 /* 사진은 띠 오른쪽에 **원본 크기 그대로(1:1)** 붙인다.
@@ -1236,6 +1237,10 @@ footer {
   /* 스크롤 진행률(--p)에 따라 잔디가 옆으로 흐른다.
      띠가 화면을 지나가는 동안 계속 움직여야 "흐른다"는 인상이 생긴다 */
   translate: calc((var(--p, 0.5) - 0.5) * -70px) 0;
+  /* screen은 어두운 픽셀을 투명처럼 통과시킨다. 뒤의 붉은 점이 잔디를 뚫고
+     올라와서, 가리는 사진이 아니라 겹쳐 찍힌 한 컷으로 읽힌다 */
+  opacity: 0.42;
+  mix-blend-mode: screen;
 }
 
 .about-card__inner {
@@ -1316,11 +1321,14 @@ footer {
    컨테이너 자체는 가운데 정렬을 유지해야 한다 — margin을 0으로 두면
    판의 -8% 지점, 즉 화면 밖에서 시작한다. 그래서 자식 블록의 폭만 제한한다 */
 .about-card__inner > * {
-  max-width: 34rem;
+  /* 오른쪽은 마운드 자리다. 글칸이 거기까지 뻗으면 실루엣과 겹쳐 둘 다 죽는다 */
+  max-width: 30rem;
 }
-/* 잔디 위 흰 글씨의 획이 뭉개지지 않게 바닥을 깐다 */
+/* 잔디와 실루엣 위에 얹히는 흰 글씨라 바닥을 깔아야 획이 산다 */
 .about-card__inner {
-  text-shadow: 0 1px 12px oklch(0% 0 0 / 0.75);
+  text-shadow:
+    0 1px 2px oklch(0% 0 0 / 0.9),
+    0 2px 18px oklch(0% 0 0 / 0.85);
 }
 
 /* 밝은 판 위에서는 색을 통째로 뒤집는다.
@@ -1762,6 +1770,9 @@ body {
 .contact-list {
   gap: 0;
   overflow: hidden;
+  /* 마지막 장면에 트로피가 화면 한가운데 선다. 표가 투명하면 도트 위에
+     주소가 얹혀 못 읽는다 — 여기만은 판을 깔아야 한다 */
+  background: oklch(0% 0 0 / 0.88);
 }
 .contact-list li {
   display: grid;
