@@ -4,8 +4,8 @@
   <script>document.documentElement.classList.add('js');</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JISU PARK — Developer Portfolio</title>
-  <meta name="description" content="Jisu Park의 개발자 포트폴리오. WorkFlow_AI, JIVIS를 비롯한 11개 프로젝트를 소개합니다." />
+  <title>JISU PARK — 야구 장면 버전</title>
+  <meta name="description" content="Jisu Park의 개발자 포트폴리오. WorkFlow_AI, JIVIS를 비롯한 10개 프로젝트를 소개합니다." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="assets/css/tokens.css" />
   <link rel="stylesheet" href="assets/css/base.css" />
-  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/components.film.css" />
 </head>
 <body>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
@@ -57,6 +57,13 @@
   </header>
 
   <main id="main">
+    <!-- 무대 — 페이지 전체가 이 한 컷 안에서 흘러간다. 본문이 그 위를 지나간다 -->
+    <div class="film" aria-hidden="true">
+      <canvas class="film__stage"></canvas>
+    </div>
+    <!-- 공은 판 밖에 둔다. 판 안에 있으면 그 쌓임 맥락에 갇혀서
+         프로젝트 카드 뒤로 들어가 임팩트 뒤 타구가 통째로 안 보인다 -->
+    <span class="film__ball" aria-hidden="true"></span>
     <section id="top" class="hero" aria-labelledby="hero-heading">
       <svg class="hero-diamond" aria-hidden="true" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
         <rect class="hero-diamond__infield" x="100" y="100" width="200" height="200" transform="rotate(45 200 200)" />
@@ -88,11 +95,14 @@
 
     <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
          어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
-    <section id="about" class="section about" aria-labelledby="about-heading">
+    <section id="about" class="section about pin-section" aria-labelledby="about-heading">
+     <!-- 소개 글이 공 궤적 위에 깔린다. 무대가 짧으면 카메라가 공을 쫓는 속도로
+          글이 흘러가 읽을 틈이 없다 — 이 구간만 길게 잡는다 -->
+     <div class="pin-stage" style="--pin-travel: 160vh">
+      <div class="pin-sticky">
       <div class="about-card">
         <div class="about-card__inner container">
-          <p class="section-kicker">01 · About</p>
-          <h2 id="about-heading" class="section-title reveal">소개</h2>
+          <h2 id="about-heading" class="section-title reveal sr-only">소개</h2>
           <p class="about-lead reveal">
             백엔드부터 프론트엔드, 배포까지 서비스 전 구간을 직접 만듭니다.
           </p>
@@ -109,12 +119,17 @@
           </div>
         </div>
       </div>
+      </div>
+     </div>
     </section>
 
-    <section id="featured" class="section container" aria-labelledby="featured-heading">
-      <p class="section-kicker">02 · Featured</p>
-      <h2 id="featured-heading" class="section-title reveal">대표 프로젝트</h2>
-      <div class="project-grid project-grid--featured" id="featured-grid"></div>
+    <section id="featured" class="section pin-section" aria-labelledby="featured-heading">
+     <div class="pin-stage" style="--pin-travel: 90vh">
+      <div class="pin-sticky container">
+        <h2 id="featured-heading" class="section-title reveal sr-only">대표 프로젝트</h2>
+        <div class="project-grid project-grid--featured" id="featured-grid"></div>
+      </div>
+     </div>
     </section>
 
     <!-- 프로젝트 — 세로 스크롤이 필름 띠를 좌우로 흘린다.
@@ -124,8 +139,7 @@
       <div class="lineup-stage" id="lineup-stage">
         <div class="lineup-sticky">
           <div class="container">
-            <p class="section-kicker">03 · Projects</p>
-            <h2 id="projects-heading" class="section-title reveal">프로젝트</h2>
+            <h2 id="projects-heading" class="section-title reveal sr-only">프로젝트</h2>
             <p class="section-lead reveal">스크롤하면 하나씩 넘어갑니다.</p>
           </div>
 
@@ -145,21 +159,26 @@
       <div class="sr-only" aria-live="polite" id="filter-status"></div>
     </section>
 
-    <section id="skills" class="section container" aria-labelledby="skills-heading">
-      <p class="section-kicker">04 · Stack</p>
-      <h2 id="skills-heading" class="section-title reveal">기술 스택</h2>
-      <dl class="skill-list" id="skill-list"></dl>
+    <section id="skills" class="section pin-section" aria-labelledby="skills-heading">
+     <div class="pin-stage" style="--pin-travel: 70vh">
+      <div class="pin-sticky container">
+        <h2 id="skills-heading" class="section-title reveal sr-only">기술 스택</h2>
+        <dl class="skill-list" id="skill-list"></dl>
+      </div>
+     </div>
     </section>
 
-    <section id="principles" class="section container" aria-labelledby="principles-heading">
-      <p class="section-kicker">05 · Approach</p>
-      <h2 id="principles-heading" class="section-title reveal">일하는 방식</h2>
-      <div class="principle-list" id="principle-list"></div>
+    <section id="principles" class="section pin-section" aria-labelledby="principles-heading">
+     <div class="pin-stage" style="--pin-travel: 70vh">
+      <div class="pin-sticky container">
+        <h2 id="principles-heading" class="section-title reveal sr-only">일하는 방식</h2>
+        <div class="principle-list" id="principle-list"></div>
+      </div>
+     </div>
     </section>
 
     <section id="contact" class="section container" aria-labelledby="contact-heading">
-      <p class="section-kicker">06 · Contact</p>
-      <h2 id="contact-heading" class="section-title reveal">연락처</h2>
+      <h2 id="contact-heading" class="section-title reveal sr-only">연락처</h2>
       <ul class="contact-list reveal" id="contact-list"></ul>
     </section>
   </main>
@@ -185,7 +204,8 @@
   <script type="module" src="assets/js/render.js"></script>
   <script type="module" src="assets/js/viz/trajectory.js"></script>
   <script type="module" src="assets/js/viz/heatmap.js"></script>
-  <script type="module" src="assets/js/motion.js"></script>
+  <script type="module" src="assets/js/motion.film.js"></script>
+  <script type="module" src="assets/js/film.js"></script>
   <script type="module" src="assets/js/interactions.js"></script>
 </body>
 </html>

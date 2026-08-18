@@ -131,14 +131,17 @@ function setupHeroParallax() {
 }
 
 /**
- * 요소가 화면을 지나는 진행률을 매 프레임 --p(0~1)로 기록한다.
+ * 핀 고정된 섹션이 무대를 지나는 진행률을 매 프레임 --p(0~1)로 기록한다.
  *
- * 0 = 화면 아래 끝에 막 닿음, 0.5 = 화면 한가운데, 1 = 위로 완전히 빠져나감.
+ * 0 = 판이 화면에 막 붙은 순간, 0.5 = 붙어 있는 중간, 1 = 판이 떨어지는 순간.
  *
- * 기존 리빌은 "한 번 켜지고 끝"이라 스크롤이 그냥 아래로 내려가는 느낌만 남았다.
- * 진행률을 계속 흘려보내면 요소가 화면에 머무는 내내 움직여서, 페이지 전체가
- * 하나의 흐름으로 읽힌다. 무엇을 어떻게 움직일지는 CSS가 정한다 —
- * 여기서는 값만 공급하고, 모션 종류를 늘려도 이 함수는 그대로다.
+ * 이전에는 요소가 화면을 지나는 비율을 요소마다 따로 쟀다. 섹션을 핀으로
+ * 붙이면 그 요소들은 더 이상 화면 안에서 움직이지 않는다 — 값이 0.5에
+ * 얼어붙어 아무 일도 일어나지 않는다. 기준을 요소가 아니라 무대로 옮긴다.
+ *
+ * --p를 무대에 한 번만 쓰고 자식은 CSS 상속으로 받는다. 요소마다 쓰던 것보다
+ * 계산이 줄고, 한 판 안의 요소들이 같은 시계를 공유해서 따로 놀지 않는다.
+ * 방향을 다르게 하고 싶으면 CSS에서 :nth-child로 갈라 쓴다.
  *
  * transform이 아니라 translate/rotate/scale 개별 속성에 쓴다.
  * transform은 카드 hover 틸트(interactions.js)와 리빌이 이미 쓰고 있어서
@@ -147,34 +150,50 @@ function setupHeroParallax() {
 function setupScrollProgress() {
   if (prefersReducedMotion) return;
 
-  const targets = [
-    ...document.querySelectorAll(
-      '.about-card, .project-grid--featured .project-card, .principle-item, .skill-row'
-    ),
-  ];
-  if (!targets.length || !('IntersectionObserver' in window)) return;
+  const stages = [...document.querySelectorAll('.pin-stage')];
+  if (!stages.length) return;
 
-  // 화면 밖 요소까지 매 프레임 재면 레이아웃 계산이 헛돈다.
-  // 실제로 보이는 것만 갱신 대상으로 남긴다
-  const active = new Set();
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) active.add(entry.target);
-        else active.delete(entry.target);
-      });
-    },
-    { rootMargin: '25% 0px 25% 0px' }
-  );
-  targets.forEach((el) => observer.observe(el));
+  // 좁은 화면·모션 최소화에서는 CSS가 핀을 풀어둔다. 그때 무대 진행률은
+  // 의미가 없다. 판정은 CSS에 맡기고(브레이크포인트를 JS에 복제하지 않는다)
+  // 결과만 읽는다 — 매 프레임 읽으면 스타일 재계산을 강제하므로
+  // 크기가 바뀔 때만 다시 잰다
+  let pinned = [];
+  const measure = () => {
+    pinned = stages.map(
+      (stage) =>
+        !!stage.firstElementChild &&
+        getComputedStyle(stage.firstElementChild).position === 'sticky'
+    );
+  };
+  measure();
+  window.addEventListener('resize', measure);
 
-  onScrollFrame(() => {
+  // 화면 밖 무대는 끝값에 고정돼 있다. 매 프레임 다시 써봐야 값이 그대로인데
+  // 커스텀 속성 한 번이 그 아래 전체 스타일을 무효화한다
+  const idle = stages.map(() => false);
+
+  onScrollFrame((y) => {
     const viewport = window.innerHeight;
-    active.forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      const span = viewport + rect.height;
-      const progress = Math.min(Math.max((viewport - rect.top) / span, 0), 1);
-      el.style.setProperty('--p', progress.toFixed(4));
+    stages.forEach((stage, index) => {
+      const box = stage.getBoundingClientRect();
+      const away = box.bottom < -200 || box.top > viewport + 200;
+      if (away && idle[index]) return;
+      idle[index] = away;
+
+      if (!pinned[index]) {
+        stage.style.setProperty('--p', '0.5');
+        return;
+      }
+      // rect는 실제 스크롤 기준, y는 보간된 값이다. 절대 좌표로 바꿔서 뺀다 —
+      // 터치 환경처럼 둘이 어긋나는 경우에도 진행률이 튀지 않는다
+      const stageTop = window.scrollY + box.top;
+      const travel = stage.offsetHeight - viewport;
+      if (travel <= 0) {
+        stage.style.setProperty('--p', '0.5');
+        return;
+      }
+      const progress = Math.min(Math.max((y - stageTop) / travel, 0), 1);
+      stage.style.setProperty('--p', progress.toFixed(4));
     });
   });
 }

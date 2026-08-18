@@ -1176,68 +1176,22 @@ footer {
    ───────────────────────────────────────────── */
 .about {
   position: relative;
-  /* 판이 화면 밖으로 나가야 잘린 것처럼 읽힌다 */
-  overflow: hidden;
+  /* 판이 화면 밖으로 나가야 잘린 것처럼 읽힌다.
+     hidden이 아니라 clip이어야 한다 — hidden은 스크롤 컨테이너를 만들고,
+     그러면 안쪽 .pin-sticky가 이 섹션에 붙어버려 핀이 죽는다.
+     clip은 컨테이너를 만들지 않으면서 자르기만 한다 */
+  overflow: clip;
 }
+/* 판에서 잔디 사진·기울기·그림자를 전부 걷어냈다. 소개 글이 공 궤적 위로
+   올라가면서 글을 받칠 판이 필요 없어졌고, 판을 남기면 그 뒤에서 던지는
+   투수를 다시 가린다. 지금 이 요소는 글 자리를 잡아주는 상자일 뿐이다 */
 .about-card {
   position: relative;
-  /* 기울였을 때 좌우 끝이 비지 않도록 화면보다 넓게 */
-  width: 116%;
-  margin-left: -8%;
   padding-block: var(--space-16);
-  background-color: var(--color-surface);
-  background-image: linear-gradient(120deg, var(--color-surface-alt), var(--color-bg) 62%);
-  overflow: hidden;
   color: var(--color-turf-text);
-  transform: rotate(-2.2deg);
-  box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
-}
-/* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
-/* 사진은 띠 오른쪽에 **원본 크기 그대로(1:1)** 붙인다.
-   background-size:cover로 깔면 555px 원본을 띠 폭(약 1980px)까지 3.5배
-   늘려야 해서 무조건 뭉갠다. 폭을 원본에 고정하면 확대가 없다.
-
-   왼쪽 경계는 마스크로 녹인다. 배경 그라디언트로 맞추려 하면 화면 폭이
-   바뀔 때마다 사진 시작점과 어긋나 딱딱한 세로선이 드러난다 */
-.about-card::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  /* 좌우로 흘릴 여유. 스크롤에 따라 미끄러져도 가장자리가 비지 않는다 */
-  left: -60px;
-  right: -60px;
-  z-index: 0;
-  background-image: url('../img/intro_field_band.jpg');
-  /* 원본 1900x555를 1:1로 쓴다. cover로 늘리면 뭉갠다 */
-  background-size: auto;
-  background-position: right center;
-  background-repeat: no-repeat;
-  /* 잔디가 띠 전체에 깔리되 글이 앉는 왼쪽만 옅게 눌러 대비를 만든다.
-     완전히 지워버리면 "띠"가 아니라 오른쪽 사진 한 장이 된다 */
-  /* 46%까지는 옅게 눌러 둔다 — 글이 앉는 구간이다.
-     거기서부터 살아나 오른쪽 끝(공·배트)은 온전히 보인다 */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  /* 스크롤 진행률(--p)에 따라 잔디가 옆으로 흐른다.
-     띠가 화면을 지나가는 동안 계속 움직여야 "흐른다"는 인상이 생긴다 */
-  translate: calc((var(--p, 0.5) - 0.5) * -70px) 0;
 }
 
-.about-card__inner {
-  transform: rotate(2.2deg);
-}
+
 
 /* ─────────────────────────────────────────────
    스크롤 진행률 모션 — motion.js가 --p(0~1)를 매 프레임 기록한다.
@@ -1248,15 +1202,6 @@ footer {
 
 /* 섹션마다 다른 종류의 움직임을 준다. 전부 같은 방식으로 떠오르면
    스크롤이 아래로 내려가는 것 말고는 아무 일도 안 일어나는 것처럼 읽힌다. */
-
-/* 01 소개 — 띠가 기울기를 바꾸며 스쳐 지나간다 (회전) */
-.about-card {
-  rotate: calc((var(--p, 0.5) - 0.5) * -4.5deg);
-}
-/* 그 안의 잔디는 반대로 흘러 시차를 만든다 (가로 패럴랙스) */
-.about-card::after {
-  translate: calc((var(--p, 0.5) - 0.5) * -150px) 0;
-}
 
 /* 02 대표 프로젝트 — 양옆에서 모여든다 (좌우 + 회전) */
 .project-grid--featured .project-card {
@@ -1313,11 +1258,14 @@ footer {
    컨테이너 자체는 가운데 정렬을 유지해야 한다 — margin을 0으로 두면
    판의 -8% 지점, 즉 화면 밖에서 시작한다. 그래서 자식 블록의 폭만 제한한다 */
 .about-card__inner > * {
-  max-width: 34rem;
+  /* 오른쪽은 마운드 자리다. 글칸이 거기까지 뻗으면 실루엣과 겹쳐 둘 다 죽는다 */
+  max-width: 30rem;
 }
-/* 잔디 위 흰 글씨의 획이 뭉개지지 않게 바닥을 깐다 */
+/* 잔디와 실루엣 위에 얹히는 흰 글씨라 바닥을 깔아야 획이 산다 */
 .about-card__inner {
-  text-shadow: 0 1px 12px oklch(0% 0 0 / 0.75);
+  text-shadow:
+    0 1px 2px oklch(0% 0 0 / 0.9),
+    0 2px 18px oklch(0% 0 0 / 0.85);
 }
 
 /* 밝은 판 위에서는 색을 통째로 뒤집는다.
@@ -1355,26 +1303,7 @@ footer {
     columns: 1;
   }
 }
-/* 좁아지면 사진 555px가 화면 대부분을 덮어 글과 겹친다.
-   마스크를 세로로 돌려 글은 위, 사진은 아래쪽 질감으로 남긴다 */
 @media (max-width: 60rem) {
-  /* 좁은 화면에서는 1900px 띠의 오른쪽 끝(공·배트)만 보인다.
-     마스크를 세로로 돌려 글은 위, 잔디는 아래쪽 바닥으로 남긴다 */
-  .about-card::after {
-    background-position: right center;
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-    mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-  }
   .about-card__inner > * {
     max-width: none;
   }
@@ -1384,15 +1313,8 @@ footer {
   .about-cols {
     columns: 1;
   }
-  /* 좁은 화면에서 각도가 크면 글줄이 눈에 띄게 기운다 */
   .about-card {
-    transform: rotate(-1deg);
-    width: 108%;
-    margin-left: -4%;
     padding-block: var(--space-12);
-  }
-  .about-card__inner {
-    transform: rotate(1deg);
   }
 }
 
@@ -1502,6 +1424,79 @@ body {
 /* ─────────────────────────────────────────────
    타순 무대 — 세로 스크롤이 띠를 좌우로 흘린다
    ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────
+   섹션 핀 — 판이 화면에 붙어 자기 모션을 다 쓴 뒤 놓아준다.
+
+   그냥 흘려보내면 스크롤이 "아래로 내려간다"로만 읽힌다. 붙여두면
+   같은 스크롤이 판 안에서 일어나는 일로 바뀐다 — 프로젝트 무대가
+   세로 스크롤을 가로 이동으로 바꾸는 것과 같은 원리를 섹션마다 적용한다.
+
+   무대 높이 = 화면 한 장(100vh) + 붙어 있는 동안의 여유(--pin-travel).
+   그 여유를 지나는 진행률이 --p(0~1)이고, motion.js가 무대에 기록한다.
+   --p는 CSS 변수라 자식 전부가 물려받는다.
+   ───────────────────────────────────────────── */
+.pin-section {
+  /* 판이 화면 한 장을 통째로 쓰므로 섹션 패딩은 화면만 비게 만든다.
+     여백은 .pin-sticky가 자기 안에서 만든다 */
+  padding-block: 0;
+}
+.pin-stage {
+  position: relative;
+  height: calc(100vh + var(--pin-travel, 80vh));
+  /* 판 안의 요소가 좌우로 움직이며 화면 밖까지 나간다(그게 연출이다).
+     body의 overflow-x:clip은 이걸 못 막는다 — html/body의 overflow는
+     뷰포트로 전파되는 특수 규칙이라 그대로 적용되지 않는다.
+     무대는 화면 폭 그대로라, 여기서 자르면 화면 밖만 정확히 잘린다.
+     clip이어야 한다 — hidden은 스크롤 컨테이너를 만들어 안쪽 핀을 죽인다.
+     세로는 열어둔다(3D 회전이 위아래로 조금 나간다) */
+  overflow-x: clip;
+}
+.pin-sticky {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
+  padding-block: var(--space-8);
+}
+/* 판 안에서 세로 간격은 gap이 전담한다. 자식이 원래 갖고 있던 아래 여백까지
+   더해지면 판이 화면 한 장을 넘겨서, 핀으로 붙어 있는 동안 아래가 잘린 채
+   영영 안 보인다 — 스크롤해도 판이 따라오기 때문이다 */
+.pin-sticky > * {
+  margin-block-end: 0;
+}
+
+/* 좁은 화면에서 핀은 답답하다 — 섹션 하나를 지나는 데 화면 두 장을 굴려야 한다.
+   모션을 줄인 사용자에게도 같은 이유로 걷어낸다 */
+@media (max-width: 60rem) {
+  .pin-section {
+    padding-block: var(--space-section) 0;
+  }
+  .pin-stage {
+    height: auto;
+  }
+  .pin-sticky {
+    position: static;
+    min-height: 0;
+    padding-block: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pin-section {
+    padding-block: var(--space-section) 0;
+  }
+  .pin-stage {
+    height: auto;
+  }
+  .pin-sticky {
+    position: static;
+    min-height: 0;
+    padding-block: 0;
+  }
+}
+
 .lineup-section {
   /* 무대가 자체 높이를 가지므로 섹션 패딩은 위쪽만 남긴다 */
   padding-block: var(--space-section) 0;
@@ -1686,6 +1681,9 @@ body {
 .contact-list {
   gap: 0;
   overflow: hidden;
+  /* 마지막 장면에 트로피가 화면 한가운데 선다. 표가 투명하면 도트 위에
+     주소가 얹혀 못 읽는다 — 여기만은 판을 깔아야 한다 */
+  background: oklch(0% 0 0 / 0.93);
 }
 .contact-list li {
   display: grid;
@@ -1736,5 +1734,297 @@ body {
   .contact-list li > a {
     padding-top: var(--space-1);
     padding-bottom: var(--space-3);
+  }
+}
+
+/* ── 무대 ───────────────────────────────────────
+   페이지 전체가 이 한 컷 안에서 흘러간다. 화면에 고정되어 본문 뒤에
+   계속 떠 있고, 카메라만 스크롤을 따라 움직인다.
+   ───────────────────────────────────────────── */
+.film {
+  --lamp: var(--color-phosphor);
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* 꺼진 도트를 화면 전체에 깐다. 밝으면 실루엣과 대비가 죽어 판이 뿌예진다 */
+  background-color: color-mix(in oklch, var(--color-bg) 90%, black);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--ink-800) 46%, transparent) 0 21%,
+    transparent 22%
+  );
+  background-size: 9px 9px;
+  /* 가장자리를 눌러 "판을 본다"가 아니라 "안에 들어와 있다"로 만든다 */
+  box-shadow:
+    inset 0 0 clamp(6rem, 20vw, 20rem) oklch(0% 0 0 / 0.72),
+    inset 0 0 clamp(2rem, 6vw, 6rem) oklch(0% 0 0 / 0.45);
+  /* 밝기는 JS가 스크롤에서 뽑아 --on으로 넣는다. 전환 시간을 주면
+     되감을 때 값이 뒤늦게 따라와 판이 히어로 위로 새어 나온다 */
+  opacity: 0;
+  pointer-events: none;
+}
+.film.is-ready {
+  opacity: var(--on, 0);
+}
+.film__stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 야구공 — 실밥은 공보다 큰 원 두 개를 좌우에 겹쳐 가장자리 호만 남긴다.
+   지름은 JS가 월드 크기 × 카메라 배율로 넣는다. 손으로 정하지 않는다 */
+.film ~ .film__ball {
+  /* 본문(z-index 1) 위, 헤더(50) 아래. 타구가 카드 위를 넘어간다 */
+  position: fixed;
+  z-index: 3;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  width: var(--bd, 30px);
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    circle at 34% 28%,
+    var(--chalk) 0%,
+    oklch(93% 0.006 100) 46%,
+    oklch(78% 0.01 100) 100%
+  );
+  box-shadow:
+    0 0 calc(var(--bd, 30px) * 0.7) calc(var(--bd, 30px) * 0.14)
+      color-mix(in oklch, var(--lamp) 55%, transparent),
+    inset -0.1em -0.13em 0.22em oklch(0% 0 0 / 0.22);
+  translate: calc(var(--bx, 0px) - 50%) calc(var(--by, 0px) - 50%);
+  rotate: var(--brot, 0deg);
+  opacity: var(--bo, 0);
+  overflow: hidden;
+}
+.film__ball::before,
+.film__ball::after {
+  content: '';
+  position: absolute;
+  inset-block: -26%;
+  width: 118%;
+  border-radius: var(--radius-full);
+  /* 점선이 그대로 실밥이 된다 */
+  border: max(1px, 0.06em) dashed var(--lg-red-600);
+}
+.film__ball::before {
+  inset-inline-start: -84%;
+}
+.film__ball::after {
+  inset-inline-end: -84%;
+}
+
+/* 본문은 무대 위를 지나간다 */
+.film ~ * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film.is-ready {
+    /* 움직이지 않는 판 하나로 남는다. 스크롤 훅이 안 도니 값을 못 받는다 */
+    opacity: 1;
+  }
+}
+/* ── Stack 본문 — 장면이 서 있던 그 전광판을 그대로 이어받는다 ─────────
+   앞 장면이 화면 가득 큰 글씨로 "Language 4"를 말하고 나면, 본문이
+   가운데 놓인 작은 박스로 같은 말을 반복했다. 판이 바뀐 것처럼 보여
+   흐름이 끊긴다. 같은 도트 판 위에서 숫자 대신 안을 펼치는 쪽으로 바꾼다.
+   ───────────────────────────────────────────────────────────── */
+#skills .pin-sticky {
+  /* 장면 글자와 같은 여백에 오른쪽 끝을 맞춘다. 72rem 컨테이너에 가두면
+     장면보다 안쪽에서 끝나 세로 리듬이 어긋난다 */
+  max-width: none;
+  padding-inline: 4vw;
+}
+#skills .skill-list {
+  /* 카드 껍데기를 걷어낸다. 판 위에 얹힌 표지, 판 위에 놓인 상자가 아니다 */
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  border-block: 1px solid color-mix(in oklch, var(--color-stitch) 34%, transparent);
+  /* 둥근 모서리를 자르려고 걸어둔 것이다. 모서리가 사라졌으니 풀어야
+     한다 — 안 풀면 행이 좌우로 밀릴 때 라벨 첫 글자가 잘린다 */
+  overflow: visible;
+}
+#skills .skill-row {
+  grid-template-columns: minmax(10rem, 20rem) 1fr;
+}
+#skills .skill-group {
+  background: none;
+  padding-inline: 0 var(--space-8);
+  border-right-color: color-mix(in oklch, var(--color-stitch) 22%, transparent);
+  font-size: clamp(0.875rem, 0.6rem + 0.7vw, 1.25rem);
+}
+#skills .skill-items {
+  padding-block: clamp(0.9rem, 1.4vh, 1.5rem);
+  padding-inline: var(--space-8) 0;
+  gap: var(--space-3);
+}
+#skills .skill-chip {
+  /* 작은 모노 알약은 장면의 대형 타이포 옆에서 각주처럼 읽힌다.
+     테두리를 지우고 글자 자체를 키워 항목이 주인공이 되게 한다 */
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1rem, 0.7rem + 0.85vw, 1.65rem);
+  font-weight: 500;
+  color: var(--color-text);
+  text-shadow: 0 0 0.5em oklch(0% 0 0 / 0.85);
+}
+/* 항목 사이를 점으로 끊는다. 칩 테두리가 하던 일을 글자 한 칸이 대신한다 */
+#skills .skill-chip + .skill-chip::before {
+  content: '·';
+  margin-inline-end: var(--space-3);
+  color: color-mix(in oklch, var(--color-phosphor) 55%, transparent);
+}
+#skills .skill-chip:hover {
+  color: var(--color-phosphor);
+}
+
+@media (max-width: 60rem) {
+  #skills .pin-sticky {
+    padding-inline: var(--space-6);
+  }
+  #skills .skill-row {
+    grid-template-columns: 1fr;
+  }
+  #skills .skill-group {
+    border-right: 0;
+    padding-inline: 0;
+  }
+  #skills .skill-items {
+    padding-inline: 0;
+  }
+}
+
+/* 표가 화면 끝까지 차면서 좌우 여유가 사라졌다. 밀리는 폭이 그대로면
+   왼쪽 라벨이 화면 밖으로 잘린다. 방향은 두고 폭만 줄인다 */
+#skills .skill-row:nth-child(odd) {
+  translate: calc((0.5 - var(--p, 0.5)) * -40px) 0;
+}
+#skills .skill-row:nth-child(even) {
+  translate: calc((0.5 - var(--p, 0.5)) * 40px) 0;
+}
+
+
+/* ── 동작이 본문을 켠다 ──────────────────────────────────────────
+   화면에 들어오면 뜨는 방식은 릴리스든 임팩트든 상관하지 않는다. 그래서
+   장면과 본문이 따로 놀았다. film.js가 흘려보내는 --story(이야기 시간)를
+   기준선(--cue)과 비교해서, 공이 손을 떠나는 순간 소개가 뜨고 배트에 맞는
+   순간 프로젝트가 뜨게 한다.
+
+   비교는 calc으로 한다 — (지금 - 기준) × 기울기를 0~1로 자르면 그게 곧
+   그 줄의 밝기다. 줄마다 --i가 달라서 차례로 번져 나간다.
+   ───────────────────────────────────────────────────────────── */
+html.js .film ~ #featured .project-card {
+  --lit: clamp(0, (var(--story, 0) - var(--cue, 0)) * 26, 1);
+  opacity: var(--lit);
+  /* 공이 지나간 쪽에서 끌려 들어온다 */
+  transform: translateX(calc((1 - var(--lit)) * 3.5rem));
+  transition: none;
+}
+
+/* 소개 글은 공 궤적 위에 앉는다. 자리도 밝기도 film.js가 매 프레임 잡는다 —
+   본문 흐름에서 빼고 화면에 직접 건다. 좁은 화면에서는 이 클래스가 안 붙어
+   평범한 본문으로 남는다(.reveal이 그대로 처리한다) */
+html.js .reveal.about-flown {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: min(27rem, 40vw);
+  margin: 0;
+  /* 궤적선 바로 아래에 깔린다 */
+  padding-top: 0.6rem;
+  opacity: var(--lit, 0);
+  transition: none;
+  pointer-events: none;
+  /* 자리가 매 프레임 바뀐다 — 합성기에 올려둔다 */
+  will-change: transform;
+}
+html.js .reveal.about-flown.about-lead {
+  width: min(30rem, 44vw);
+}
+
+/* 임팩트(0.345)에서 프로젝트가 튀어나온다 */
+#featured .project-card {
+  --cue: calc(0.345 + var(--i, 0) * 0.03);
+}
+#featured .project-card:nth-child(2) {
+  --i: 1;
+}
+#featured .project-card:nth-child(3) {
+  --i: 2;
+}
+#featured .project-card:nth-child(4) {
+  --i: 3;
+}
+
+/* 타구가 외야로 뻗는 동안 스택이 한 줄씩 채워진다 */
+html.js .film ~ #skills .skill-row {
+  --cue: calc(0.655 + var(--i, 0) * 0.021);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  /* 표는 이미 --p로 좌우 지그재그를 탄다. 여기서 크게 밀면 두 움직임이
+     싸운다 — 방향만 맞춰 살짝 끌려 들어오게 둔다 */
+  transform: translateX(calc((1 - var(--lit)) * 2.5rem));
+  transition: none;
+}
+
+/* 공이 담장을 넘어가는 구간. 일하는 방식은 서면서 켜진다 */
+html.js .film ~ #principles .principle-item {
+  --cue: calc(0.815 + var(--i, 0) * 0.038);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  /* 이 섹션만 세로다. 바닥에 누웠다 일어서는 --p 회전과 같은 축이라야
+     한 동작으로 읽힌다 */
+  transform: translateY(calc((1 - var(--lit)) * 2rem));
+  transition: none;
+}
+
+/* 트로피가 올라오는 0.9~1 사이에 연락처가 켜진다 */
+html.js .film ~ #contact .contact-list li {
+  --cue: calc(0.9 + var(--i, 0) * 0.018);
+  --lit: clamp(0, (var(--story, 0) - var(--cue)) * 26, 1);
+  opacity: var(--lit);
+  transform: translateX(calc((1 - var(--lit)) * 2.5rem));
+  transition: none;
+}
+
+/* 줄 번호. calc이 nth-child를 못 읽어서 한 줄씩 적어준다 */
+#skills .skill-row:nth-child(2),
+#principles .principle-item:nth-child(2),
+#contact .contact-list li:nth-child(2) {
+  --i: 1;
+}
+#skills .skill-row:nth-child(3),
+#principles .principle-item:nth-child(3),
+#contact .contact-list li:nth-child(3) {
+  --i: 2;
+}
+#skills .skill-row:nth-child(4) {
+  --i: 3;
+}
+#skills .skill-row:nth-child(5) {
+  --i: 4;
+}
+#skills .skill-row:nth-child(6) {
+  --i: 5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .film ~ #featured .project-card,
+  html.js .film ~ #skills .skill-row,
+  html.js .film ~ #principles .principle-item,
+  html.js .film ~ #contact .contact-list li {
+    /* 스크롤 훅이 안 도니 --story가 안 온다. 그냥 보여준다 */
+    opacity: 1;
+    transform: none;
   }
 }
