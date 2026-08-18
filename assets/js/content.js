@@ -68,7 +68,13 @@ export const projects = [
     role: '기획부터 구현까지 단독 완결',
     stack: ['Python', 'Streamlit', 'Claude API'],
     viz: null,
-    links: { repo: 'https://github.com/jjssspark/JIVIS', demo: null },
+    links: {
+      repo: 'https://github.com/jjssspark/JIVIS',
+      // 아직 배포 전이다
+      demo: null,
+      notion:
+        'https://app.notion.com/p/JIVIS-3b1f6f1e619a80b98973cf557a09119f?source=copy_link',
+    },
   },
   {
     id: 'pitchiq',
