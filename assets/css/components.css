@@ -524,30 +524,36 @@ html.js .project-card.reveal.is-visible {
       opacity var(--duration-normal) var(--ease-out-expo);
   }
 
-  /* 가리킨 카드만 앞으로 나온다 — 확대 + 바닥 그림자 + 강조색 번짐 */
-  .project-card:hover {
+  /* 가리킨 카드만 앞으로 나온다 — 확대 + 바닥 그림자 + 강조색 번짐.
+     확대는 transform이 아니라 독립 속성 scale로 준다. 카드의 transform은
+     마우스 틸트가 인라인으로 잡고 있어서, CSS에서 transform으로 확대를 걸면
+     항상 진다. scale은 별도 속성이라 틸트와 겹쳐서 적용된다 */
+  .project-grid .project-card:hover,
+  .lineup__frame:hover > .project-card {
+    scale: 1.07;
     z-index: 5;
     box-shadow:
       0 32px 64px oklch(0% 0 0 / 0.6),
       0 0 72px -14px color-mix(in oklch, var(--color-accent) 70%, transparent);
   }
 
-  /* 확대는 transform이 아니라 독립 속성 scale로 준다. 카드의 transform은
-     마우스 틸트가 인라인으로 잡고 있어서, CSS에서 transform으로 확대를 걸면
-     항상 진다. scale은 별도 속성이라 틸트와 겹쳐서 적용된다 */
-  .project-card:hover {
-    scale: 1.07;
+  /* 캐러셀에서는 카드가 아니라 칸(.lineup__frame)으로 호버를 판정한다.
+     카드를 기준으로 잡으면, 확대된 카드의 경계가 커졌다 작아지면서 커서가
+     안팎을 오가 확대·축소가 계속 반복된다. 칸은 확대해도 크기가 그대로다 */
+  .lineup__frame:hover {
+    z-index: 6;
   }
 
   /* 솔로 조명 — 조명 밖의 카드는 어둡게 물러난다 */
   .project-grid:has(.project-card:hover) .project-card:not(:hover),
-  .lineup__track:has(.project-card:hover) .lineup__frame:not(:has(.project-card:hover)) {
+  .lineup__track:has(.lineup__frame:hover) .lineup__frame:not(:hover) {
     opacity: 0.4;
     filter: saturate(0.5) brightness(0.7);
   }
 
   /* 마우스를 따라다니는 조명. 평소보다 세게 켠다 */
-  .project-card:hover::before {
+  .project-card:hover::before,
+  .lineup__frame:hover > .project-card::before {
     background: radial-gradient(
       300px circle at var(--mx, 50%) var(--my, 50%),
       color-mix(in oklch, var(--color-accent) 26%, transparent),
@@ -557,7 +563,8 @@ html.js .project-card.reveal.is-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-card:hover {
+  .project-grid .project-card:hover,
+  .lineup__frame:hover > .project-card {
     scale: 1;
   }
 }
