@@ -25,7 +25,7 @@ export const profile = {
   tagline: '쓰는 사람 입장에서 편한 서비스를 만들고, 필요한 곳에 AI를 붙입니다',
   stats: [
     { label: 'PROJECTS', value: 10 },
-    { label: 'STACKS', value: 28 },
+    { label: 'STACKS', value: 30 },
   ],
   links: {
     email: 'hsyoun585@gmail.com',
@@ -47,7 +47,7 @@ export const projects = [
     summary:
       '팀 프로젝트의 회의록·업무·평가 근거를 AI로 하나의 흐름으로 연결하는 협업·평가 보조 웹 플랫폼. 회의록을 올리면 To-Do가 자동으로 뽑혀 업무 보드에 꽂히고, 그 기록이 그대로 기여도 평가 근거가 된다. 6인 팀에서 부팀장을 맡았다.',
     role:
-      '실시간 알림(SSE)·회의록 AI 분석 파이프라인·심사자 기여도 평가·마이페이지·CI/CD 배포 게이트. 개인 커밋 356개',
+      '실시간 알림(SSE)·회의록 AI 분석 파이프라인·심사자 기여도 평가·마이페이지·CI/CD 배포 게이트. 개인 커밋 342개',
     stack: ['React', 'TypeScript', 'Spring Boot', 'FastAPI', 'LangGraph', 'PostgreSQL', 'Redis', 'Docker'],
     viz: null,
     image: 'assets/img/workflow-home.jpg',
@@ -124,7 +124,8 @@ export const projects = [
     image: 'assets/img/truthlens-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/TruthLens',
-      demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app',
+      // 클라우드타입 배포가 내려가 404가 뜬다. 다시 띄우면 링크를 되살린다
+      demo: null,
       notion:
         'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
     },
@@ -171,7 +172,7 @@ export const projects = [
     status: 'shipped',
     summary:
       '클루의 추리 룰 위에서 LLM 에이전트 5명을 거짓 반증과 1:1 밀담으로 교란·교섭하는 싱글플레이 웹 추리게임. 설치·로그인·API 키 없이 링크만으로 플레이. NHN Game×AI 해커톤 사전 과제.',
-    role: '2인 팀 — UI 전체 설계·구현(화면 14개), CSS 변수 기반 디자인 시스템 직접 구축, 시나리오 4종·직업 10종 콘텐츠와 밸런싱 데이터 작성',
+    role: '2인 팀 — UI 전체 설계·구현(컴포넌트 14개), CSS 변수 기반 디자인 시스템 직접 구축, 시나리오 4종·직업 10종 콘텐츠와 밸런싱 데이터 작성',
     stack: ['React', 'TypeScript', 'Zustand', 'Cloudflare Workers', 'Claude API'],
     viz: null,
     image: 'assets/img/perjury-home.jpg',
@@ -189,7 +190,7 @@ export const projects = [
     status: 'in-play',
     summary:
       '회의록을 LLM으로 요약하고, 오간 대화에서 「누가 언제까지 무엇을」에 해당하는 약속을 뽑아 추적하는 팀 협업 워크스페이스. @비서 봇에게 물으면 그동안의 기록을 근거로 답한다.',
-    role: '컴퓨터공학 캡스톤디자인 3인 팀 — FastAPI 백엔드와 Next.js 프론트 전 구간, JWT 인증·권한, Render/Vercel 배포',
+    role: '컴퓨터공학 캡스톤디자인 초기 3인 팀 → 이후 단독 개발 — FastAPI 백엔드와 Next.js 프론트 전 구간, JWT 인증·권한, Render/Vercel 배포',
     stack: ['Next.js', 'React', 'TypeScript', 'FastAPI', 'PostgreSQL', 'Gemini API'],
     viz: null,
     links: {
@@ -241,7 +242,7 @@ export const principles = [
   },
   {
     title: '푼 문제는 기록으로 남긴다',
-    body: '원인과 함께 실패한 시도까지 적어둔다. 같은 원인의 문제를 다른 프로젝트에서 처음부터 다시 조사하지 않기 위해서다. 지금까지 24건을 누적했다.',
+    body: '원인과 함께 실패한 시도까지 적어둔다. 같은 원인의 문제를 다른 프로젝트에서 처음부터 다시 조사하지 않기 위해서다. 지금까지 172건을 누적했다.',
   },
 ];
 
