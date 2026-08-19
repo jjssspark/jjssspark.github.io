@@ -83,15 +83,8 @@ function projectCardHtml(project, index) {
       </svg>
       `;
 
-  // 전광판 패널만 상세(박스스코어)를 연다. 패널 전체를 클릭 대상으로 삼으면
-  // 안에 있는 링크·태그 버튼과 히트 영역이 겹치므로 전용 버튼을 둔다.
-  const backHtml =
-    project.tier === 'shipped'
-      ? `<button type="button" class="cardback-open" data-project="${escapeHtml(project.id)}">박스스코어 <span aria-hidden="true">↗</span></button>`
-      : '';
-
   // 링크 줄을 따로 감싼다 — 내용 길이가 달라도 하단선이 맞는다(.project-foot { margin-top: auto })
-  const footHtml = `<div class="project-foot"><span class="project-foot__links">${linkHtml}${demoHtml}${notionHtml}</span>${backHtml}</div>`;
+  const footHtml = `<div class="project-foot"><span class="project-foot__links">${linkHtml}${demoHtml}${notionHtml}</span></div>`;
 
   if (project.image) {
     return `
@@ -177,85 +170,6 @@ function renderContact() {
 }
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/**
- * 카드 뒷면 — 야구 카드를 뒤집으면 나오는 스탯 시트.
- *
- * 네이티브 <dialog>.showModal()을 쓴다. 포커스 트랩·Esc 닫기·열었던 버튼으로의
- * 포커스 복귀를 브라우저가 처리해줘서, 직접 구현할 때 새는 접근성 구멍이 없다.
- *
- * 표시하는 값은 전부 content.js에 실재하는 필드다. 없는 항목은 줄 자체를 빼고,
- * 채우기 위한 숫자를 지어내지 않는다.
- */
-function setupCardBack() {
-  const dialog = document.getElementById('cardback');
-  if (!dialog || typeof dialog.showModal !== 'function') return;
-
-  const body = dialog.querySelector('.cardback__body');
-  const title = dialog.querySelector('.cardback__title');
-  const number = dialog.querySelector('.cardback__number');
-
-  /** @param {import('./content.js').Project} project */
-  function fill(project, index) {
-    const rows = [
-      project.role ? ['담당', escapeHtml(project.role)] : null,
-      project.stack.length
-        ? ['스택', project.stack.map((s) => `<span class="cardback__chip">${escapeHtml(s)}</span>`).join('')]
-        : null,
-    ].filter(Boolean);
-
-    const links = [
-      project.links.repo ? ['Repository', project.links.repo] : null,
-      project.links.demo ? ['Demo', project.links.demo] : null,
-      project.links.notion ? ['Notion', project.links.notion] : null,
-    ].filter(Boolean);
-
-    number.textContent = String(index + 1).padStart(2, '0');
-    title.textContent = project.name;
-    // 진입 고스팅용 복제 텍스트 — CSS ::after가 attr()로 읽는다
-    title.dataset.text = project.name;
-
-    body.innerHTML = `
-      <p class="cardback__summary">${escapeHtml(project.summary)}</p>
-      ${
-        rows.length
-          ? `<dl class="cardback__stats">${rows
-              .map(([label, value]) => `<dt>${label}</dt><dd>${value}</dd>`)
-              .join('')}</dl>`
-          : ''
-      }
-      ${
-        links.length
-          ? `<div class="cardback__links">${links
-              .map(
-                ([label, url]) =>
-                  `<a class="project-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label} <span aria-hidden="true">↗</span></a>`
-              )
-              .join('')}</div>`
-          : ''
-      }
-    `;
-  }
-
-  document.querySelectorAll('.cardback-open').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.project;
-      const project = projects.find((p) => p.id === id);
-      if (!project) return;
-      const shipped = projects.filter((p) => p.tier === 'shipped');
-      fill(project, shipped.indexOf(project));
-      dialog.showModal();
-    });
-  });
-
-  dialog.querySelector('.cardback__close')?.addEventListener('click', () => dialog.close());
-
-  // 배경(백드롭) 클릭으로 닫기. <dialog> 자체가 백드롭 영역까지 포함하므로
-  // 내부 시트 바깥을 눌렀는지로 판별한다.
-  dialog.addEventListener('click', (event) => {
-    if (event.target === dialog) dialog.close();
-  });
-}
 
 /**
  * 필름 띠의 원근 휨. 트랙 중앙을 정면으로 두고, 좌우로 멀어질수록 안쪽으로 접힌다.
@@ -414,6 +328,9 @@ function setupLineupLoop(track, count, geom) {
   return { base, unit, wrap };
 }
 
+/** 클릭이 아니라 끌기로 볼 최소 이동 거리(px) */
+const DRAG_INTENT = 12;
+
 /**
  * 마우스로 트랙을 끌어 넘긴다.
  *
@@ -431,6 +348,8 @@ function setupLineupDrag(track) {
   // 끌고 놓은 직후의 click 한 번만 막는다. dragging을 그대로 쓰면
   // 다음 클릭까지 계속 막혀서 카드 링크가 죽는다
   let swallowClick = false;
+  // 끌린 거리. 링크를 누르다 손이 조금 밀린 것과 진짜로 민 것을 가른다
+  let movedX = 0;
 
   track.addEventListener('pointerdown', (event) => {
     // 터치는 브라우저의 관성 패닝이 이미 더 낫다. 겹치면 두 배로 움직인다
@@ -440,11 +359,13 @@ function setupLineupDrag(track) {
     startLeft = track.scrollLeft;
     dragging = false;
     swallowClick = false;
+    movedX = 0;
   });
 
   track.addEventListener('pointermove', (event) => {
     if (event.pointerId !== active) return;
     const dx = event.clientX - startX;
+    movedX = Math.max(movedX, Math.abs(dx));
     if (!dragging) {
       // 클릭과 구분되는 문턱. 이게 없으면 링크를 누를 때마다 끌린 것으로 친다
       if (Math.abs(dx) < 6) return;
@@ -470,7 +391,10 @@ function setupLineupDrag(track) {
       /* 이미 풀렸다 */
     }
     track.classList.remove('is-dragging');
-    swallowClick = dragging;
+    // 6px는 끌기를 시작하는 문턱일 뿐이다. 이 값으로 클릭까지 막으면
+    // 링크를 누를 때 손이 조금만 밀려도 아무 일도 일어나지 않는다.
+    // 실제로 민 거리가 DRAG_INTENT를 넘었을 때만 클릭을 취소한다
+    swallowClick = dragging && movedX >= DRAG_INTENT;
     dragging = false;
     active = null;
   };
@@ -664,7 +588,6 @@ function setupLineup() {
 renderHero();
 renderProjects();
 setupLineup();
-setupCardBack();
 renderSkills();
 renderPrinciples();
 renderContact();
