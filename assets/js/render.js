@@ -354,6 +354,9 @@ function setupLineupDrag(track) {
   track.addEventListener('pointerdown', (event) => {
     // 터치는 브라우저의 관성 패닝이 이미 더 낫다. 겹치면 두 배로 움직인다
     if (event.pointerType === 'touch' || event.button !== 0) return;
+    // 링크·버튼 위에서 누른 건 넘기려는 게 아니라 그걸 누르려는 것이다.
+    // 여기서 끌기를 걸면 손이 조금만 밀려도 그 클릭이 취소된다
+    if (event.target.closest?.('a, button')) return;
     active = event.pointerId;
     startX = event.clientX;
     startLeft = track.scrollLeft;

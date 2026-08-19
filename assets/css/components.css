@@ -506,51 +506,68 @@ html.js .project-card.reveal.is-visible {
 /* 대표 카드는 hover를 기다리지 않는다. 여기 담당 줄이 그 카드를 대표로
    올린 이유라서, 마우스를 올려야 보이면 올린 의미가 없다.
    터치 기기에는 hover가 아예 없기도 하다 */
-.project-card--featured.project-card--media .project-more {
-  max-height: none;
-  opacity: 1;
-  overflow: visible;
+.project-card--featured/* 담당·태그는 처음부터 펼쳐 둔다. 호버할 때 폈다 접으면 그 사이 아래 링크 줄이
+   밀려 내려가서, 링크를 누르려고 다가가는 동안 링크가 도망간다 */
+.project-card--media .project-more {
   margin-top: var(--space-3);
 }
-.project-card--media .project-more {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition:
-    max-height var(--duration-normal) var(--ease-out-expo),
-    opacity var(--duration-fast) var(--ease-out-expo);
-}
+
 @media (hover: hover) {
-  .project-card--media {
+  /* 호버 전환은 여기서 잡는다. .reveal의 900ms가 더 구체적이라, 낮은 자리에
+     써두면 확대가 그 시간에 끌려가 늘어지는 것처럼 보인다 */
+  html.js .project-card.reveal.is-visible {
     transition:
-      transform var(--duration-fast) var(--ease-out-expo),
-      box-shadow var(--duration-fast) var(--ease-out-expo),
-      border-color var(--duration-fast) var(--ease-out-expo);
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-fast) var(--ease-out-expo),
+      filter var(--duration-normal) var(--ease-out-expo),
+      opacity var(--duration-normal) var(--ease-out-expo);
   }
-  .project-card--media:hover {
-    transform: scale(1.08);
+
+  /* 가리킨 카드만 앞으로 나온다 — 확대 + 바닥 그림자 + 강조색 번짐 */
+  .project-card:hover {
     z-index: 5;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 32px 64px oklch(0% 0 0 / 0.6),
+      0 0 72px -14px color-mix(in oklch, var(--color-accent) 70%, transparent);
   }
-  .project-card--media:hover .project-more {
-    /* max-height 트랜지션에는 고정값이 필요한데, 220px는 담당 설명이 길고 태그가 많은
-       카드(DiamondScout: 실측 242px)에서 맨 아랫줄 링크를 잘라먹었다. 가장 높은 카드보다
-       넉넉히 잡는다 - overflow:hidden이라 상한이 커도 여백이 생기지는 않는다. */
-    max-height: 420px;
-    opacity: 1;
-    margin-top: var(--space-3);
+
+  /* 확대는 transform이 아니라 독립 속성 scale로 준다. 카드의 transform은
+     마우스 틸트가 인라인으로 잡고 있어서, CSS에서 transform으로 확대를 걸면
+     항상 진다. scale은 별도 속성이라 틸트와 겹쳐서 적용된다 */
+  .project-card:hover {
+    scale: 1.07;
+  }
+
+  /* 솔로 조명 — 조명 밖의 카드는 어둡게 물러난다 */
+  .project-grid:has(.project-card:hover) .project-card:not(:hover),
+  .lineup__track:has(.project-card:hover) .lineup__frame:not(:has(.project-card:hover)) {
+    opacity: 0.4;
+    filter: saturate(0.5) brightness(0.7);
+  }
+
+  /* 마우스를 따라다니는 조명. 평소보다 세게 켠다 */
+  .project-card:hover::before {
+    background: radial-gradient(
+      300px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in oklch, var(--color-accent) 26%, transparent),
+      transparent 72%
+    );
   }
 }
-/* 터치 기기에는 hover가 없어 위 블록이 적용되지 않는다. 펼칠 방법이 없으므로
-   담당·태그·링크를 처음부터 펼쳐 둔다 - 안 그러면 폰에서 Repository/Demo 링크가
-   영영 보이지 않는다. */
-@media (hover: none) {
-  .project-card--media .project-more {
-    max-height: none;
-    opacity: 1;
-    overflow: visible;
-    margin-top: var(--space-3);
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card:hover {
+    scale: 1;
   }
+}
+
+/* 링크 글자는 작아서 그대로 두면 누르기 어렵다. 보이는 모양은 그대로 두고
+   눌리는 영역만 넓힌다 — 레이아웃에 영향을 주지 않으려고 의사요소를 쓴다 */
+.project-link::before {
+  content: '';
+  position: absolute;
+  inset: -0.65rem -0.5rem;
 }
 
 /* Skills */
