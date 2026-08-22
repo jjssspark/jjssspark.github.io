@@ -15,16 +15,43 @@ function setupSpotlight(el) {
 /**
  * @param {HTMLElement} card
  */
+/** 기울기 때문에 카드 모서리가 화면에서 움직여도 되는 최대 거리(px) */
+const MAX_EDGE_SHIFT = 8;
+
+/**
+ * @param {HTMLElement} card
+ */
 function setupTilt(card) {
   // 10도는 카드가 통째로 흔들려 텍스트를 읽기 어렵다. 깊이만 암시하는 정도로 낮춘다
   const maxDeg = 3;
+
+  // 기울인 뒤의 박스를 다시 재면 회전한 만큼 넓어진 값이 나온다. 그 값으로 다음
+  // 기울기를 계산하면 또 박스가 달라져서, 커서를 가만히 둬도 카드가 떤다.
+  // 들어올 때 한 번 잰 박스를 그 호버 동안 계속 쓴다
+  let rect = null;
+  let deg = maxDeg;
+
+  const measure = () => {
+    rect = card.getBoundingClientRect();
+    // 카드가 길수록 같은 각도라도 아래 모서리가 크게 움직인다. 727px 카드에서
+    // 3도면 20px 가까이 밀리는데, 그러면 아래 링크가 커서를 피해 다닌다.
+    // 모서리 이동 거리를 기준으로 각도를 거꾸로 잡는다
+    const half = rect.height / 2;
+    deg = half > 0 ? Math.min(maxDeg, (Math.asin(Math.min(1, MAX_EDGE_SHIFT / half)) * 180) / Math.PI) : maxDeg;
+  };
+
+  card.addEventListener('mouseenter', measure);
   card.addEventListener('mousemove', (event) => {
-    const rect = card.getBoundingClientRect();
+    if (!rect) measure();
+    // 링크 줄 위에서는 기울기를 더 건드리지 않는다. 겨냥하는 그 순간에
+    // 링크가 조금이라도 움직이면 빗나간다
+    if (event.target.closest?.('.project-foot')) return;
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
-    card.style.transform = `perspective(800px) rotateX(${(-py * maxDeg).toFixed(2)}deg) rotateY(${(px * maxDeg).toFixed(2)}deg)`;
+    card.style.transform = `perspective(800px) rotateX(${(-py * deg).toFixed(2)}deg) rotateY(${(px * deg).toFixed(2)}deg)`;
   });
   card.addEventListener('mouseleave', () => {
+    rect = null;
     card.style.transform = '';
   });
 }
