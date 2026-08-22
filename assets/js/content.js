@@ -177,7 +177,8 @@ export const projects = [
     viz: null,
     image: 'assets/img/perjury-home.jpg',
     links: {
-      repo: 'https://github.com/rhantj/perjury',
+      // 2인 팀 저장소라 원본은 팀원 계정에 있다. 내 작업물이 담긴 포크로 건다
+      repo: 'https://github.com/jjssspark/perjury',
       demo: 'https://rhantj.github.io/perjury/',
       notion:
         'https://app.notion.com/p/Perjury_game-3b1f6f1e619a8065b49aedb4f9872502?source=copy_link',
