@@ -83,7 +83,8 @@ export const projects = [
     status: 'shipped',
     summary:
       '이전 투구 패턴과 경기 상황을 분석해 다음 구종을 예측하고, 실제 중계 영상과 연동해 투구 타이밍까지 자동 감지하는 MLB 투구 분석 서비스.',
-    role: null,
+    role:
+      '단독 개발 — Statcast 2025 시즌으로 BiLSTM 다음 구종 8분류(48.5%), 파인튜닝한 YOLOv8 궤적으로 속구·변화구 판정(66.4%, 기준선 53.6%), 스코어버그 OCR로 타임라인 앵커 200개',
     stack: ['Python', 'TensorFlow', 'YOLOv8', 'Streamlit'],
     viz: 'trajectory',
     links: {
@@ -100,7 +101,8 @@ export const projects = [
     status: 'shipped',
     summary:
       'KBO FA 선수의 최근 성적 데이터를 기반으로 예상 연봉을 예측하고 구단별 적정 제시가를 추천하는 XGBoost·LightGBM 앙상블 기반 예측 서비스.',
-    role: null,
+    role:
+      '단독 개발 — KBO 17시즌 선수 2,012명과 FA 계약 210건으로 학습셋 구성, 타자·투수 분리 모델을 시간 순서 검증으로 채택(MAE 3.26억·2.68억), SHAP으로 예측 근거 표시',
     stack: ['Python', 'XGBoost', 'LightGBM', 'Streamlit'],
     viz: null,
     image: 'assets/img/salarycast-home.jpg',
@@ -118,14 +120,14 @@ export const projects = [
     status: 'shipped',
     summary:
       '영상·이미지·뉴스·논문의 AI 생성 여부를 판별하고 신뢰 지표와 판별 근거를 시각화하는 AI 생성 콘텐츠 판별 서비스.',
-    role: null,
+    role:
+      '팀 코드를 이어받아 두 달간 단독 고도화 — 이미지 판별 모델 5개를 같은 표본으로 비교해 다수결로 묶어 85.7%→94.3%, 테스트 31개→178개(커버리지 82%), 뉴스 판별 16초→1.3초',
     stack: ['Python', 'Flask', 'MariaDB', 'Redis', 'Celery'],
     viz: null,
     image: 'assets/img/truthlens-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/TruthLens',
-      // 클라우드타입 배포가 내려가 404가 뜬다. 다시 띄우면 링크를 되살린다
-      demo: null,
+      demo: 'https://port-0-truthlens-mscko82687e05bd3.sel3.cloudtype.app',
       notion:
         'https://app.notion.com/p/3b1f6f1e619a80ef90fce2a31236b1d7?source=copy_link',
     },
