@@ -1490,6 +1490,15 @@ footer {
   max-width: 48ch;
   word-break: keep-all;
 }
+/* 같은 이유로 한글이 들어가는 나머지 글 블록도 어절 단위로 끊는다.
+   제목이 "…남긴 / 다", 카드 설명이 "약 / 속"으로 잘리고 있었다 */
+.principle-title,
+.project-desc,
+.project-more,
+.section-lead {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
 /* 가운데 정렬로 바뀌면서 다이아몬드가 글자 뒤에 바로 겹친다 — 더 뒤로 물린다 */
 .hero-diamond {
   opacity: 0.26;
