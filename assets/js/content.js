@@ -194,6 +194,7 @@ export const projects = [
     role: '컴퓨터공학 캡스톤디자인 초기 3인 팀 → 이후 단독 개발 — FastAPI 백엔드와 Next.js 프론트 전 구간, JWT 인증·권한, Render/Vercel 배포',
     stack: ['Next.js', 'React', 'TypeScript', 'FastAPI', 'PostgreSQL', 'Gemini API'],
     viz: null,
+    image: 'assets/img/onque-home.jpg',
     links: {
       repo: 'https://github.com/jjssspark/OnQue',
       demo: 'https://onque-frontend.vercel.app',
