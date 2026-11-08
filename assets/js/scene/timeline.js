@@ -46,7 +46,7 @@ const v = (x, y, z) => new Vector3(x, y, z);
 const POSE = {
   heroA: { pos: v(26, 42, -150), target: v(0, 2, -10) },
   heroB: { pos: v(14, 30, -110), target: v(0, 1.5, -14) },
-  dive: { pos: v(0.9, 0.75, -17.0), target: MOUND },
+  dive: { pos: v(0.28, 0.46, -17.95), target: MOUND },
   impact: { pos: v(2.4, 1.1, 1.2), target: HOME },
   board: { pos: v(0, 10, -92), target: BOARD },
   pullback: { pos: v(0, 16, -68), target: v(0, 7, -125) },
@@ -77,7 +77,8 @@ function pose(p, ball) {
     return { pos: POSE.heroA.pos.clone().lerp(POSE.heroB.pos, t), target: POSE.heroA.target.clone().lerp(POSE.heroB.target, t) };
   }
   if (p < 0.25) {
-    const t = smooth(0.1, 0.25, p);
+    // 급강하는 빨리 끝내고(0.10~0.145) 나머지는 공 앞에 머문다
+    const t = smooth(0.1, 0.145, p);
     return { pos: POSE.heroB.pos.clone().lerp(POSE.dive.pos, t), target: POSE.heroB.target.clone().lerp(POSE.dive.target, t) };
   }
   if (p < 0.4) {
@@ -93,12 +94,12 @@ function pose(p, ball) {
   }
   if (p < 0.7) {
     const t = smooth(0.45, 0.48, p);
-    const side = ball.clone().add(v(13, 2.5, 5));
+    const side = ball.clone().add(v(1.3, 0.35, 0.6));
     return { pos: POSE.impact.pos.clone().lerp(side, t), target: ball.clone() };
   }
   if (p < 0.82) {
     const t = smooth(0.7, 0.74, p);
-    const side = ball.clone().add(v(13, 2.5, 5));
+    const side = ball.clone().add(v(1.3, 0.35, 0.6));
     return { pos: side.lerp(POSE.board.pos, t), target: ball.clone().lerp(BOARD, t) };
   }
   if (p < 0.92) {
@@ -124,6 +125,7 @@ function pose(p, ball) {
  * @property {number} aberration
  * @property {number} darken
  * @property {number[]} cardT
+ * @property {number} p
  */
 
 /**
@@ -157,5 +159,5 @@ export function sample(p, portrait) {
 
   const cardT = CARD_P.map((cp) => Math.max(-1, Math.min(1, (p - cp) / 0.03)));
 
-  return { camPos: pos, camTarget: target, ballPos, ballSpin, batT, lights, boardOn, shake, aberration: shake, darken, cardT };
+  return { p, camPos: pos, camTarget: target, ballPos, ballSpin, batT, lights, boardOn, shake, aberration: shake, darken, cardT };
 }
