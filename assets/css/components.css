@@ -1785,3 +1785,8 @@ body {
     padding-bottom: var(--space-3);
   }
 }
+
+/* 장면 구간 길이 — 임시. Task 6에서 레이아웃 재작성 때 정리한다 */
+html:not(.no-scene) [data-scene] {
+  min-height: calc(var(--scene-len, 1) * 100vh);
+}

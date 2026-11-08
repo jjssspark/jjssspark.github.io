@@ -5,23 +5,97 @@ import { decideScene } from './fallback.js';
  * 폴백 경로가 three를 내려받지 않게.
  */
 const { run } = decideScene();
+
+/** 페이지 총 길이(화면 높이 배수). 각 구간 길이 = (to-from) × 이 값 */
+const TOTAL_VH = 12;
+/** 데스크톱에서 멈춰 있을 때 그레인만 갱신하는 주기 (ms) */
+const IDLE_TICK = 83;
+
+const sceneEls = [...document.querySelectorAll('[data-scene]')];
+
+const maxScroll = () => document.documentElement.scrollHeight - window.innerHeight;
+export const pOf = (y) => (maxScroll() > 0 ? Math.min(1, Math.max(0, y / maxScroll())) : 0);
+export const yOf = (p) => p * maxScroll();
+
 if (run) {
+  const [{ createStage }, { SEGMENTS, sample }, { onScrollFrame, scrollToY, refresh }] = await Promise.all([
+    import('./stage.js'),
+    import('./timeline.js'),
+    import('../scroll-engine.js'),
+  ]);
+
   const canvas = document.getElementById('stage');
   const isTouch = window.matchMedia('(hover: none)').matches;
-  const { createStage } = await import('./stage.js');
   const stage = createStage(canvas, { isTouch });
 
-  // setSize는 canvas.width를 다시 써서 그림을 지운다. 크기를 맞췄으면 바로 다시 그린다
+  function layoutSections() {
+    for (const el of sceneEls) {
+      const seg = SEGMENTS.find((s) => s.id === el.dataset.scene);
+      if (seg) el.style.setProperty('--scene-len', String((seg.to - seg.from) * TOTAL_VH));
+    }
+  }
+
+  let p = 0;
+  let portrait = window.innerHeight > window.innerWidth;
+  let needsRender = true;
+  let lastIdle = 0;
+  let lastT = performance.now();
+  let fps = 60;
+
+  layoutSections();
+  p = pOf(window.scrollY);
+
   const fit = () => {
+    portrait = window.innerHeight > window.innerWidth;
+    layoutSections();
+    refresh();
     stage.setSize(window.innerWidth, window.innerHeight);
-    stage.render(null, 0);
+    needsRender = true;
   };
   fit();
   new ResizeObserver(fit).observe(document.documentElement);
 
+  onScrollFrame((y) => {
+    const next = pOf(y);
+    if (next !== p) {
+      p = next;
+      needsRender = true;
+    }
+  });
+
+  function loop(now) {
+    const dt = (now - lastT) / 1000;
+    const idleDue = !isTouch && now - lastIdle > IDLE_TICK;
+    if (needsRender || idleDue) {
+      stage.render(sample(p, portrait), dt);
+      fps = fps * 0.9 + (1 / Math.max(dt, 1e-3)) * 0.1;
+      needsRender = false;
+      lastIdle = now;
+    }
+    lastT = now;
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  // 앵커 이동은 네이티브 점프 대신 관성으로. 카메라가 순간이동하지 않게
+  document.querySelector('header nav')?.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const target = document.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    scrollToY(target.offsetTop);
+  });
+
   if (new URLSearchParams(location.search).get('debug') === '1') {
     const { mountDebug } = await import('./debug.js');
-    let fps = 0;
-    mountDebug({ getProgress: () => 0, setProgress: () => {}, getFps: () => fps });
+    mountDebug({
+      getProgress: () => p,
+      setProgress: (np) => {
+        window.scrollTo(0, yOf(np));
+        refresh();
+      },
+      getFps: () => fps,
+    });
   }
 }

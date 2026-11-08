@@ -66,7 +66,7 @@
   </header>
 
   <main id="main">
-    <section id="top" class="hero" aria-labelledby="hero-heading">
+    <section id="top" class="hero" data-scene="hero" aria-labelledby="hero-heading">
       <svg class="hero-diamond" aria-hidden="true" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
         <rect class="hero-diamond__infield" x="100" y="100" width="200" height="200" transform="rotate(45 200 200)" />
         <circle class="hero-diamond__mound" cx="200" cy="200" r="22" />
@@ -97,7 +97,7 @@
 
     <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
          어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
-    <section id="about" class="section about" aria-labelledby="about-heading">
+    <section id="about" class="section about" data-scene="about" aria-labelledby="about-heading">
       <div class="about-card">
         <div class="about-card__inner container">
           <p class="section-kicker">01 · About</p>
@@ -120,7 +120,7 @@
       </div>
     </section>
 
-    <section id="featured" class="section container" aria-labelledby="featured-heading">
+    <section id="featured" class="section container" data-scene="featured" aria-labelledby="featured-heading">
       <p class="section-kicker">02 · Featured</p>
       <h2 id="featured-heading" class="section-title reveal">대표 프로젝트</h2>
       <div class="project-grid project-grid--featured" id="featured-grid"></div>
@@ -129,7 +129,8 @@
     <!-- 프로젝트 — 옆으로 미는 캐러셀.
          무대 id를 떼면 render.js가 세로 스크롤 구동 대신 트랙 자체 스크롤로 간다.
          트랙에 scroll-snap이 걸려 있어 카드 단위로 착지한다 -->
-    <section id="projects" class="section lineup-section" aria-labelledby="projects-heading">
+    <div class="scene-gap" data-scene="impact" aria-hidden="true"></div>
+    <section id="projects" class="section lineup-section" data-scene="projects" aria-labelledby="projects-heading">
       <div class="lineup-stage">
         <div class="lineup-sticky">
           <div class="container">
@@ -154,19 +155,19 @@
       <div class="sr-only" aria-live="polite" id="filter-status"></div>
     </section>
 
-    <section id="skills" class="section container" aria-labelledby="skills-heading">
+    <section id="skills" class="section container" data-scene="stack" aria-labelledby="skills-heading">
       <p class="section-kicker">04 · Stack</p>
       <h2 id="skills-heading" class="section-title reveal">기술 스택</h2>
       <dl class="skill-list" id="skill-list"></dl>
     </section>
 
-    <section id="principles" class="section container" aria-labelledby="principles-heading">
+    <section id="principles" class="section container" data-scene="approach" aria-labelledby="principles-heading">
       <p class="section-kicker">05 · Approach</p>
       <h2 id="principles-heading" class="section-title reveal">일하는 방식</h2>
       <div class="principle-list" id="principle-list"></div>
     </section>
 
-    <section id="contact" class="section container" aria-labelledby="contact-heading">
+    <section id="contact" class="section container" data-scene="contact" aria-labelledby="contact-heading">
       <p class="section-kicker">06 · Contact</p>
       <h2 id="contact-heading" class="section-title reveal">연락처</h2>
       <ul class="contact-list reveal" id="contact-list"></ul>
