@@ -84,7 +84,7 @@ function makeBoardTexture() {
     for (let i = 0; i < DOT_COLS * DOT_ROWS; i++) {
       const col = i % DOT_COLS;
       const row = (i / DOT_COLS) | 0;
-      ctx.fillStyle = i < n ? '#ff6a4a' : '#1a1416';
+      ctx.fillStyle = i < n ? '#b8372a' : '#1a1416';
       ctx.beginPath();
       ctx.arc(col * 6 + 3, row * 6 + 3, 2.1, 0, Math.PI * 2);
       ctx.fill();
@@ -184,7 +184,7 @@ export function buildWorld(assets) {
     new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.8 }),
     new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.8 }),
-    new THREE.MeshStandardMaterial({ map: boardTex, emissiveMap: boardTex, emissive: 0xffffff, emissiveIntensity: 1.6, roughness: 0.9 }),
+    new THREE.MeshStandardMaterial({ map: boardTex, emissiveMap: boardTex, emissive: 0xffffff, emissiveIntensity: 0.9, roughness: 0.9 }),
     new THREE.MeshStandardMaterial({ color: 0x15151a, roughness: 0.8 }),
   ];
   const board = new THREE.Mesh(new THREE.BoxGeometry(BOARD_W, BOARD_H, 1), boardMats);

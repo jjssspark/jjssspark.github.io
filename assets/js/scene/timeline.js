@@ -46,7 +46,7 @@ const v = (x, y, z) => new Vector3(x, y, z);
 const POSE = {
   heroA: { pos: v(26, 42, -150), target: v(0, 2, -10) },
   heroB: { pos: v(14, 30, -110), target: v(0, 1.5, -14) },
-  dive: { pos: v(0.28, 0.46, -17.95), target: MOUND },
+  dive: { pos: v(0.3, 0.46, -17.95), target: v(-0.16, 0.3, -18.4) },
   impact: { pos: v(2.4, 1.1, 1.2), target: HOME },
   board: { pos: v(0, 10, -92), target: BOARD },
   pullback: { pos: v(0, 16, -68), target: v(0, 7, -125) },
@@ -150,7 +150,7 @@ export function sample(p, portrait) {
   // 글이 지나가는 구간은 장면을 눌러 준다
   const darken =
     0.35 * (1 - smooth(0.08, 0.12, p)) +
-    0.75 * smooth(0.1, 0.13, p) * (1 - smooth(0.23, 0.26, p)) +
+    0.9 * smooth(0.1, 0.13, p) * (1 - smooth(0.23, 0.26, p)) +
     0.45 * smooth(0.25, 0.28, p) * (1 - smooth(0.39, 0.41, p)) +
     0.3 * smooth(0.45, 0.48, p) * (1 - smooth(0.69, 0.71, p)) +
     0.25 * smooth(0.7, 0.73, p) * (1 - smooth(0.81, 0.83, p)) +

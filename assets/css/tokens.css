@@ -27,6 +27,7 @@
 
   /* 의미 토큰 — 컴포넌트는 이것만 참조 */
   --color-scene-fog: oklch(10% 0.01 260);
+  --color-board-text: var(--light-sodium);
   --color-bg: var(--ink-950);
   --color-surface: var(--ink-900);
   --color-surface-alt: var(--ink-800);

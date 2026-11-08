@@ -10,8 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-  <!-- 한글 본문·제목용. Space Grotesk와 DM Serif Display에는 한글 글리프가 없어
-       시스템 폰트로 떨어지고 있었다 -->
+  <!-- 한글 본문·제목용. Space Grotesk와 DM Serif Display에는 한글 글리프가 없다 -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link
     rel="stylesheet"
@@ -34,22 +33,15 @@
   <canvas id="stage" class="stage" aria-hidden="true"></canvas>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
-  <!-- 전광판 점등 시퀀스. JS가 세션당 1회만 띄우고 제거한다 -->
+  <!-- 전광판 점등 화면 = 에셋 로더. scene/main.js가 띄우고 제거한다 -->
   <div class="boot" id="boot" hidden>
     <div class="boot__screen">
       <p class="boot__brand">JISU PARK</p>
-      <p class="boot__meta">Developer Portfolio, Ball Park Edition<br />Version 2.0</p>
+      <p class="boot__meta">Developer Portfolio, Ball Park Edition<br />Version 3.0</p>
       <div class="boot__bar"><span class="boot__fill"></span></div>
-      <p class="boot__foot">Loading projects — please stand by.</p>
+      <p class="boot__foot">Loading the ball park — please stand by.</p>
     </div>
   </div>
-
-  <svg class="scroll-seam" aria-hidden="true" viewBox="0 0 10 200" preserveAspectRatio="none">
-    <path
-      pathLength="1"
-      d="M5,0 C0,20 10,40 5,60 C0,80 10,100 5,120 C0,140 10,160 5,180 C0,190 10,195 5,200"
-    />
-  </svg>
 
   <header>
     <nav class="container" aria-label="주 메뉴">
@@ -66,122 +58,114 @@
   </header>
 
   <main id="main">
-    <section id="top" class="hero" data-scene="hero" aria-labelledby="hero-heading">
-      <svg class="hero-diamond" aria-hidden="true" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
-        <rect class="hero-diamond__infield" x="100" y="100" width="200" height="200" transform="rotate(45 200 200)" />
-        <circle class="hero-diamond__mound" cx="200" cy="200" r="22" />
-        <rect class="hero-diamond__base" x="193" y="51.6" width="14" height="14" transform="rotate(45 200 58.6)" />
-        <rect class="hero-diamond__base" x="334.4" y="193" width="14" height="14" transform="rotate(45 341.4 200)" />
-        <rect class="hero-diamond__base" x="193" y="334.4" width="14" height="14" transform="rotate(45 200 341.4)" />
-        <rect class="hero-diamond__base" x="51.6" y="193" width="14" height="14" transform="rotate(45 58.6 200)" />
-      </svg>
-      <div class="strike-grid" aria-hidden="true" id="hero-grid"></div>
-      <div class="hero-spotlight" aria-hidden="true"></div>
-      <div class="hero-inner">
-        <p class="section-kicker">Developer Portfolio</p>
-        <!-- reveal은 마스크를 열어주는 스위치다. 이 클래스가 없으면
-             motion.js가 감싼 마스크가 영영 안 열려 이름이 안 보인다 -->
-        <h1 id="hero-heading" class="hero-name reveal" data-hero="name"></h1>
-        <p class="hero-tagline" data-hero="tagline"></p>
-        <dl class="stat-line" id="hero-stats"></dl>
-        <div class="hero-cta">
-          <a class="btn btn-primary" data-hero="github" target="_blank" rel="noopener noreferrer">GitHub 보기</a>
-          <a class="btn btn-ghost" href="#contact">연락하기</a>
+    <!-- 각 섹션은 장면 구간(data-scene)이다. 높이는 scene/main.js가 --scene-len으로 준다.
+         .pin이 화면에 머물고 그 안의 내용이 장면 위를 지나간다 -->
+    <section id="top" class="scene hero" data-scene="hero" aria-labelledby="hero-heading">
+      <div class="pin">
+        <div class="container hero-inner">
+          <p class="section-kicker">Developer Portfolio</p>
+          <h1 id="hero-heading" class="hero-name reveal" data-hero="name"></h1>
+          <p class="hero-tagline reveal" data-hero="tagline"></p>
+          <dl class="stat-line reveal" id="hero-stats"></dl>
+          <div class="hero-cta reveal">
+            <a class="btn btn-primary" data-hero="github" target="_blank" rel="noopener noreferrer">GitHub 보기</a>
+            <a class="btn btn-ghost" href="#contact">연락하기</a>
+          </div>
+          <a class="hero-scroll" href="#about">
+            <span class="hero-scroll__label">Scroll to play</span>
+            <span class="hero-scroll__rail" aria-hidden="true"></span>
+          </a>
         </div>
-        <a class="hero-scroll" href="#featured">
-          <span class="hero-scroll__label">Scroll to see the projects</span>
-          <span class="hero-scroll__rail" aria-hidden="true"></span>
-        </a>
       </div>
     </section>
 
-    <!-- About — 라인업 카드 용지가 사선으로 화면을 가로지른다.
-         어두운 섹션 사이에 밝은 판을 끼워 성격을 바꾸는 구성 -->
-    <section id="about" class="section about" data-scene="about" aria-labelledby="about-heading">
-      <div class="about-card">
-        <div class="about-card__inner container">
+    <section id="about" class="scene about" data-scene="about" aria-labelledby="about-heading">
+      <div class="pin">
+        <div class="container copy">
           <p class="section-kicker">01 · About</p>
           <h2 id="about-heading" class="section-title reveal">소개</h2>
-          <p class="about-lead reveal">
-            백엔드부터 프론트엔드, 배포까지 서비스 전 구간을 직접 만듭니다.
+          <p class="about-lead reveal">백엔드부터 프론트엔드, 배포까지 서비스 전 구간을 직접 만듭니다.</p>
+          <p class="about-text reveal" style="--delay:120ms">
+            AI는 그 안에서 문제를 푸는 도구로 씁니다. 요약·예측·검색이 필요한 자리에 붙이고,
+            느려지거나 엉뚱한 응답이 와도 화면이 멈추지 않게 설계합니다.
           </p>
-          <div class="about-cols">
-            <p class="about-text reveal" style="--delay:120ms">
-              AI는 그 안에서 문제를 푸는 도구로 씁니다. 요약·예측·검색이 필요한 자리에 붙이고,
-              느려지거나 엉뚱한 응답이 와도 화면이 멈추지 않게 설계합니다.
-            </p>
-            <p class="about-text reveal" style="--delay:200ms">
-              10개 프로젝트에서 API 설계와 DB, 화면, CI/CD 배포를 전부 거쳤습니다.
-              6인 팀 프로젝트에서는 부팀장을 맡아 두 번째로 많은 커밋을 넣었고,
-              푼 문제는 원인과 실패한 시도까지 기록으로 남깁니다.
-            </p>
-          </div>
+          <p class="about-text reveal" style="--delay:200ms">
+            10개 프로젝트에서 API 설계와 DB, 화면, CI/CD 배포를 전부 거쳤습니다.
+            6인 팀 프로젝트에서는 부팀장을 맡아 두 번째로 많은 커밋을 넣었고,
+            푼 문제는 원인과 실패한 시도까지 기록으로 남깁니다.
+          </p>
         </div>
       </div>
     </section>
 
-    <section id="featured" class="section container" data-scene="featured" aria-labelledby="featured-heading">
-      <p class="section-kicker">02 · Featured</p>
-      <h2 id="featured-heading" class="section-title reveal">대표 프로젝트</h2>
-      <div class="project-grid project-grid--featured" id="featured-grid"></div>
+    <section id="featured" class="scene featured" data-scene="featured" aria-labelledby="featured-heading">
+      <div class="pin">
+        <div class="container">
+          <p class="section-kicker">02 · Featured</p>
+          <h2 id="featured-heading" class="section-title reveal">대표 프로젝트</h2>
+          <div class="featured-grid" id="featured-grid"></div>
+        </div>
+      </div>
     </section>
 
-    <!-- 프로젝트 — 옆으로 미는 캐러셀.
-         무대 id를 떼면 render.js가 세로 스크롤 구동 대신 트랙 자체 스크롤로 간다.
-         트랙에 scroll-snap이 걸려 있어 카드 단위로 착지한다 -->
-    <div class="scene-gap" data-scene="impact" aria-hidden="true"></div>
-    <section id="projects" class="section lineup-section" data-scene="projects" aria-labelledby="projects-heading">
-      <div class="lineup-stage">
-        <div class="lineup-sticky">
-          <div class="container">
-            <p class="section-kicker">03 · Projects</p>
-            <h2 id="projects-heading" class="section-title reveal">프로젝트</h2>
-            <p class="section-lead reveal">옆으로 넘겨서 봅니다. 화살표로도 넘어갑니다.</p>
-          </div>
+    <div class="scene scene--gap" data-scene="impact" aria-hidden="true"></div>
 
-          <div class="lineup">
-            <div class="lineup__track" id="shipped-grid" data-hscroll></div>
-          </div>
-
-          <div class="container">
-            <div class="lineup__nav">
-              <button class="lineup__btn" type="button" data-lineup="prev" aria-label="이전 프로젝트">←</button>
-              <span class="lineup__count" id="lineup-count" aria-live="polite"></span>
-              <button class="lineup__btn" type="button" data-lineup="next" aria-label="다음 프로젝트">→</button>
-            </div>
+    <section id="projects" class="scene projects" data-scene="projects" aria-labelledby="projects-heading">
+      <div class="pin">
+        <div class="container projects-head">
+          <p class="section-kicker">03 · Projects</p>
+          <h2 id="projects-heading" class="section-title reveal">프로젝트</h2>
+          <p class="section-lead reveal">스크롤을 내리면 타구를 따라 한 장씩 지나갑니다.</p>
+        </div>
+        <div class="card-rail" id="shipped-grid"></div>
+        <div class="container">
+          <div class="card-nav">
+            <button class="card-nav__btn" type="button" data-lineup="prev" aria-label="이전 프로젝트">←</button>
+            <span class="card-nav__count" id="lineup-count" aria-live="polite"></span>
+            <button class="card-nav__btn" type="button" data-lineup="next" aria-label="다음 프로젝트">→</button>
           </div>
         </div>
       </div>
       <div class="sr-only" aria-live="polite" id="filter-status"></div>
     </section>
 
-    <section id="skills" class="section container" data-scene="stack" aria-labelledby="skills-heading">
-      <p class="section-kicker">04 · Stack</p>
-      <h2 id="skills-heading" class="section-title reveal">기술 스택</h2>
-      <dl class="skill-list" id="skill-list"></dl>
+    <section id="skills" class="scene stack" data-scene="stack" aria-labelledby="skills-heading">
+      <div class="pin">
+        <div class="board-overlay" id="board-stack">
+          <p class="section-kicker">04 · Stack</p>
+          <h2 id="skills-heading" class="section-title">기술 스택</h2>
+          <dl class="skill-list" id="skill-list"></dl>
+        </div>
+      </div>
     </section>
 
-    <section id="principles" class="section container" data-scene="approach" aria-labelledby="principles-heading">
-      <p class="section-kicker">05 · Approach</p>
-      <h2 id="principles-heading" class="section-title reveal">일하는 방식</h2>
-      <div class="principle-list" id="principle-list"></div>
+    <section id="principles" class="scene approach" data-scene="approach" aria-labelledby="principles-heading">
+      <div class="pin">
+        <div class="container">
+          <p class="section-kicker">05 · Approach</p>
+          <h2 id="principles-heading" class="section-title reveal">일하는 방식</h2>
+          <div class="principle-list" id="principle-list"></div>
+        </div>
+      </div>
     </section>
 
-    <section id="contact" class="section container" data-scene="contact" aria-labelledby="contact-heading">
-      <p class="section-kicker">06 · Contact</p>
-      <h2 id="contact-heading" class="section-title reveal">연락처</h2>
-      <ul class="contact-list reveal" id="contact-list"></ul>
+    <section id="contact" class="scene contact" data-scene="contact" aria-labelledby="contact-heading">
+      <div class="pin">
+        <div class="board-overlay" id="board-contact">
+          <p class="section-kicker">06 · Contact</p>
+          <h2 id="contact-heading" class="section-title">연락처</h2>
+          <ul class="contact-list" id="contact-list"></ul>
+        </div>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>&copy; 2026 Jisu Park. Built with plain HTML/CSS/JS, hosted on GitHub Pages.</p>
+    <p>&copy; 2026 Jisu Park. Plain HTML/CSS/JS + Three.js, hosted on GitHub Pages. 텍스처는 Poly Haven(CC0). <a href="CREDITS.md">출처</a></p>
   </footer>
 
   <script type="module" src="assets/js/scene/main.js"></script>
   <script type="module" src="assets/js/render.js"></script>
-  <script type="module" src="assets/js/viz/trajectory.js"></script>
-  <script type="module" src="assets/js/viz/heatmap.js"></script>
   <script type="module" src="assets/js/motion.js"></script>
   <script type="module" src="assets/js/interactions.js"></script>
 </body>

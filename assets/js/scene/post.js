@@ -35,7 +35,7 @@ const FilmShader = {
       c.rgb += n * grain;
       float v = smoothstep(0.9, 0.3, length(vUv - 0.5));
       c.rgb *= max(0.55, v);
-      c.rgb *= 1.0 - darken * 0.55;
+      c.rgb *= 1.0 - darken * 0.7;
       gl_FragColor = c;
     }
   `,

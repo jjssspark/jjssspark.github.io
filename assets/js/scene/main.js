@@ -18,14 +18,23 @@ export const pOf = (y) => (maxScroll() > 0 ? Math.min(1, Math.max(0, y / maxScro
 export const yOf = (p) => p * maxScroll();
 
 if (run) {
-  const [{ createStage }, { SEGMENTS, sample }, { onScrollFrame, scrollToY, refresh }, { loadCritical }, { runBoot }] =
-    await Promise.all([
-      import('./stage.js'),
-      import('./timeline.js'),
-      import('../scroll-engine.js'),
-      import('./assets.js'),
-      import('../boot.js'),
-    ]);
+  const [
+    { createStage },
+    { SEGMENTS, CARD_P, sample },
+    { onScrollFrame, scrollToY, refresh },
+    { loadCritical },
+    { runBoot },
+    { trackBoard },
+    { placeCards, setupCardNav, projectCards },
+  ] = await Promise.all([
+    import('./stage.js'),
+    import('./timeline.js'),
+    import('../scroll-engine.js'),
+    import('./assets.js'),
+    import('../boot.js'),
+    import('./overlay.js'),
+    import('../render.js'),
+  ]);
 
   // 부팅 화면 = 로더. 첫 묶음이 다 올 때까지 바가 차오른다
   let onProgress = () => {};
@@ -40,6 +49,22 @@ if (run) {
   const canvas = document.getElementById('stage');
   const isTouch = window.matchMedia('(hover: none)').matches;
   const stage = createStage(canvas, { isTouch, assets });
+
+  // 전광판 오버레이 두 개(스택·연락처)를 전광판 메시에 붙인다
+  const boardTrackers = ['board-stack', 'board-contact']
+    .map((id) => document.getElementById(id))
+    .filter(Boolean)
+    .map((el) => trackBoard(stage.world.board, stage.camera, el));
+
+  // 카드 화살표: 가장 가까운 카드 진행도의 앞뒤로 페이지를 보낸다
+  const currentCard = () => {
+    let best = 0;
+    CARD_P.forEach((cp, i) => {
+      if (Math.abs(cp - p) < Math.abs(CARD_P[best] - p)) best = i;
+    });
+    return best;
+  };
+  const syncCount = setupCardNav({ count: CARD_P.length, current: currentCard, goTo: (i) => scrollToY(yOf(CARD_P[i])) });
 
   function layoutSections() {
     for (const el of sceneEls) {
@@ -80,7 +105,15 @@ if (run) {
     const dt = (now - lastT) / 1000;
     const idleDue = !isTouch && now - lastIdle > IDLE_TICK;
     if (needsRender || idleDue) {
-      stage.render(sample(p, portrait), dt);
+      const state = sample(p, portrait);
+      stage.render(state, dt);
+      if (needsRender) {
+        placeCards(projectCards, state.cardT);
+        // 스택 구간엔 스택 판만, 연락처 구간엔 연락처 판만
+        boardTrackers[0]?.(p < 0.83 ? state.boardOn : 0);
+        boardTrackers[1]?.(p >= 0.9 ? state.boardOn : 0);
+        syncCount();
+      }
       fps = fps * 0.9 + (1 / Math.max(dt, 1e-3)) * 0.1;
       needsRender = false;
       lastIdle = now;
