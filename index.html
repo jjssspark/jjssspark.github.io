@@ -21,8 +21,17 @@
   <link rel="stylesheet" href="assets/css/tokens.css" />
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/components.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
+  <canvas id="stage" class="stage" aria-hidden="true"></canvas>
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
   <!-- 전광판 점등 시퀀스. JS가 세션당 1회만 띄우고 제거한다 -->
@@ -168,6 +177,7 @@
     <p>&copy; 2026 Jisu Park. Built with plain HTML/CSS/JS, hosted on GitHub Pages.</p>
   </footer>
 
+  <script type="module" src="assets/js/scene/main.js"></script>
   <script type="module" src="assets/js/boot.js"></script>
   <script type="module" src="assets/js/render.js"></script>
   <script type="module" src="assets/js/viz/trajectory.js"></script>
