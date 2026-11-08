@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { MOUND, HOME, FENCE_TOP, BOARD } from './timeline.js';
+import { MOUND, HOME, BOARD, hitPath } from './timeline.js';
 
 /**
  * 야구장 최소 구성. 잔디 평면 + 내야 흙 + 마운드 + 파울 라인 + 펜스 + 조명탑 + 전광판,
@@ -84,7 +84,7 @@ function makeBoardTexture() {
     for (let i = 0; i < DOT_COLS * DOT_ROWS; i++) {
       const col = i % DOT_COLS;
       const row = (i / DOT_COLS) | 0;
-      ctx.fillStyle = i < n ? '#b8372a' : '#1a1416';
+      ctx.fillStyle = i < n ? '#b8372a' : '#2a1d1f';
       ctx.beginPath();
       ctx.arc(col * 6 + 3, row * 6 + 3, 2.1, 0, Math.PI * 2);
       ctx.fill();
@@ -157,6 +157,37 @@ export function buildWorld(assets) {
   fence.position.set(0, 1.6, 2);
   group.add(fence);
 
+  // 관중석 — 펜스 뒤 계단식 호. 좌석은 어둡고 드문드문 폰 불빛
+  const seatMat = new THREE.MeshStandardMaterial({ color: 0x2a2630, roughness: 0.95 });
+  const stepMat = new THREE.MeshStandardMaterial({ color: 0x1b1a20, roughness: 1 });
+  for (let i = 0; i < 7; i++) {
+    const r = 123.5 + i * 2.6;
+    const y = 3.4 + i * 1.5;
+    const tier = new THREE.Mesh(
+      new THREE.CylinderGeometry(r, r, 1.5, 96, 1, true, -Math.PI * 0.3, Math.PI * 0.6),
+      i % 2 ? seatMat : stepMat,
+    );
+    tier.position.set(0, y + 0.75, 2);
+    group.add(tier);
+    const tread = new THREE.Mesh(new THREE.RingGeometry(r, r + 2.6, 96, 1, Math.PI * 1.2, Math.PI * 0.6), stepMat);
+    tread.rotation.x = -Math.PI / 2;
+    tread.position.set(0, y + 1.5, 2);
+    group.add(tread);
+  }
+  // 관중 폰 불빛 — 점 200개
+  const crowdPts = [];
+  for (let i = 0; i < 200; i++) {
+    const a = Math.PI * 1.5 + (Math.random() - 0.5) * Math.PI * 0.56;
+    const tier = (Math.random() * 7) | 0;
+    const r = 124 + tier * 2.6 + Math.random() * 2;
+    crowdPts.push(Math.cos(a) * r, 4.2 + tier * 1.5 + Math.random() * 0.6, Math.sin(a) * r + 2);
+  }
+  const crowd = new THREE.Points(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(crowdPts, 3)),
+    new THREE.PointsMaterial({ color: 0xe8ecff, size: 0.5, sizeAttenuation: true, transparent: true, opacity: 0.85 }),
+  );
+  group.add(crowd);
+
   // 조명탑
   const towers = [];
   const poleMat = new THREE.MeshStandardMaterial({ color: 0x23242a, roughness: 0.7, metalness: 0.4 });
@@ -190,6 +221,9 @@ export function buildWorld(assets) {
   const board = new THREE.Mesh(new THREE.BoxGeometry(BOARD_W, BOARD_H, 1), boardMats);
   board.position.copy(BOARD);
   group.add(board);
+  const standsLight = new THREE.PointLight(0x9fb0d8, 400, 90, 1.6);
+  standsLight.position.set(0, 26, -108);
+  group.add(standsLight);
   for (const sx of [-1, 1]) {
     const leg = new THREE.Mesh(new THREE.BoxGeometry(0.8, BOARD.y - BOARD_H / 2, 0.8), poleMat);
     leg.position.set(sx * (BOARD_W / 2 - 1.5), (BOARD.y - BOARD_H / 2) / 2, BOARD.z);
@@ -207,13 +241,7 @@ export function buildWorld(assets) {
 
   // 트레일 — 투구 구간, 타구 구간
   const pitchTrail = makeTrail([MOUND.clone(), MOUND.clone().lerp(HOME, 0.5), HOME.clone()], 0.012, 0xff5a3c);
-  const hitPts = [];
-  for (let i = 0; i <= 24; i++) {
-    const t = i / 24;
-    const p = HOME.clone().lerp(FENCE_TOP, t);
-    p.y = HOME.y + (FENCE_TOP.y - HOME.y) * t + 28 * 4 * t * (1 - t);
-    hitPts.push(p);
-  }
+  const hitPts = Array.from({ length: 33 }, (_, i) => hitPath(i / 32));
   const hitTrail = makeTrail(hitPts, 0.06, 0xff5a3c);
   group.add(pitchTrail, hitTrail);
 
@@ -245,7 +273,7 @@ export function buildWorld(assets) {
     }
 
     pitchTrail.setFrac(smooth(0.25, 0.4, s.p) * (1 - smooth(0.44, 0.47, s.p)));
-    hitTrail.setFrac(smooth(0.45, 0.7, s.p) * (1 - smooth(0.74, 0.8, s.p)));
+    hitTrail.setFrac(smooth(0.45, 0.7, s.p) * (1 - smooth(0.72, 0.78, s.p)));
   }
 
   return { group, ball, bat, towers, board, apply };

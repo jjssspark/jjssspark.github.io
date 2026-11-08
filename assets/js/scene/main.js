@@ -123,7 +123,8 @@ if (run) {
       if (needsRender) {
         placeCards(projectCards, state.cardT);
         // 스택 구간엔 스택 판만, 연락처 구간엔 연락처 판만
-        boardTrackers[0]?.(p < 0.83 ? state.boardOn : 0);
+        // 전광판이 정면에 잡힌 뒤(점등 완료)에만 글자를 올린다
+        boardTrackers[0]?.(p < 0.83 && state.boardOn >= 0.95 ? 1 : 0);
         boardTrackers[1]?.(p >= 0.9 ? state.boardOn : 0);
         syncCount();
       }

@@ -1,5 +1,6 @@
 import { Vector3 } from 'three';
 
+
 /**
  * 진행도 p(0~1) 하나가 장면의 모든 상태를 정한다. 시간은 없다.
  * 되감기가 되려면 여기 있는 모든 것이 p의 순수 함수여야 한다.
@@ -21,7 +22,16 @@ export const MOUND = new Vector3(0, 0.3, -18.4);
 export const HOME = new Vector3(0, 0.9, 0);
 export const FENCE_TOP = new Vector3(0, 3.5, -118);
 export const BOARD = new Vector3(0, 12, -125);
-const BOARD_FACE = new Vector3(0, 10, -124.4);
+/** 타구 착지점 — 전광판 뒤 어둠 속. 펜스(-120)·관중석(-123~-140)·전광판(-125, 높이 17)을 다 넘긴다 */
+export const LANDING = new Vector3(2, 0.2, -170);
+const HIT_APEX = 30;
+
+/** 타구 궤적. t 0=임팩트, 1=착지. world.js의 트레일도 이 함수를 쓴다 */
+export function hitPath(t) {
+  const pos = HOME.clone().lerp(LANDING, t);
+  pos.y = lerp(HOME.y, LANDING.y, t) + HIT_APEX * 4 * t * (1 - t);
+  return pos;
+}
 
 /** 프로젝트 카드 8장이 카메라 정면을 지나는 진행도 */
 export const CARD_P = Array.from({ length: 8 }, (_, i) => 0.45 + (0.25 * (i + 0.5)) / 8);
@@ -48,6 +58,7 @@ const POSE = {
   heroB: { pos: v(14, 30, -110), target: v(0, 1.5, -14) },
   dive: { pos: v(0.3, 0.46, -17.95), target: v(-0.16, 0.3, -18.4) },
   impact: { pos: v(2.4, 1.1, 1.2), target: HOME },
+  watch: { pos: v(12, 3.5, -62), target: BOARD },
   board: { pos: v(0, 10, -92), target: BOARD },
   pullback: { pos: v(0, 16, -68), target: v(0, 7, -125) },
   contactA: { pos: v(0, 12, -95), target: BOARD },
@@ -62,13 +73,8 @@ function ballAt(p) {
     const t = clamp01((p - 0.425) / 0.025);
     return HOME.clone().add(v(0, t * 0.6, -t * 1.5));
   }
-  if (p < 0.7) {
-    const t = smooth(0.45, 0.7, p);
-    const pos = HOME.clone().lerp(FENCE_TOP, t);
-    pos.y = lerp(HOME.y, FENCE_TOP.y, t) + 28 * 4 * t * (1 - t);
-    return pos;
-  }
-  return BOARD_FACE.clone();
+  if (p < 0.7) return hitPath(smooth(0.45, 0.7, p));
+  return LANDING.clone();
 }
 
 function pose(p, ball) {
@@ -95,12 +101,18 @@ function pose(p, ball) {
   if (p < 0.7) {
     const t = smooth(0.45, 0.48, p);
     const side = ball.clone().add(v(1.3, 0.35, 0.6));
-    return { pos: POSE.impact.pos.clone().lerp(side, t), target: ball.clone() };
+    // 0.60부터는 공을 놓아주고 외야에 서서 공이 관중석·전광판을 넘어가는 걸 본다
+    const watch = smooth(0.52, 0.62, p);
+    const pos = POSE.impact.pos.clone().lerp(side, t).lerp(POSE.watch.pos, watch);
+    // 지켜보는 동안은 공과 전광판 사이를 본다 — 둘 다 프레임에 들어오게
+    const target = ball.clone().lerp(ball.clone().lerp(BOARD, 0.55), watch);
+    return { pos, target };
   }
   if (p < 0.82) {
+    // 공은 전광판 뒤로 사라졌다. 시선을 전광판으로 — HOME RUN 점등
     const t = smooth(0.7, 0.74, p);
-    const side = ball.clone().add(v(1.3, 0.35, 0.6));
-    return { pos: side.lerp(POSE.board.pos, t), target: ball.clone().lerp(BOARD, t) };
+    const from = ball.clone().lerp(BOARD, 0.55);
+    return { pos: POSE.watch.pos.clone().lerp(POSE.board.pos, t), target: from.lerp(BOARD, t) };
   }
   if (p < 0.92) {
     const t = smooth(0.82, 0.92, p);

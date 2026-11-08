@@ -536,6 +536,42 @@ html.no-scene .board-overlay[hidden] {
   display: flex;
 }
 
+/* HOME RUN — 전광판이 켜질 때 세 번 깜빡이고 작게 남는다 (opacity만) */
+.board-flash {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(2rem, 9cqw, 7rem);
+  letter-spacing: 0.08em;
+  color: var(--color-board-text);
+  text-shadow: 0 0 24px color-mix(in oklch, var(--color-board-text) 70%, transparent);
+  pointer-events: none;
+  opacity: 0;
+  animation: board-flash 2.4s steps(1) 0.2s forwards;
+}
+.board-overlay:not([hidden]) .board-flash {
+  animation-play-state: running;
+}
+@keyframes board-flash {
+  0%, 20%, 40% { opacity: 1; }
+  10%, 30%, 50% { opacity: 0; }
+  60%, 100% { opacity: 0; }
+}
+html.no-scene .board-flash {
+  display: none;
+}
+/* HOME RUN이 깜빡이는 동안 스택 글자는 잠깐 기다린다 */
+html:not(.no-scene) #board-stack > :not(.board-flash) {
+  opacity: 0;
+  animation: board-text-in 400ms var(--ease-out-expo) 2.2s forwards;
+}
+@keyframes board-text-in {
+  to { opacity: 1; }
+}
+
 /* ─── 일하는 방식 ─── */
 .principle-list {
   display: grid;
