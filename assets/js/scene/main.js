@@ -18,15 +18,28 @@ export const pOf = (y) => (maxScroll() > 0 ? Math.min(1, Math.max(0, y / maxScro
 export const yOf = (p) => p * maxScroll();
 
 if (run) {
-  const [{ createStage }, { SEGMENTS, sample }, { onScrollFrame, scrollToY, refresh }] = await Promise.all([
-    import('./stage.js'),
-    import('./timeline.js'),
-    import('../scroll-engine.js'),
-  ]);
+  const [{ createStage }, { SEGMENTS, sample }, { onScrollFrame, scrollToY, refresh }, { loadCritical }, { runBoot }] =
+    await Promise.all([
+      import('./stage.js'),
+      import('./timeline.js'),
+      import('../scroll-engine.js'),
+      import('./assets.js'),
+      import('../boot.js'),
+    ]);
+
+  // 부팅 화면 = 로더. 첫 묶음이 다 올 때까지 바가 차오른다
+  let onProgress = () => {};
+  // ?slowload=1 — 느린 회선 흉내. 부팅 바가 차오르는 걸 로컬에서 보려고 둔 디버그 전용 지연
+  const slow = new URLSearchParams(location.search).get('slowload') === '1';
+  const assetsReady = loadCritical((r) => (slow ? setTimeout(() => onProgress(r), 1800 * r) : onProgress(r)));
+  const bootDone = runBoot((cb) => {
+    onProgress = cb;
+  });
+  const assets = await assetsReady;
 
   const canvas = document.getElementById('stage');
   const isTouch = window.matchMedia('(hover: none)').matches;
-  const stage = createStage(canvas, { isTouch });
+  const stage = createStage(canvas, { isTouch, assets });
 
   function layoutSections() {
     for (const el of sceneEls) {
@@ -75,6 +88,7 @@ if (run) {
     lastT = now;
     requestAnimationFrame(loop);
   }
+  await bootDone;
   requestAnimationFrame(loop);
 
   // 앵커 이동은 네이티브 점프 대신 관성으로. 카메라가 순간이동하지 않게

@@ -10,7 +10,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
  * @param {HTMLCanvasElement} canvas
  * @param {{ isTouch: boolean }} opts
  */
-export function createStage(canvas, { isTouch }) {
+export function createStage(canvas, { isTouch, assets }) {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: !isTouch,
@@ -36,7 +36,9 @@ export function createStage(canvas, { isTouch }) {
   const placeholder = new THREE.Group();
   const grass = new THREE.Mesh(
     new THREE.PlaneGeometry(200, 200),
-    new THREE.MeshStandardMaterial({ color: 0x2f5a30, roughness: 1 }),
+    assets?.grass
+      ? new THREE.MeshStandardMaterial({ ...assets.grass, roughness: 1 })
+      : new THREE.MeshStandardMaterial({ color: 0x2f5a30, roughness: 1 }),
   );
   grass.rotation.x = -Math.PI / 2;
   placeholder.add(grass);
