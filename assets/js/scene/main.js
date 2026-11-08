@@ -93,7 +93,9 @@ if (run) {
   fit();
   new ResizeObserver(fit).observe(document.documentElement);
 
-  onScrollFrame((y) => {
+  // WebGL 컨텍스트를 잃으면 검은 canvas로 남기지 말고 폴백으로 전환
+  let alive = true;
+  const unsubscribe = onScrollFrame((y) => {
     const next = pOf(y);
     if (next !== p) {
       p = next;
@@ -101,7 +103,18 @@ if (run) {
     }
   });
 
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();
+    alive = false;
+    unsubscribe();
+    stage.renderer.dispose();
+    document.documentElement.classList.add('no-scene');
+    for (const el of sceneEls) el.style.removeProperty('--scene-len');
+    refresh();
+  });
+
   function loop(now) {
+    if (!alive) return;
     const dt = (now - lastT) / 1000;
     const idleDue = !isTouch && now - lastIdle > IDLE_TICK;
     if (needsRender || idleDue) {

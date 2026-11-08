@@ -25,11 +25,20 @@
   max-width: 36rem;
 }
 
-/* 폴백 — canvas 없음. 일반 세로 문서로 */
+/* 폴백 — canvas 없음. 일반 세로 문서로. 배경은 장면을 캡처한 포스터 */
 html.no-scene .scene {
   min-height: 0;
   padding-block: var(--space-section);
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(oklch(8% 0.01 260 / 0.78), oklch(8% 0.01 260 / 0.78)), var(--poster, none);
 }
+html.no-scene [data-scene='hero'] { --poster: url('../img/poster/hero.webp'); }
+html.no-scene [data-scene='about'] { --poster: url('../img/poster/about.webp'); }
+html.no-scene [data-scene='featured'] { --poster: url('../img/poster/featured.webp'); }
+html.no-scene [data-scene='projects'] { --poster: url('../img/poster/projects.webp'); }
+html.no-scene [data-scene='stack'] { --poster: url('../img/poster/stack.webp'); }
+html.no-scene [data-scene='contact'] { --poster: url('../img/poster/contact.webp'); }
 html.no-scene .scene--gap {
   display: none;
 }
