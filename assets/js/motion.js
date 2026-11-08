@@ -102,7 +102,7 @@ function setupMaskedText(selector) {
 // 마스크 삽입은 리빌 관찰보다 먼저다 — 관찰을 먼저 걸면
 // DOM을 갈아끼우는 사이에 이미 보이는 제목이 켜지지 않은 채 남는다
 setupMaskedText('.hero-name');
-setupMaskedText('.section-title');
+setupMaskedText('.section-title.reveal');
 
 setupReveal('.reveal');
 setupReveal('[data-countup]', animateCountUp);

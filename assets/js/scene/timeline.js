@@ -33,8 +33,10 @@ export function hitPath(t) {
   return pos;
 }
 
-/** 프로젝트 카드 8장이 카메라 정면을 지나는 진행도 */
-export const CARD_P = Array.from({ length: 8 }, (_, i) => 0.45 + (0.25 * (i + 0.5)) / 8);
+/** 프로젝트 카드 n장이 카메라 정면을 지나는 진행도. n은 content.js의 레일 카드 수 */
+export function cardProgress(n) {
+  return Array.from({ length: n }, (_, i) => 0.45 + (0.25 * (i + 0.5)) / n);
+}
 
 export function progressOf(segmentId, local) {
   const s = SEGMENTS.find((x) => x.id === segmentId);
@@ -69,9 +71,9 @@ function ballAt(p) {
   if (p < 0.25) return MOUND.clone();
   if (p < 0.4) return MOUND.clone().lerp(HOME, smooth(0.25, 0.4, p));
   if (p < 0.45) {
-    // 임팩트 직후 살짝 튕긴다
-    const t = clamp01((p - 0.425) / 0.025);
-    return HOME.clone().add(v(0, t * 0.6, -t * 1.5));
+    // 임팩트 직후 살짝 튕겼다가 0.45의 타구 시작점(HOME)으로 돌아온다 — 경계에서 점프 금지
+    const t = Math.sin(clamp01((p - 0.425) / 0.025) * Math.PI);
+    return HOME.clone().add(v(0, t * 0.35, -t * 0.6));
   }
   if (p < 0.7) return hitPath(smooth(0.45, 0.7, p));
   return LANDING.clone();
@@ -91,12 +93,14 @@ function pose(p, ball) {
     // 공 바로 뒤에서 따라간다. 시작은 dive 포즈와 이어져야 한다
     const t = smooth(0.25, 0.29, p);
     const follow = ball.clone().add(v(0.35, 0.22, -1.1));
-    return { pos: POSE.dive.pos.clone().lerp(follow, t), target: ball.clone().add(v(0, 0, 1.5)) };
+    const ahead = ball.clone().add(v(0, 0, 1.5));
+    return { pos: POSE.dive.pos.clone().lerp(follow, t), target: POSE.dive.target.clone().lerp(ahead, smooth(0.25, 0.27, p)) };
   }
   if (p < 0.45) {
     const t = smooth(0.4, 0.415, p);
     const follow = ball.clone().add(v(0.35, 0.22, -1.1));
-    return { pos: follow.lerp(POSE.impact.pos, t), target: ball.clone() };
+    const target = ball.clone().add(v(0, 0, 1.5)).lerp(ball, smooth(0.4, 0.41, p));
+    return { pos: follow.lerp(POSE.impact.pos, t), target };
   }
   if (p < 0.7) {
     const t = smooth(0.45, 0.48, p);
@@ -143,9 +147,10 @@ function pose(p, ball) {
 /**
  * @param {number} p
  * @param {boolean} portrait
+ * @param {number} [cardCount] 레일 카드 수
  * @returns {SceneState}
  */
-export function sample(p, portrait) {
+export function sample(p, portrait, cardCount = 8) {
   p = clamp01(p);
   const ballPos = ballAt(p);
   const { pos, target } = pose(p, ballPos);
@@ -169,7 +174,7 @@ export function sample(p, portrait) {
     0.6 * smooth(0.82, 0.85, p) * (1 - smooth(0.91, 0.93, p)) +
     0.35 * smooth(0.92, 0.95, p);
 
-  const cardT = CARD_P.map((cp) => Math.max(-1, Math.min(1, (p - cp) / 0.03)));
+  const cardT = cardProgress(cardCount).map((cp) => Math.max(-1, Math.min(1, (p - cp) / 0.03)));
 
   return { p, camPos: pos, camTarget: target, ballPos, ballSpin, batT, lights, boardOn, shake, aberration: shake, darken, cardT };
 }

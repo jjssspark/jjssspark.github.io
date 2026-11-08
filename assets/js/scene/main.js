@@ -8,8 +8,8 @@ const { run } = decideScene();
 
 /** 페이지 총 길이(화면 높이 배수). 각 구간 길이 = (to-from) × 이 값 */
 const TOTAL_VH = 12;
-/** 데스크톱에서 멈춰 있을 때 그레인만 갱신하는 주기 (ms) */
-const IDLE_TICK = 83;
+/** 데스크톱에서 멈춰 있을 때 그레인 갱신 주기 (ms). 전체 프레임을 다시 그리므로 낮게 */
+const IDLE_TICK = 125;
 
 const sceneEls = [...document.querySelectorAll('[data-scene]')];
 
@@ -20,12 +20,12 @@ export const yOf = (p) => p * maxScroll();
 if (run) {
   const [
     { createStage },
-    { SEGMENTS, CARD_P, sample },
+    { SEGMENTS, cardProgress, sample },
     { onScrollFrame, scrollToY, refresh },
     { loadCritical },
     { runBoot },
     { trackBoard },
-    { placeCards, setupCardNav, projectCards },
+    { placeCards, clearCards, setupCardNav, projectCards },
   ] = await Promise.all([
     import('./stage.js'),
     import('./timeline.js'),
@@ -44,11 +44,27 @@ if (run) {
   const bootDone = runBoot((cb) => {
     onProgress = cb;
   });
-  const assets = await assetsReady;
-
+  const CARD_P = cardProgress(projectCards.length);
   const canvas = document.getElementById('stage');
   const isTouch = window.matchMedia('(hover: none)').matches;
-  const stage = createStage(canvas, { isTouch, assets });
+
+  // 에셋이 안 오거나 렌더러를 못 만들면 폴백으로. 부팅 화면이 떠 있었으면 치운다
+  function bail() {
+    document.documentElement.classList.add('no-scene');
+    document.getElementById('boot')?.remove();
+    document.body.style.overflow = '';
+    for (const el of sceneEls) el.style.removeProperty('--scene-len');
+    clearCards(projectCards);
+    refresh();
+  }
+  let stage;
+  try {
+    const assets = await assetsReady;
+    stage = createStage(canvas, { isTouch, assets });
+  } catch {
+    bail();
+  }
+  if (!stage) throw new Error('scene unavailable — fallback engaged');
 
   // 전광판 오버레이 두 개(스택·연락처)를 전광판 메시에 붙인다
   const boardTrackers = ['board-stack', 'board-contact']
@@ -83,15 +99,29 @@ if (run) {
   layoutSections();
   p = pOf(window.scrollY);
 
+  // 한 프레임 그리기 — 루프와 리사이즈가 같이 쓴다. setSize가 버퍼를 비우므로 리사이즈 직후 바로 그려야 빈 프레임이 없다
+  function renderFrame(dt) {
+    const state = sample(p, portrait, projectCards.length);
+    stage.render(state, dt);
+    placeCards(projectCards, state.cardT);
+    // 전광판이 정면에 잡힌 뒤(점등 완료)에만 스택 글자, 연락처 구간엔 연락처
+    boardTrackers[0]?.(p < 0.83 && state.boardOn >= 0.95 ? 1 : 0);
+    boardTrackers[1]?.(p >= 0.9 ? state.boardOn : 0);
+    syncCount();
+  }
+
   const fit = () => {
     portrait = window.innerHeight > window.innerWidth;
     layoutSections();
     refresh();
+    p = pOf(window.scrollY);
     stage.setSize(window.innerWidth, window.innerHeight);
-    needsRender = true;
+    renderFrame(0);
+    needsRender = false;
   };
   fit();
-  new ResizeObserver(fit).observe(document.documentElement);
+  const ro = new ResizeObserver(fit);
+  ro.observe(document.documentElement);
 
   // WebGL 컨텍스트를 잃으면 검은 canvas로 남기지 말고 폴백으로 전환
   let alive = true;
@@ -107,10 +137,9 @@ if (run) {
     e.preventDefault();
     alive = false;
     unsubscribe();
+    ro.disconnect();
     stage.renderer.dispose();
-    document.documentElement.classList.add('no-scene');
-    for (const el of sceneEls) el.style.removeProperty('--scene-len');
-    refresh();
+    bail();
   });
 
   function loop(now) {
@@ -118,16 +147,7 @@ if (run) {
     const dt = (now - lastT) / 1000;
     const idleDue = !isTouch && now - lastIdle > IDLE_TICK;
     if (needsRender || idleDue) {
-      const state = sample(p, portrait);
-      stage.render(state, dt);
-      if (needsRender) {
-        placeCards(projectCards, state.cardT);
-        // 스택 구간엔 스택 판만, 연락처 구간엔 연락처 판만
-        // 전광판이 정면에 잡힌 뒤(점등 완료)에만 글자를 올린다
-        boardTrackers[0]?.(p < 0.83 && state.boardOn >= 0.95 ? 1 : 0);
-        boardTrackers[1]?.(p >= 0.9 ? state.boardOn : 0);
-        syncCount();
-      }
+      renderFrame(dt);
       fps = fps * 0.9 + (1 / Math.max(dt, 1e-3)) * 0.1;
       needsRender = false;
       lastIdle = now;
@@ -138,15 +158,7 @@ if (run) {
   await bootDone;
   requestAnimationFrame(loop);
 
-  // 앵커 이동은 네이티브 점프 대신 관성으로. 카메라가 순간이동하지 않게
-  document.querySelector('header nav')?.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    const target = document.querySelector(a.getAttribute('href'));
-    if (!target) return;
-    e.preventDefault();
-    scrollToY(target.offsetTop);
-  });
+  // 앵커 클릭의 관성 이동은 scroll-engine.js가 document 레벨에서 처리한다 (해시·포커스 유지)
 
   if (new URLSearchParams(location.search).get('debug') === '1') {
     const { mountDebug } = await import('./debug.js');

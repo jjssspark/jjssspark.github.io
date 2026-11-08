@@ -19,14 +19,19 @@ export function trackBoard(board, camera, el) {
   const tmp = new THREE.Vector3();
   return (boardOn) => {
     if (boardOn < 0.05) {
-      el.hidden = true;
+      el.classList.add('is-off');
       return;
     }
-    el.hidden = false;
+    el.classList.remove('is-off');
+    el.classList.add('is-lit'); // 첫 점등 이후 유지 — HOME RUN 플래시는 한 번만
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (const c of corners) {
       tmp.copy(c);
       board.localToWorld(tmp).project(camera);
+      if (tmp.z > 1) {
+        el.classList.add('is-off');
+        return;
+      }
       const x = ((tmp.x + 1) / 2) * window.innerWidth;
       const y = ((1 - tmp.y) / 2) * window.innerHeight;
       minX = Math.min(minX, x); maxX = Math.max(maxX, x);

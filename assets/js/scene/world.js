@@ -175,12 +175,15 @@ export function buildWorld(assets) {
     group.add(tread);
   }
   // 관중 폰 불빛 — 점 200개
+  // 로드마다 같은 자리에 켜지도록 고정 시드 난수
+  let seed = 20261108;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
   const crowdPts = [];
   for (let i = 0; i < 200; i++) {
-    const a = Math.PI * 1.5 + (Math.random() - 0.5) * Math.PI * 0.56;
-    const tier = (Math.random() * 7) | 0;
-    const r = 124 + tier * 2.6 + Math.random() * 2;
-    crowdPts.push(Math.cos(a) * r, 4.2 + tier * 1.5 + Math.random() * 0.6, Math.sin(a) * r + 2);
+    const a = Math.PI * 1.5 + (rnd() - 0.5) * Math.PI * 0.56;
+    const tier = (rnd() * 7) | 0;
+    const r = 124 + tier * 2.6 + rnd() * 2;
+    crowdPts.push(Math.cos(a) * r, 4.2 + tier * 1.5 + rnd() * 0.6, Math.sin(a) * r + 2);
   }
   const crowd = new THREE.Points(
     new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(crowdPts, 3)),

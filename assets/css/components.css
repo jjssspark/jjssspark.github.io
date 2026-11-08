@@ -250,6 +250,7 @@ html:not(.js) .reveal {
 /* ─── 카드 ─── */
 .card {
   --t: 0;
+  --dim: 1;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -263,8 +264,11 @@ html:not(.js) .reveal {
   box-shadow: var(--shadow-lg);
   transition: opacity var(--duration-normal) var(--ease-out-expo);
 }
+.card {
+  opacity: var(--dim);
+}
 .card[data-dim='true'] {
-  opacity: 0.35;
+  --dim: 0.35;
 }
 .card__head {
   display: flex;
@@ -395,7 +399,7 @@ html:not(.no-scene) .card__thumb {
   grid-area: 1 / 1;
   pointer-events: auto;
   transform: translate3d(calc(var(--t) * 110vw), calc(var(--t) * var(--t) * -8vh), 0) rotate(calc(var(--t) * -4deg));
-  opacity: calc(1 - max(var(--t), -1 * var(--t)) * 1.4);
+  opacity: calc((1 - max(var(--t), -1 * var(--t)) * 1.4) * var(--dim));
 }
 .card-rail .card[inert] {
   pointer-events: none;
@@ -458,8 +462,8 @@ html.no-scene .featured-grid .card {
   color: var(--color-board-text);
   opacity: var(--board-on, 1);
 }
-.board-overlay[hidden] {
-  display: none;
+.board-overlay.is-off {
+  visibility: hidden;
 }
 .board-overlay .section-kicker {
   color: var(--color-board-text);
@@ -532,8 +536,8 @@ html.no-scene .board-overlay {
   container-type: normal;
   opacity: 1;
 }
-html.no-scene .board-overlay[hidden] {
-  display: flex;
+html.no-scene .board-overlay.is-off {
+  visibility: visible;
 }
 
 /* HOME RUN — 전광판이 켜질 때 세 번 깜빡이고 작게 남는다 (opacity만) */
@@ -550,10 +554,9 @@ html.no-scene .board-overlay[hidden] {
   text-shadow: 0 0 24px color-mix(in oklch, var(--color-board-text) 70%, transparent);
   pointer-events: none;
   opacity: 0;
-  animation: board-flash 2.4s steps(1) 0.2s forwards;
 }
-.board-overlay:not([hidden]) .board-flash {
-  animation-play-state: running;
+.board-overlay.is-lit .board-flash {
+  animation: board-flash 2.4s steps(1) 0.2s forwards;
 }
 @keyframes board-flash {
   0%, 20%, 40% { opacity: 1; }
@@ -566,6 +569,8 @@ html.no-scene .board-flash {
 /* HOME RUN이 깜빡이는 동안 스택 글자는 잠깐 기다린다 */
 html:not(.no-scene) #board-stack > :not(.board-flash) {
   opacity: 0;
+}
+html:not(.no-scene) #board-stack.is-lit > :not(.board-flash) {
   animation: board-text-in 400ms var(--ease-out-expo) 2.2s forwards;
 }
 @keyframes board-text-in {
@@ -598,13 +603,54 @@ html:not(.no-scene) #board-stack > :not(.board-flash) {
   .principle-list {
     grid-template-columns: 1fr;
   }
-  .featured-grid {
-    flex-direction: column;
+  /* 세로 화면에서 카드를 세로로 쌓으면 100vh 밖으로 잘린다. 옆으로 넘기는 줄로 */
+  html:not(.no-scene) .featured-grid {
+    justify-content: flex-start;
     gap: var(--space-4);
-    align-items: center;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
   }
-  .featured-grid .card {
-    width: min(26rem, 86vw);
+  html:not(.no-scene) .featured-grid .card {
+    flex: 0 0 82vw;
+    width: 82vw;
+    max-height: 62vh;
+    scroll-snap-align: center;
+  }
+  html:not(.no-scene) .card-rail .card__thumb {
+    display: none;
+  }
+  html:not(.no-scene) .card-rail .card {
+    max-height: 70vh;
+  }
+}
+/* 세로 화면에서는 전광판 메시가 너무 작다. 오버레이를 메시에서 떼어 화면 폭 기준 판으로 */
+@media (orientation: portrait) {
+  html:not(.no-scene) .board-overlay {
+    left: 4vw;
+    top: auto;
+    bottom: 8vh;
+    width: 92vw;
+    height: auto;
+    max-height: 70vh;
+    overflow: auto;
+    padding: var(--space-4);
+    border: 1px solid color-mix(in oklch, var(--color-board-text) 35%, transparent);
+    background: oklch(10% 0.02 25 / 0.85);
+    container-type: inline-size;
+  }
+  html:not(.no-scene) .board-overlay .section-title {
+    font-size: var(--text-lg);
+  }
+  html:not(.no-scene) .skill-list {
+    font-size: var(--text-xs);
+  }
+  html:not(.no-scene) .contact-list {
+    font-size: var(--text-sm);
+  }
+  html:not(.no-scene) .board-flash {
+    font-size: var(--text-2xl);
   }
 }
 
@@ -665,31 +711,25 @@ footer {
   margin-bottom: var(--space-6);
 }
 /* 도트 매트릭스처럼 칸이 차오른다 */
+/* 실제 로딩 비율만큼 boot.js가 scaleX로 채운다 */
 .boot__fill {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
   background-image: repeating-linear-gradient(
     to right,
     var(--color-phosphor) 0 10px,
     transparent 10px 14px
   );
-  animation: boot-fill 1.8s steps(18) forwards;
-}
-@keyframes boot-fill {
-  to { width: 100%; }
 }
 .boot__foot {
   font-size: var(--text-xs);
   opacity: 0.7;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .boot__fill {
-    animation: none;
-    width: 100%;
-  }
-}
+
 
 /* ─────────────────────────────────────────────
    카드 뒷면 — 야구 카드를 뒤집으면 나오는 스탯 시트

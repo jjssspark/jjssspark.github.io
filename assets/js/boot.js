@@ -35,7 +35,10 @@ export function runBoot(progress$) {
   };
 
   return new Promise((resolve) => {
+    let done = false;
     const finish = () => {
+      if (done) return;
+      done = true;
       if (!shown) {
         boot.remove();
         resolve();

@@ -112,6 +112,14 @@ export function placeCards(cards, cardT) {
   });
 }
 
+/** 폴백으로 넘어갈 때 궤적 배치의 흔적을 지운다 */
+export function clearCards(cards) {
+  for (const card of cards) {
+    card.style.removeProperty('--t');
+    card.inert = false;
+  }
+}
+
 /**
  * 화살표·카운터. 어디로 갈지는 호출자(scene/main.js)가 안다.
  * @param {{ count: number, current(): number, goTo(index: number): void }} api
