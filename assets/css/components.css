@@ -1,22 +1,77 @@
-/* Nav */
-header {
+/* ═══════════════════════════════════════════════
+   레이아웃 — 본문이 3D 장면 위를 흐른다
+   섹션(.scene)은 장면 구간 길이만큼 높고, .pin이 화면에 머문다
+   ═══════════════════════════════════════════════ */
+.container {
+  width: min(72rem, 100% - var(--space-8));
+  margin-inline: auto;
+}
+.scene {
+  position: relative;
+  min-height: calc(var(--scene-len, 1) * 100vh);
+}
+.scene--gap {
+  pointer-events: none;
+}
+.pin {
   position: sticky;
   top: 0;
-  z-index: 50;
-  background: color-mix(in oklch, var(--color-bg) 85%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--color-border);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
 }
-nav {
+.copy {
+  max-width: 36rem;
+}
+
+/* 폴백 — canvas 없음. 일반 세로 문서로. 배경은 장면을 캡처한 포스터 */
+html.no-scene .scene {
+  min-height: 0;
+  padding-block: var(--space-section);
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(oklch(8% 0.01 260 / 0.78), oklch(8% 0.01 260 / 0.78)), var(--poster, none);
+}
+html.no-scene [data-scene='hero'] { --poster: url('../img/poster/hero.webp'); }
+html.no-scene [data-scene='about'] { --poster: url('../img/poster/about.webp'); }
+html.no-scene [data-scene='featured'] { --poster: url('../img/poster/featured.webp'); }
+html.no-scene [data-scene='projects'] { --poster: url('../img/poster/projects.webp'); }
+html.no-scene [data-scene='stack'] { --poster: url('../img/poster/stack.webp'); }
+html.no-scene [data-scene='contact'] { --poster: url('../img/poster/contact.webp'); }
+html.no-scene .scene--gap {
+  display: none;
+}
+html.no-scene .pin {
+  position: static;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+html.no-scene .card-nav {
+  display: none;
+}
+
+/* ─── 헤더 ─── */
+header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 5;
+  padding-block: var(--space-4);
+  background: linear-gradient(to bottom, oklch(8% 0.01 260 / 0.85), transparent);
+}
+header nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: var(--space-4);
+  gap: var(--space-6);
 }
 .logo {
-  font-family: var(--font-mono);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-lg);
   text-decoration: none;
+  letter-spacing: var(--tracking-wide);
 }
 .nav-links {
   display: flex;
@@ -25,923 +80,589 @@ nav {
   padding: 0;
 }
 .nav-links a {
+  font-size: var(--text-sm);
   text-decoration: none;
-  position: relative;
+  color: var(--color-text-muted);
+  transition: color var(--duration-fast) var(--ease-out-expo);
 }
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 1px;
-  background: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--duration-fast) var(--ease-out-expo);
+.nav-links a:hover,
+.nav-links a:focus-visible {
+  color: var(--color-text);
 }
-.nav-links a:hover::after {
-  transform: scaleX(1);
-}
-
-/* 320px 나브 오버플로 수정 (Task 11) — 베이스 규칙 뒤에 둬서 나중에 .nav-links a에
-   font-size가 추가돼도 이 미디어쿼리가 조용히 묻히지 않도록 한다 */
-@media (max-width: 480px) {
+@media (max-width: 48rem) {
   .nav-links {
-    gap: var(--space-2);
-  }
-  .nav-links a {
-    font-size: var(--text-xs);
-  }
-}
-
-/* Hero */
-.hero {
-  position: relative;
-  min-height: 90vh;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 85% 65% at 50% 120%,
-    oklch(42% 0.09 150 / 0.5),
-    transparent 62%
-  );
-  pointer-events: none;
-}
-.hero-diamond {
-  position: absolute;
-  z-index: 0;
-  top: 50%;
-  left: 50%;
-  /* 패럴랙스는 --py로만 들어온다(motion.js). JS가 transform을 통째로 덮으면
-     아래 중앙 정렬이 사라져 다이아몬드가 화면 밖으로 튄다 */
-  width: min(75vh, 700px);
-  height: min(75vh, 700px);
-  transform: translate(-50%, calc(-50% + var(--py, 0px)));
-  pointer-events: none;
-  animation: diamond-pulse 4s var(--ease-in-out) infinite;
-}
-.hero-diamond rect.hero-diamond__infield {
-  fill: color-mix(in oklch, var(--color-accent) 10%, transparent);
-  stroke: var(--color-accent);
-  stroke-width: 3;
-  opacity: 0.55;
-  stroke-dasharray: 810;
-  stroke-dashoffset: 810;
-  animation: diamond-draw 1.6s var(--ease-out-expo) 0.2s forwards;
-}
-.hero-diamond circle.hero-diamond__mound {
-  fill: none;
-  stroke: var(--color-stitch);
-  stroke-width: 2;
-  opacity: 0.5;
-}
-.hero-diamond rect.hero-diamond__base {
-  fill: var(--color-text);
-  opacity: 0.4;
-}
-@keyframes diamond-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@keyframes diamond-pulse {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 0 transparent);
-  }
-  50% {
-    filter: drop-shadow(0 0 18px color-mix(in oklch, var(--color-accent) 35%, transparent));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-diamond {
-    animation: none;
-  }
-  .hero-diamond rect.hero-diamond__infield {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-}
-.hero-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 72rem;
-  margin-inline: auto;
-  padding-inline: var(--space-6);
-  width: 100%;
-  /* 배경보다 훨씬 느리게 따라와 깊이가 생긴다(motion.js가 --py 기록) */
-  transform: translate3d(0, var(--py, 0px), 0);
-}
-.hero-spotlight {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: radial-gradient(
-    520px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in oklch, var(--color-accent) 26%, transparent),
-    transparent 70%
-  );
-  pointer-events: none;
-}
-@media (hover: none) {
-  .hero-spotlight {
     display: none;
   }
 }
-.hero-name {
-  font-size: var(--text-hero);
-  letter-spacing: var(--tracking-tight);
+
+/* ─── 공통 타이포 ─── */
+.section-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-accent-hover);
+  margin-bottom: var(--space-3);
+}
+.section-title {
+  font-family: var(--font-display-ko);
+  font-weight: 700;
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
-  margin-block: var(--space-2);
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: var(--space-6);
+}
+.section-lead {
+  color: var(--color-text-muted);
+  max-width: 36rem;
+}
+
+/* 리빌 — transform/opacity만 */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 1.2rem, 0);
+  transition:
+    opacity var(--duration-reveal) var(--ease-out-expo) var(--delay, 0ms),
+    transform var(--duration-reveal) var(--ease-out-expo) var(--delay, 0ms);
+}
+.reveal.is-visible,
+html:not(.js) .reveal {
+  opacity: 1;
+  transform: none;
+}
+.mask-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.mask-word__inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  transition: transform var(--duration-mask) var(--ease-out-expo) var(--delay, 0ms);
+}
+.reveal.is-visible .mask-word__inner {
+  transform: none;
+}
+
+/* ─── 히어로 ─── */
+.hero .pin {
+  align-items: flex-end;
+}
+.hero-inner {
+  padding-bottom: 12vh;
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+.hero-name {
+  font-family: var(--font-serif);
+  font-size: var(--text-hero);
+  line-height: 0.95;
+  letter-spacing: var(--tracking-tight);
+  text-shadow: 0 0 40px oklch(0% 0 0 / 0.6);
 }
 .hero-tagline {
   font-size: var(--text-lg);
   color: var(--color-text-muted);
-  max-width: 40ch;
+  max-width: 40rem;
 }
-/* 전광판 — 야구장 스코어보드. 칸을 나누고 숫자를 발광시킨다 */
 .stat-line {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0;
-  margin-block: var(--space-8);
-  font-family: var(--font-mono);
-  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
-  border-radius: var(--radius-sm);
-  background: color-mix(in oklch, var(--color-grid) 35%, transparent);
-  overflow: hidden;
-}
-.scoreboard__cell {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-6);
-  min-width: 7.5rem;
+  gap: var(--space-8);
+  font-family: var(--font-mono);
 }
-.scoreboard__cell + .scoreboard__cell {
-  border-left: 1px solid color-mix(in oklch, var(--color-stitch) 30%, transparent);
-}
-.stat-line dt {
+.stat dt {
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
   letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
+  color: var(--color-text-muted);
 }
-/* 전광판 램프처럼 번지게 — 도트 전광판의 빛 번짐 */
-.stat-line dd {
+.stat dd {
   font-size: var(--text-xl);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--color-stitch-hover);
-  text-shadow:
-    0 0 12px color-mix(in oklch, var(--color-stitch) 70%, transparent),
-    0 0 28px color-mix(in oklch, var(--color-stitch) 35%, transparent);
-  font-variant-numeric: tabular-nums;
+  color: var(--color-data);
 }
-
 .hero-cta {
   display: flex;
-  gap: var(--space-4);
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
 .btn {
-  display: inline-block;
-  padding: var(--space-3) var(--space-6);
-  border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: var(--text-sm);
   text-decoration: none;
-  font-weight: 600;
+  border: 1px solid transparent;
   transition:
-    transform var(--duration-fast) var(--ease-out-expo),
     background-color var(--duration-fast) var(--ease-out-expo),
-    border-color var(--duration-fast) var(--ease-out-expo);
+    transform var(--duration-fast) var(--ease-out-expo);
+}
+.btn:active {
+  transform: translateY(1px);
 }
 .btn-primary {
   background: var(--color-accent);
-  color: var(--ink-950);
+  color: var(--color-text);
 }
 .btn-primary:hover {
   background: var(--color-accent-hover);
 }
 .btn-ghost {
-  border: 1px solid var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 .btn-ghost:hover {
-  border-color: var(--color-accent);
+  background: oklch(100% 0 0 / 0.08);
 }
-.btn:active {
-  transform: translateY(1px);
-}
-
-/* Project cards */
-.project-grid {
-  display: grid;
-  gap: var(--space-6);
-}
-.project-grid--featured {
-  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
-}
-.project-grid--shipped {
-  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-}
-.project-grid--soon {
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-}
-
-.project-card {
-  position: relative;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  overflow: hidden;
-  transition:
-    transform var(--duration-fast) var(--ease-out-expo),
-    border-color var(--duration-fast) var(--ease-out-expo),
-    opacity var(--duration-fast) var(--ease-out-expo);
-}
-.project-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    240px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in oklch, var(--color-accent) 12%, transparent),
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out-expo);
-  pointer-events: none;
-}
-/* 카드 내용 길이가 제각각이라 세로 플렉스로 쌓고, 링크 줄을 아래로 밀어 하단선을 맞춘다 */
-.project-card {
-  display: flex;
-  flex-direction: column;
-}
-.project-foot {
-  margin-top: auto;
-  padding-top: var(--space-4);
-}
-/* 카드가 세로 플렉스라 인라인 요소도 폭이 늘어난다 — 배지는 글자 폭만 차지하게 되돌린다 */
-.status-badge {
-  align-self: flex-start;
-}
-
-/* 실밥 — SVG stroke로 그려 hover 시 둘레를 흐르게 한다.
-   위계를 위해 대표 프로젝트에만 두른다. 전 카드에 걸면 구분이 사라진다 */
-.card-seam {
-  display: none;
-}
-.project-card--featured .card-seam {
-  display: block;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-}
-.card-seam__path {
-  width: calc(100% - 12px);
-  height: calc(100% - 12px);
-  fill: none;
-  stroke: color-mix(in oklch, var(--color-stitch) 55%, transparent);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 7 9;
-  transition: stroke var(--duration-normal) var(--ease-out-expo);
-}
-
-@media (hover: hover) {
-  .project-card:hover .card-seam__path {
-    stroke: var(--color-stitch-hover);
-    animation: seam-run 2.4s linear infinite;
-  }
-}
-
-/* 실밥이 카드 둘레를 도는 방향. 야구공 회전 방향과 같게 시계방향. */
-@keyframes seam-run {
-  to {
-    stroke-dashoffset: -32;
-  }
-}
-
-/* 등번호 — 유니폼처럼 크게, 평소엔 배경에 잠겨 있다가 hover 시 떠오른다 */
-.project-index {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-6);
-  font-family: var(--font-mono);
-  font-size: var(--text-xl);
-  font-weight: 700;
-  line-height: 1;
-  color: color-mix(in oklch, var(--color-stitch) 22%, transparent);
-  transition:
-    color var(--duration-normal) var(--ease-out-expo),
-    transform var(--duration-normal) var(--ease-out-expo);
-  pointer-events: none;
-}
-@media (hover: hover) {
-  .project-card:hover .project-index {
-    color: var(--color-stitch-hover);
-    transform: translateY(-2px) scale(1.08);
-  }
-}
-
-/* 틸트에 깊이를 얹는다 — 기울기만으로는 평면으로 읽힌다 */
-.project-card {
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-@media (hover: hover) {
-  .project-card:hover {
-    border-color: color-mix(in oklch, var(--color-stitch) 60%, var(--color-border));
-    box-shadow:
-      0 18px 40px oklch(0% 0 0 / 0.45),
-      0 2px 0 color-mix(in oklch, var(--color-stitch) 30%, transparent);
-  }
-}
-
-/* 진입 — 살짝 기운 채로 날아와 제자리에 꽂힌다. --delay가 카드마다 순차를 만든다 */
-html.js .project-card.reveal {
-  transform: translateY(24px) rotate(-1.2deg) scale(0.985);
-}
-html.js .project-card.reveal.is-visible {
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-seam__path {
-    animation: none !important;
-  }
-  .project-card:hover .project-index {
-    transform: none;
-  }
-  html.js .project-card.reveal {
-    transform: none;
-  }
-}
-@media (hover: hover) {
-  .project-card:hover::before {
-    opacity: 1;
-  }
-  .project-card:hover {
-    border-color: var(--color-accent);
-  }
-  .project-card:hover::after {
-    border-color: var(--color-stitch-hover);
-  }
-}
-.project-card--featured {
-  padding: var(--space-8);
-}
-.project-card--soon {
-  background: var(--color-surface-alt);
-  border-style: dashed;
-}
-.project-card.is-dimmed {
-  opacity: 0.35;
-}
-
-.project-name {
-  margin-block: var(--space-2);
-  font-size: var(--text-xl);
-}
-.project-desc {
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-4);
-}
-.status-badge {
-  display: inline-block;
+.hero-scroll {
+  margin-top: var(--space-6);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-accent);
-  color: var(--color-accent);
-  margin-bottom: var(--space-3);
+  text-decoration: none;
+  color: var(--color-text-muted);
+}
+.hero-scroll__rail {
+  width: 4rem;
+  height: 1px;
+  background: currentColor;
 }
 
+/* ─── 소개 ─── */
+.about-lead {
+  font-family: var(--font-display-ko);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-6);
+}
+.about-text {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+/* ─── 카드 ─── */
+.card {
+  --t: 0;
+  --dim: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(26rem, 86vw);
+  padding: var(--space-6);
+  border: 1px solid oklch(100% 0 0 / 0.14);
+  border-radius: var(--radius-md);
+  background: oklch(12% 0.01 260 / 0.72);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+.card {
+  opacity: var(--dim);
+}
+.card[data-dim='true'] {
+  --dim: 0.35;
+}
+.card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+.card__index {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  padding: 2px var(--space-2);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent-hover);
+  border-radius: var(--radius-sm);
+}
+.card__name {
+  flex-basis: 100%;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+.card__desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.card__desc strong {
+  color: var(--color-text);
+}
+.card__thumb {
+  border-radius: var(--radius-sm);
+  border: 1px solid oklch(100% 0 0 / 0.1);
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
 .tag-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   list-style: none;
   padding: 0;
-  margin-bottom: var(--space-4);
 }
 .tag {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
-  padding: var(--space-1) var(--space-3);
+  border: 1px solid oklch(100% 0 0 / 0.16);
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
-  min-height: 24px;
   transition:
-    background-color var(--duration-fast) var(--ease-out-expo),
-    color var(--duration-fast) var(--ease-out-expo);
+    color var(--duration-fast) var(--ease-out-expo),
+    border-color var(--duration-fast) var(--ease-out-expo);
 }
+.tag:hover,
 .tag.is-active {
-  background: var(--color-accent);
-  color: var(--ink-950);
-  border-color: var(--color-accent);
+  color: var(--color-text);
+  border-color: var(--color-accent-hover);
 }
-
-.project-link {
+.card__foot {
+  margin-top: auto;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
-  text-decoration: none;
-  position: relative;
 }
-.project-link::after {
-  content: '';
+.card__link {
+  color: var(--color-text);
+}
+
+/* 장면 위에서는 카드가 화면보다 커지면 안 된다. 긴 글은 줄여 보여준다 */
+html:not(.no-scene) .card__desc {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+html:not(.no-scene) .card__thumb {
+  aspect-ratio: 16 / 8;
+}
+.copy {
+  text-shadow: 0 1px 2px oklch(0% 0 0 / 0.6), 0 0 24px oklch(0% 0 0 / 0.5);
+}
+
+/* 대표작 2장 — 공 양옆 */
+.featured-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: clamp(6rem, 20vw, 20rem);
+}
+.featured .pin {
+  align-items: flex-start;
+  padding-top: 11vh;
+}
+.featured-grid .card {
+  width: min(22rem, 40vw);
+  max-height: 68vh;
+  overflow: hidden;
+}
+.card-rail .card {
+  max-height: 76vh;
+  overflow: hidden;
+}
+.featured-grid .card:nth-child(1) {
+  transform: translate3d(calc(-1 * var(--pull, 0) * 30vw), 0, 0);
+}
+
+/* 프로젝트 — 궤적 위 카드. --t: -1(아직) 0(정면) 1(지나감) */
+.projects .pin {
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 14vh 8vh;
+}
+.card-rail {
   position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--duration-fast) var(--ease-out-expo);
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
-.project-link:hover::after {
-  transform: scaleX(1);
+.card-rail .card {
+  grid-area: 1 / 1;
+  pointer-events: auto;
+  transform: translate3d(calc(var(--t) * 110vw), calc(var(--t) * var(--t) * -8vh), 0) rotate(calc(var(--t) * -4deg));
+  opacity: calc((1 - max(var(--t), -1 * var(--t)) * 1.4) * var(--dim));
 }
-
-.viz-canvas {
-  width: 100%;
-  height: 120px;
-  margin-bottom: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-alt);
+.card-rail .card[inert] {
+  pointer-events: none;
 }
-
-.project-thumb {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
-  object-position: top;
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-3);
-  display: block;
+html.no-scene .card-rail {
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: var(--space-6);
+  place-items: stretch;
+}
+html.no-scene .card-rail .card {
+  grid-area: auto;
+  transform: none;
+  opacity: 1;
+  width: auto;
+}
+html.no-scene .featured-grid {
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+html.no-scene .featured-grid .card {
+  width: auto;
+  flex: 1 1 20rem;
+}
+.card-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.card-nav__btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-full);
   border: 1px solid var(--color-border);
+  background: oklch(12% 0.01 260 / 0.6);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out-expo);
+}
+.card-nav__btn:hover {
+  border-color: var(--color-accent-hover);
 }
 
-.project-card--media {
-  z-index: 1;
+/* ─── 전광판 오버레이 (Stack · Contact) ─── */
+.board-overlay {
+  position: fixed;
+  left: var(--bx, 10vw);
+  top: var(--by, 20vh);
+  width: var(--bw, 80vw);
+  height: var(--bh, 50vh);
+  padding: 3% 4%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: var(--color-board-text);
+  opacity: var(--board-on, 1);
 }
-/* 대표 카드는 hover를 기다리지 않는다. 여기 담당 줄이 그 카드를 대표로
-   올린 이유라서, 마우스를 올려야 보이면 올린 의미가 없다.
-   터치 기기에는 hover가 아예 없기도 하다 */
-.project-card--featured/* 담당·태그는 처음부터 펼쳐 둔다. 호버할 때 폈다 접으면 그 사이 아래 링크 줄이
-   밀려 내려가서, 링크를 누르려고 다가가는 동안 링크가 도망간다 */
-.project-card--media .project-more {
-  margin-top: var(--space-3);
+.board-overlay.is-off {
+  visibility: hidden;
 }
-
-@media (hover: hover) {
-  /* 호버 전환은 여기서 잡는다. .reveal의 900ms가 더 구체적이라, 낮은 자리에
-     써두면 확대가 그 시간에 끌려가 늘어지는 것처럼 보인다 */
-  html.js .project-card.reveal.is-visible {
-    transition:
-      transform var(--duration-normal) var(--ease-out-expo),
-      box-shadow var(--duration-normal) var(--ease-out-expo),
-      border-color var(--duration-fast) var(--ease-out-expo),
-      filter var(--duration-normal) var(--ease-out-expo),
-      opacity var(--duration-normal) var(--ease-out-expo);
-  }
-
-  /* 가리킨 카드만 앞으로 나온다 — 확대 + 바닥 그림자 + 강조색 번짐.
-     확대는 transform이 아니라 독립 속성 scale로 준다. 카드의 transform은
-     마우스 틸트가 인라인으로 잡고 있어서, CSS에서 transform으로 확대를 걸면
-     항상 진다. scale은 별도 속성이라 틸트와 겹쳐서 적용된다 */
-  .project-grid .project-card:hover,
-  .lineup__frame:hover > .project-card {
-    scale: 1.07;
-    z-index: 5;
-    box-shadow:
-      0 32px 64px oklch(0% 0 0 / 0.6),
-      0 0 72px -14px color-mix(in oklch, var(--color-accent) 70%, transparent);
-  }
-
-  /* 캐러셀에서는 카드가 아니라 칸(.lineup__frame)으로 호버를 판정한다.
-     카드를 기준으로 잡으면, 확대된 카드의 경계가 커졌다 작아지면서 커서가
-     안팎을 오가 확대·축소가 계속 반복된다. 칸은 확대해도 크기가 그대로다 */
-  .lineup__frame:hover {
-    z-index: 6;
-  }
-
-  /* 솔로 조명 — 조명 밖의 카드는 어둡게 물러난다 */
-  .project-grid:has(.project-card:hover) .project-card:not(:hover),
-  .lineup__track:has(.lineup__frame:hover) .lineup__frame:not(:hover) {
-    opacity: 0.4;
-    filter: saturate(0.5) brightness(0.7);
-  }
-
-  /* 마우스를 따라다니는 조명. 평소보다 세게 켠다 */
-  .project-card:hover::before,
-  .lineup__frame:hover > .project-card::before {
-    background: radial-gradient(
-      300px circle at var(--mx, 50%) var(--my, 50%),
-      color-mix(in oklch, var(--color-accent) 26%, transparent),
-      transparent 72%
-    );
-  }
+.board-overlay .section-kicker {
+  color: var(--color-board-text);
+  opacity: 0.7;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .project-grid .project-card:hover,
-  .lineup__frame:hover > .project-card {
-    scale: 1;
-  }
+.board-overlay .section-title {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-size: clamp(1rem, 2.4cqw, 2rem);
+  margin-bottom: var(--space-3);
+  text-shadow: 0 0 12px color-mix(in oklch, var(--color-board-text) 60%, transparent);
 }
-
-/* 링크 글자는 작아서 그대로 두면 누르기 어렵다. 보이는 모양은 그대로 두고
-   눌리는 영역만 넓힌다 — 레이아웃에 영향을 주지 않으려고 의사요소를 쓴다 */
-.project-link::before {
-  content: '';
-  position: absolute;
-  inset: -0.65rem -0.5rem;
+.board-overlay {
+  container-type: size;
 }
-
-/* Skills */
 .skill-list {
   display: grid;
-  gap: 0;
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-2);
+  font-size: clamp(0.6rem, 1.5cqw, 1rem);
 }
 .skill-row {
   display: grid;
-  grid-template-columns: minmax(7rem, 12rem) 1fr;
-  gap: var(--space-4);
+  grid-template-columns: 7em 1fr;
+  gap: var(--space-3);
   align-items: baseline;
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--color-border);
 }
 .skill-group {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  opacity: 0.7;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--color-text-muted);
 }
 .skill-items {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
+  gap: var(--space-1) var(--space-3);
 }
 .skill-chip {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  padding: 0.25rem 0.6rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  color: var(--color-text);
-  transition: border-color var(--duration-fast) var(--ease-out-expo),
-    color var(--duration-fast) var(--ease-out-expo);
+  text-shadow: 0 0 10px color-mix(in oklch, var(--color-board-text) 50%, transparent);
 }
-.skill-chip:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-@media (max-width: 640px) {
-  .skill-row {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
-  }
-}
-
-/* Approach */
-/* 넷을 한 줄에 두면 한 칸이 262px까지 좁아져 한 줄에 한글 13자밖에 안 들어간다.
-   2×2로 두면 한 칸이 540px가 되어 28자쯤 들어간다. auto-fit으로 두면 화면이
-   애매한 폭일 때 한 칸짜리 아주 넓은 줄이 나와서, 단수를 직접 정한다 */
-.principle-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
-}
-@media (min-width: 48rem) {
-  .principle-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-.principle-item {
-  border-top: 2px solid var(--color-accent);
-  padding-top: var(--space-4);
-}
-.principle-index {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--color-accent);
-  margin-bottom: var(--space-2);
-}
-.principle-title {
-  font-size: var(--text-lg);
-  line-height: var(--leading-tight);
-  margin-bottom: var(--space-3);
-}
-.principle-body {
-  color: var(--color-text-muted);
-  overflow-wrap: break-word;
-  word-break: keep-all;
-}
-
-/* Contact */
 .contact-list {
+  display: grid;
+  gap: var(--space-3);
   list-style: none;
   padding: 0;
+  font-size: clamp(0.75rem, 2cqw, 1.25rem);
+}
+.contact-list li {
   display: grid;
-  gap: var(--space-4);
+  grid-template-columns: 6em 1fr;
+  gap: var(--space-3);
 }
 .contact-label {
-  display: inline-block;
-  width: 6rem;
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.contact-list a {
+  color: var(--color-board-text);
+  text-shadow: 0 0 10px color-mix(in oklch, var(--color-board-text) 50%, transparent);
+}
+html.no-scene .board-overlay {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  container-type: normal;
+  opacity: 1;
+}
+html.no-scene .board-overlay.is-off {
+  visibility: visible;
 }
 
-footer {
-  text-align: center;
-  padding-block: var(--space-8);
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  border-top: 1px solid var(--color-border);
-}
-
-/* 스크롤 진행 인디케이터 — 실밥(seam) 곡선. CSS 스크롤 연동 애니메이션만 사용, JS 없음 */
-.scroll-seam {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 10px;
-  height: 100vh;
-  z-index: 60;
-  pointer-events: none;
-}
-.scroll-seam path {
-  fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 3;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-}
-@supports (animation-timeline: scroll()) {
-  .scroll-seam path {
-    animation: seam-progress auto linear;
-    animation-timeline: scroll(root);
-  }
-}
-@keyframes seam-progress {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@supports not (animation-timeline: scroll()) {
-  .scroll-seam {
-    display: none;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   Lineup — 타순 캐러셀 (shader.se의 가로 캐러셀을 야구 타순으로)
-   ───────────────────────────────────────────── */
-.section-lead {
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-8);
-}
-.lineup {
-  /* 컨테이너 밖으로 흘러나가 화면 끝까지 닿게 — 편집적 여백 */
-  margin-inline: calc(var(--space-6) * -1);
-  padding-inline: var(--space-6);
-  overflow: hidden;
-  position: relative;
-}
-
-/* 실밥 띠 — 35mm 필름의 스프로킷 홀 자리에 야구공 스티치를 둔다.
-   66도로 기운 짧은 획이 일정 간격으로 반복되는 것이 실밥의 형태다 */
-.lineup::before,
-.lineup::after {
-  content: '';
+/* HOME RUN — 전광판이 켜질 때 세 번 깜빡이고 작게 남는다 (opacity만) */
+.board-flash {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 1.15rem;
-  z-index: 2;
-  pointer-events: none;
-  background-color: var(--color-surface-alt);
-  /* 획을 짧고 굵게, 간격은 넓게 — 촘촘하면 실밥이 아니라 사선 줄무늬로 읽힌다 */
-  background-image: repeating-linear-gradient(
-    62deg,
-    color-mix(in oklch, var(--color-stitch) 45%, transparent) 0 2.5px,
-    transparent 2.5px 17px
-  );
-  border-block: 1px solid var(--color-border);
-}
-.lineup::before {
-  top: 0;
-}
-.lineup::after {
-  bottom: 0;
-  /* 아래쪽 실밥은 위와 대칭이어야 야구공처럼 읽힌다 */
-  transform: scaleY(-1);
-}
-
-/* 필름의 한 칸. 원근 휨은 카드가 아니라 이 칸에 건다 —
-   카드에 걸면 hover 틸트(interactions.js)가 transform을 덮어써 서로 지운다 */
-.lineup__frame {
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: opacity var(--duration-normal) var(--ease-out-expo);
-}
-.lineup__frame > .project-card {
-  height: 100%;
-}
-.lineup__track {
+  inset: 0;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(min(22rem, 82vw), 26rem);
-  gap: var(--space-6);
-  overflow-x: auto;
-  /* scroll-behavior:smooth를 두면 스냅과 얽혀 프로그램 스크롤이 통째로 취소된다.
-     이동은 JS가 scrollLeft 직접 대입으로 처리하고, 스냅이 착지를 정리한다. */
-  scroll-snap-type: x mandatory;
-  /* 위아래 실밥 띠를 카드가 밟지 않도록 띄운다 */
-  padding-block: var(--space-8);
-  scrollbar-width: none;
-  /* 필름 띠의 원근. perspective는 직계 자식에만 걸리므로 칸(.lineup__frame)의
-     부모인 트랙에 둬야 한다. .lineup에 두면 트랙만 왜곡되고 칸은 평면으로 남는다 */
-  perspective: 1400px;
-  perspective-origin: center;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(2rem, 9cqw, 7rem);
+  letter-spacing: 0.08em;
+  color: var(--color-board-text);
+  text-shadow: 0 0 24px color-mix(in oklch, var(--color-board-text) 70%, transparent);
+  pointer-events: none;
+  opacity: 0;
 }
-.lineup__track {
-  /* 끌 수 있다는 걸 보여준다 */
-  cursor: grab;
+.board-overlay.is-lit .board-flash {
+  animation: board-flash 2.4s steps(1) 0.2s forwards;
 }
-/* 끄는 동안에는 스냅을 놓는다 — 켜져 있으면 매 프레임 착지점으로 되돌려
-   손을 따라오지 않는다. 글자가 딸려 선택되는 것도 막는다 */
-.lineup__track.is-dragging {
-  cursor: grabbing;
-  scroll-snap-type: none;
-  scroll-behavior: auto;
-  user-select: none;
+@keyframes board-flash {
+  0%, 20%, 40% { opacity: 1; }
+  10%, 30%, 50% { opacity: 0; }
+  60%, 100% { opacity: 0; }
 }
-.lineup__track::-webkit-scrollbar {
+html.no-scene .board-flash {
   display: none;
 }
-/* 타순이 한 바퀴 돈 자리. 그림 없이 한 칸을 비워 둔다 —
-   뭘 그려 넣으면 그것도 카드처럼 읽혀서 흐름이 끊긴다 */
-.lineup__turn {
-  pointer-events: none;
+/* HOME RUN이 깜빡이는 동안 스택 글자는 잠깐 기다린다 */
+html:not(.no-scene) #board-stack > :not(.board-flash) {
+  opacity: 0;
+}
+html:not(.no-scene) #board-stack.is-lit > :not(.board-flash) {
+  animation: board-text-in 400ms var(--ease-out-expo) 2.2s forwards;
+}
+@keyframes board-text-in {
+  to { opacity: 1; }
 }
 
-/* 가운데 정렬이어야 모든 카드가 한 번씩 화면 한가운데로 온다.
-   start로 두면 왼쪽 끝에 붙고, 마지막 몇 장은 가운데까지 오지도 못한다 */
-.lineup__track > * {
-  scroll-snap-align: center;
+/* ─── 일하는 방식 ─── */
+.principle-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6) var(--space-12);
+  max-width: 56rem;
 }
-.lineup__nav {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-}
-.lineup__btn {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--radius-full);
-  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
-  background: transparent;
-  color: var(--color-text);
-  font-size: var(--text-base);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-out-expo),
-    border-color var(--duration-fast) var(--ease-out-expo),
-    transform var(--duration-fast) var(--ease-out-expo);
-}
-.lineup__btn:hover {
-  border-color: var(--color-stitch-hover);
-  background: color-mix(in oklch, var(--color-stitch) 14%, transparent);
-}
-.lineup__btn:active {
-  transform: scale(0.94);
-}
-.lineup__btn:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-.lineup__count {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ─────────────────────────────────────────────
-   About — 선언 한 줄 + 서술 (레퍼런스의 리드 구조)
-   ───────────────────────────────────────────── */
-.about-lead {
-  font-size: var(--text-xl);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  max-width: 26ch;
-  margin-bottom: var(--space-6);
-  word-break: keep-all;
-}
-.about-text {
-  color: var(--color-text-muted);
-  max-width: 62ch;
-  margin-bottom: var(--space-4);
-  word-break: keep-all;
-}
-
-/* ─────────────────────────────────────────────
-   Scroll prompt
-   ───────────────────────────────────────────── */
-.hero-scroll {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-12);
-  color: var(--color-text-muted);
+.principle__index {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: color var(--duration-fast) var(--ease-out-expo);
+  color: var(--color-accent-hover);
 }
-.hero-scroll:hover {
-  color: var(--color-stitch-hover);
-}
-.hero-scroll__rail {
-  position: relative;
-  width: 4.5rem;
-  height: 1px;
-  background: color-mix(in oklch, var(--color-stitch) 35%, transparent);
-  overflow: hidden;
-}
-/* 공이 굴러가듯 좌→우로 빛이 지나간다 */
-.hero-scroll__rail::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  width: 1.5rem;
-  background: var(--color-stitch-hover);
-  animation: rail-run 2s var(--ease-in-out) infinite;
-}
-@keyframes rail-run {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(300%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-scroll__rail::after {
-    animation: none;
-    transform: none;
-  }
-  .lineup__track {
-    scroll-behavior: auto;
-  }
-}
-
-/* ═══════════════════════════════════════════════
-   CRT — 구식 중계 화면 질감
-   전 화면 고정 오버레이. 장식이므로 클릭을 통과시킨다.
-   ═══════════════════════════════════════════════ */
-
-
-/* 세리프 — 레퍼런스의 큰 세리프 헤드라인 */
-.hero-name,
-.section-title,
-.about-lead,
-.project-name,
-.principle-title {
-  font-family: var(--font-serif);
-  font-weight: 400;
-}
-.logo {
-  font-family: var(--font-serif);
-  font-style: italic;
+.principle__title {
+  font-family: var(--font-display-ko);
+  font-weight: 700;
   font-size: var(--text-lg);
+  margin-block: var(--space-2);
 }
+.principle__body {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+@media (max-width: 48rem) {
+  .principle-list {
+    grid-template-columns: 1fr;
+  }
+  /* 세로 화면에서 카드를 세로로 쌓으면 100vh 밖으로 잘린다. 옆으로 넘기는 줄로 */
+  html:not(.no-scene) .featured-grid {
+    justify-content: flex-start;
+    gap: var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-2);
+    scrollbar-width: none;
+  }
+  html:not(.no-scene) .featured-grid .card {
+    flex: 0 0 82vw;
+    width: 82vw;
+    max-height: 62vh;
+    scroll-snap-align: center;
+  }
+  html:not(.no-scene) .card-rail .card__thumb {
+    display: none;
+  }
+  html:not(.no-scene) .card-rail .card {
+    max-height: 70vh;
+  }
+}
+/* 세로 화면에서는 전광판 메시가 너무 작다. 오버레이를 메시에서 떼어 화면 폭 기준 판으로 */
+@media (orientation: portrait) {
+  html:not(.no-scene) .board-overlay {
+    left: 4vw;
+    top: auto;
+    bottom: 8vh;
+    width: 92vw;
+    height: auto;
+    max-height: 70vh;
+    overflow: auto;
+    padding: var(--space-4);
+    border: 1px solid color-mix(in oklch, var(--color-board-text) 35%, transparent);
+    background: oklch(10% 0.02 25 / 0.85);
+    container-type: inline-size;
+  }
+  html:not(.no-scene) .board-overlay .section-title {
+    font-size: var(--text-lg);
+  }
+  html:not(.no-scene) .skill-list {
+    font-size: var(--text-xs);
+  }
+  html:not(.no-scene) .contact-list {
+    font-size: var(--text-sm);
+  }
+  html:not(.no-scene) .board-flash {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* ─── 푸터 ─── */
+footer {
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+}
+
 
 /* ═══════════════════════════════════════════════
    Boot — 전광판 점등 시퀀스
@@ -990,798 +711,25 @@ footer {
   margin-bottom: var(--space-6);
 }
 /* 도트 매트릭스처럼 칸이 차오른다 */
+/* 실제 로딩 비율만큼 boot.js가 scaleX로 채운다 */
 .boot__fill {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
   background-image: repeating-linear-gradient(
     to right,
     var(--color-phosphor) 0 10px,
     transparent 10px 14px
   );
-  animation: boot-fill 1.8s steps(18) forwards;
-}
-@keyframes boot-fill {
-  to { width: 100%; }
 }
 .boot__foot {
   font-size: var(--text-xs);
   opacity: 0.7;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .boot__fill {
-    animation: none;
-    width: 100%;
-  }
-}
+
 
 /* ─────────────────────────────────────────────
    카드 뒷면 — 야구 카드를 뒤집으면 나오는 스탯 시트
-   ───────────────────────────────────────────── */
-/* 링크 줄과 뒷면 버튼을 세로로 쌓는다. 한 줄에 두면 링크 개수에 따라
-   버튼이 어떤 카드는 옆에, 어떤 카드는 아래에 붙어 줄이 들쭉날쭉해진다 */
-.project-foot {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-.project-foot__links {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-}
-
-.cardback-open {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-full);
-  border: 1px solid color-mix(in oklch, var(--color-stitch) 45%, transparent);
-  background: transparent;
-  color: var(--color-text);
-  cursor: pointer;
-  min-height: 24px;
-  transition:
-    background-color var(--duration-fast) var(--ease-out-expo),
-    border-color var(--duration-fast) var(--ease-out-expo);
-}
-.cardback-open:hover {
-  border-color: var(--color-stitch-hover);
-  background: color-mix(in oklch, var(--color-stitch) 14%, transparent);
-}
-.cardback-open:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.cardback {
-  /* dialog 기본값(가운데 정렬 + 얇은 테두리)을 걷어내고 위에서 덮게 만든다 */
-  border: none;
-  padding: 0;
-  margin: 0 0 0 auto;
-  max-width: min(46rem, 100%);
-  width: 100%;
-  max-height: 100dvh;
-  height: 100dvh;
-  background: transparent;
-  color: var(--color-text);
-  overflow: hidden;
-}
-.cardback::backdrop {
-  background: oklch(0% 0 0 / 0.72);
-}
-
-.cardback__sheet {
-  position: relative;
-  height: 100%;
-  overflow-y: auto;
-  padding: var(--space-12) var(--space-8) var(--space-8);
-  background: var(--color-surface);
-  border-left: 1px solid var(--color-border);
-  /* 카드 뒷면의 판지 질감 — 실밥 색을 아주 옅게 깐 사선 */
-  background-image: repeating-linear-gradient(
-    66deg,
-    color-mix(in oklch, var(--color-stitch) 6%, transparent) 0 1px,
-    transparent 1px 9px
-  );
-}
-
-/* 진입 — 위에서 덮으며 내려온다. 레퍼런스의 패널 슬라이드 인 */
-@media (prefers-reduced-motion: no-preference) {
-  .cardback[open] .cardback__sheet {
-    animation: cardback-in var(--duration-slow) var(--ease-out-expo);
-  }
-  .cardback[open]::backdrop {
-    animation: cardback-fade var(--duration-normal) var(--ease-out-expo);
-  }
-  /* 고스팅 — 제목이 살짝 어긋난 잔상을 끌고 들어온다 */
-  .cardback[open] .cardback__title::after {
-    content: attr(data-text);
-    position: absolute;
-    inset: 0;
-    color: var(--color-stitch);
-    animation: cardback-ghost 640ms var(--ease-out-expo) forwards;
-    pointer-events: none;
-  }
-}
-@keyframes cardback-in {
-  from {
-    transform: translateY(-3%);
-    opacity: 0;
-  }
-}
-@keyframes cardback-fade {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes cardback-ghost {
-  from {
-    transform: translate(10px, -4px);
-    opacity: 0.55;
-  }
-  to {
-    transform: none;
-    opacity: 0;
-  }
-}
-
-.cardback__close {
-  position: absolute;
-  top: var(--space-4);
-  right: var(--space-6);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-alt);
-  color: var(--color-text);
-  cursor: pointer;
-  min-height: 24px;
-}
-.cardback__close:hover {
-  border-color: var(--color-stitch-hover);
-}
-.cardback__close:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.cardback__kicker {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
-  color: var(--color-text-muted);
-}
-.cardback__number {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-stitch);
-  font-variant-numeric: tabular-nums;
-}
-.cardback__title {
-  position: relative;
-  font-family: var(--font-serif);
-  font-size: var(--text-2xl);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-tight);
-  margin-block: var(--space-2) var(--space-6);
-}
-.cardback__summary {
-  color: var(--color-text-muted);
-  max-width: 56ch;
-  word-break: keep-all;
-  margin-bottom: var(--space-8);
-}
-
-/* 스탯 표 — 실제 카드 뒷면처럼 행마다 밑줄이 그어진 표 */
-.cardback__stats {
-  display: grid;
-  grid-template-columns: 6rem 1fr;
-  gap: var(--space-3) var(--space-6);
-  margin-bottom: var(--space-8);
-}
-.cardback__stats dt {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  padding-top: var(--space-1);
-}
-.cardback__stats dd {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: var(--space-3);
-}
-.cardback__chip {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  background: var(--color-surface-alt);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-muted);
-  border-radius: var(--radius-full);
-  padding: var(--space-1) var(--space-3);
-}
-.cardback__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-}
-
-@media (max-width: 40rem) {
-  .cardback__sheet {
-    padding-inline: var(--space-6);
-  }
-  .cardback__stats {
-    grid-template-columns: 1fr;
-    gap: var(--space-1) 0;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   About — 라인업 카드 용지가 사선으로 화면을 가로지른다
-   ───────────────────────────────────────────── */
-.about {
-  position: relative;
-  /* 판이 화면 밖으로 나가야 잘린 것처럼 읽힌다 */
-  overflow: hidden;
-}
-.about-card {
-  position: relative;
-  /* 기울였을 때 좌우 끝이 비지 않도록 화면보다 넓게 */
-  width: 116%;
-  margin-left: -8%;
-  padding-block: var(--space-16);
-  background-color: var(--color-surface);
-  background-image: linear-gradient(120deg, var(--color-surface-alt), var(--color-bg) 62%);
-  overflow: hidden;
-  color: var(--color-turf-text);
-  transform: rotate(-2.2deg);
-  box-shadow: 0 28px 70px oklch(0% 0 0 / 0.55);
-}
-/* 판은 기울고 본문은 수평을 유지한다 — 역회전으로 되돌린다 */
-/* 사진은 띠 오른쪽에 **원본 크기 그대로(1:1)** 붙인다.
-   background-size:cover로 깔면 555px 원본을 띠 폭(약 1980px)까지 3.5배
-   늘려야 해서 무조건 뭉갠다. 폭을 원본에 고정하면 확대가 없다.
-
-   왼쪽 경계는 마스크로 녹인다. 배경 그라디언트로 맞추려 하면 화면 폭이
-   바뀔 때마다 사진 시작점과 어긋나 딱딱한 세로선이 드러난다 */
-.about-card::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  /* 좌우로 흘릴 여유. 스크롤에 따라 미끄러져도 가장자리가 비지 않는다 */
-  left: -60px;
-  right: -60px;
-  z-index: 0;
-  background-image: url('../img/intro_field_band.jpg');
-  /* 원본 1900x555를 1:1로 쓴다. cover로 늘리면 뭉갠다 */
-  background-size: auto;
-  background-position: right center;
-  background-repeat: no-repeat;
-  /* 잔디가 띠 전체에 깔리되 글이 앉는 왼쪽만 옅게 눌러 대비를 만든다.
-     완전히 지워버리면 "띠"가 아니라 오른쪽 사진 한 장이 된다 */
-  /* 46%까지는 옅게 눌러 둔다 — 글이 앉는 구간이다.
-     거기서부터 살아나 오른쪽 끝(공·배트)은 온전히 보인다 */
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    oklch(0% 0 0 / 0.14) 0%,
-    oklch(0% 0 0 / 0.2) 46%,
-    oklch(0% 0 0 / 0.78) 68%,
-    oklch(0% 0 0) 84%
-  );
-  /* 스크롤 진행률(--p)에 따라 잔디가 옆으로 흐른다.
-     띠가 화면을 지나가는 동안 계속 움직여야 "흐른다"는 인상이 생긴다 */
-  translate: calc((var(--p, 0.5) - 0.5) * -70px) 0;
-}
-
-.about-card__inner {
-  transform: rotate(2.2deg);
-}
-
-/* ─────────────────────────────────────────────
-   스크롤 진행률 모션 — motion.js가 --p(0~1)를 매 프레임 기록한다.
-   전부 translate/rotate/scale 개별 속성이라 transform(리빌·hover 틸트)과
-   충돌하지 않는다. 요소가 화면에 머무는 내내 계속 움직여서
-   "한 번 켜지고 끝"이 아니라 흐르는 인상을 만든다.
-   ───────────────────────────────────────────── */
-
-/* 섹션마다 다른 종류의 움직임을 준다. 전부 같은 방식으로 떠오르면
-   스크롤이 아래로 내려가는 것 말고는 아무 일도 안 일어나는 것처럼 읽힌다. */
-
-/* 01 소개 — 띠가 기울기를 바꾸며 스쳐 지나간다 (회전) */
-.about-card {
-  rotate: calc((var(--p, 0.5) - 0.5) * -4.5deg);
-}
-/* 그 안의 잔디는 반대로 흘러 시차를 만든다 (가로 패럴랙스) */
-.about-card::after {
-  translate: calc((var(--p, 0.5) - 0.5) * -150px) 0;
-}
-
-/* 02 대표 프로젝트 — 양옆에서 모여든다 (좌우 + 회전) */
-.project-grid--featured .project-card {
-  transition: none;
-}
-.project-grid--featured .project-card:nth-child(odd) {
-  translate: calc((0.5 - var(--p, 0.5)) * -120px) 0;
-  rotate: calc((0.5 - var(--p, 0.5)) * -5deg);
-}
-.project-grid--featured .project-card:nth-child(even) {
-  translate: calc((0.5 - var(--p, 0.5)) * 120px) 0;
-  rotate: calc((0.5 - var(--p, 0.5)) * 5deg);
-}
-
-/* 04 스택 — 표가 좌우 번갈아 맞물리며 채워진다 (지그재그) */
-.skill-row:nth-child(odd) {
-  translate: calc((0.5 - var(--p, 0.5)) * -110px) 0;
-}
-.skill-row:nth-child(even) {
-  translate: calc((0.5 - var(--p, 0.5)) * 110px) 0;
-}
-
-/* 05 일하는 방식 — 바닥에 누워 있다가 일어선다 (X축 3D 회전) */
-.principle-list {
-  perspective: 1200px;
-  perspective-origin: center 40%;
-}
-.principle-item {
-  transform-origin: center bottom;
-  rotate: x calc((0.5 - var(--p, 0.5)) * 34deg);
-  translate: 0 calc((0.5 - var(--p, 0.5)) * 40px);
-}
-
-/* 좁은 화면에서는 가로 이동이 화면 밖으로 밀려 오버플로를 만든다.
-   방향은 유지하되 폭을 줄인다 */
-@media (max-width: 60rem) {
-  .project-grid--featured .project-card:nth-child(odd) {
-    translate: calc((0.5 - var(--p, 0.5)) * -36px) 0;
-  }
-  .project-grid--featured .project-card:nth-child(even) {
-    translate: calc((0.5 - var(--p, 0.5)) * 36px) 0;
-  }
-  .skill-row:nth-child(odd) {
-    translate: calc((0.5 - var(--p, 0.5)) * -34px) 0;
-  }
-  .skill-row:nth-child(even) {
-    translate: calc((0.5 - var(--p, 0.5)) * 34px) 0;
-  }
-  .principle-item {
-    rotate: x calc((0.5 - var(--p, 0.5)) * 22deg);
-  }
-}
-/* 잔디가 띠 전체에 깔리므로, 글은 마스크가 눌러둔 왼쪽 구간 안에서 끝나야 읽힌다.
-   컨테이너 자체는 가운데 정렬을 유지해야 한다 — margin을 0으로 두면
-   판의 -8% 지점, 즉 화면 밖에서 시작한다. 그래서 자식 블록의 폭만 제한한다 */
-.about-card__inner > * {
-  max-width: 34rem;
-}
-/* 잔디 위 흰 글씨의 획이 뭉개지지 않게 바닥을 깐다 */
-.about-card__inner {
-  text-shadow: 0 1px 12px oklch(0% 0 0 / 0.75);
-}
-
-/* 밝은 판 위에서는 색을 통째로 뒤집는다.
-   전역 토큰은 어두운 배경 기준이라 그대로 쓰면 대비가 무너진다 */
-.about-card .section-title,
-.about-card .about-lead {
-  color: var(--color-turf-text);
-}
-.about-card .about-text {
-  color: var(--color-turf-text-muted);
-}
-.about-card .section-kicker {
-  /* 잔디 위에서 크림슨은 대비가 죽는다 — 라인 마킹의 흰색으로 */
-  color: var(--color-turf-text);
-}
-
-/* 2단 조판 — 매거진 판형 */
-.about-cols {
-  /* 글칸이 34rem으로 좁아졌다. 여기서 2단으로 쪼개면 한 줄에 서너 어절뿐이라
-     읽는 흐름이 끊긴다 */
-  columns: 1;
-  column-gap: var(--space-12);
-  margin-top: var(--space-8);
-}
-.about-cols .about-text {
-  /* 문단이 단 경계에서 쪼개지면 읽는 흐름이 끊긴다 */
-  break-inside: avoid;
-  max-width: none;
-}
-
-/* 사진이 옆칸을 차지해 글 폭이 줄었다. 좁아진 칸에서 2단은 한 줄에 서너 어절밖에
-   안 들어가 읽기가 끊긴다 */
-@media (max-width: 75rem) {
-  .about-cols {
-    columns: 1;
-  }
-}
-/* 좁아지면 사진 555px가 화면 대부분을 덮어 글과 겹친다.
-   마스크를 세로로 돌려 글은 위, 사진은 아래쪽 질감으로 남긴다 */
-@media (max-width: 60rem) {
-  /* 좁은 화면에서는 1900px 띠의 오른쪽 끝(공·배트)만 보인다.
-     마스크를 세로로 돌려 글은 위, 잔디는 아래쪽 바닥으로 남긴다 */
-  .about-card::after {
-    background-position: right center;
-    -webkit-mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-    mask-image: linear-gradient(
-      180deg,
-      oklch(0% 0 0 / 0.1) 0%,
-      oklch(0% 0 0 / 0.18) 45%,
-      oklch(0% 0 0 / 0.5) 100%
-    );
-  }
-  .about-card__inner > * {
-    max-width: none;
-  }
-}
-
-@media (max-width: 48rem) {
-  .about-cols {
-    columns: 1;
-  }
-  /* 좁은 화면에서 각도가 크면 글줄이 눈에 띄게 기운다 */
-  .about-card {
-    transform: rotate(-1deg);
-    width: 108%;
-    margin-left: -4%;
-    padding-block: var(--space-12);
-  }
-  .about-card__inner {
-    transform: rotate(1deg);
-  }
-}
-
-/* ─────────────────────────────────────────────
-   히어로 — 풀블리드 야간 구장 위 가운데 정렬
-   ───────────────────────────────────────────── */
-.hero {
-  text-align: center;
-}
-.hero-inner {
-  max-width: 64rem;
-}
-.hero-name {
-  font-size: var(--text-display);
-}
-.hero-tagline {
-  margin-inline: auto;
-}
-.hero-cta,
-.hero-scroll {
-  justify-content: center;
-}
-.stat-line {
-  margin-inline: auto;
-}
-/* 조명탑 — 야간 경기의 상단 광원 두 개 */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(60% 42% at 16% -8%, color-mix(in oklch, var(--color-phosphor) 22%, transparent), transparent 70%),
-    radial-gradient(60% 42% at 84% -8%, color-mix(in oklch, var(--color-phosphor) 22%, transparent), transparent 70%);
-}
-.hero-diamond {
-  opacity: 0.45;
-}
-
-/* 한글은 어절 단위로 끊어야 읽힌다. keep-all 없이 두면 "…붙입 / 니다"로 잘린다 */
-.hero-tagline {
-  max-width: 48ch;
-  word-break: keep-all;
-}
-/* 같은 이유로 한글이 들어가는 나머지 글 블록도 어절 단위로 끊는다.
-   제목이 "…남긴 / 다", 카드 설명이 "약 / 속"으로 잘리고 있었다 */
-.principle-title,
-.project-desc,
-.project-more,
-.section-lead {
-  word-break: keep-all;
-  overflow-wrap: break-word;
-}
-/* 가운데 정렬로 바뀌면서 다이아몬드가 글자 뒤에 바로 겹친다 — 더 뒤로 물린다 */
-.hero-diamond {
-  opacity: 0.26;
-  width: min(88vh, 860px);
-  height: min(88vh, 860px);
-}
-
-/* 좁은 화면에서 링크 6개가 한 줄에 안 들어가 가로 오버플로를 만든다(320px에서 87px).
-   줄바꿈을 허용해 두 줄로 떨어뜨린다 — 별도 메뉴 없이 전 항목이 그대로 눌린다 */
-@media (max-width: 480px) {
-  nav {
-    flex-wrap: wrap;
-    row-gap: var(--space-2);
-    justify-content: flex-start;
-  }
-  .nav-links {
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-3);
-    width: 100%;
-  }
-}
-
-/* 판을 음수 마진으로 화면 밖까지 넓혔기 때문에, 좁은 화면에서는 컨테이너의
-   기본 여백만으로는 본문 왼쪽이 판 밖으로 밀려 잘린다. 밀어낸 만큼 되돌려 준다 */
-@media (max-width: 48rem) {
-  .about-card__inner {
-    padding-inline: calc(var(--space-6) + 5%);
-  }
-}
-
-/* ─────────────────────────────────────────────
-   한글 타이포 — 제목을 굵은 산세리프로 세운다
-   ───────────────────────────────────────────── */
-/* 섹션 제목은 전부 한글이다. 세리프 스택에는 한글 글리프가 없어
-   시스템 폰트로 떨어지면서 가늘고 흐리게 보이고 있었다 */
-.section-title,
-.about-lead,
-.cardback__title,
-.project-name,
-.principle-title {
-  font-family: var(--font-display-ko);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-/* 라틴 전용인 히어로 이름만 세리프를 유지한다 */
-.hero-name {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: var(--tracking-tight);
-}
-/* 본문도 한 단계 올린다 — 어두운 배경에서 얇은 글씨는 뭉개진다 */
-body {
-  font-weight: 500;
-}
-.about-text,
-.project-desc,
-.cardback__summary,
-.principle-body {
-  font-weight: 500;
-}
-
-/* ─────────────────────────────────────────────
-   타순 — 옆으로 미는 캐러셀
-
-   전에는 세로 스크롤이 띠를 좌우로 흘렸다. 8개를 넘기려면 무대를 네 화면쯤
-   내려야 했고, 그동안 페이지가 안 내려가는 것처럼 읽혔다. 지금은 트랙이
-   자기 스크롤을 갖고, 페이지는 이 구간을 평범하게 지나간다.
-   ───────────────────────────────────────────── */
-.lineup-section {
-  padding-block: var(--space-section);
-}
-.lineup-stage {
-  position: relative;
-}
-.lineup-sticky {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-/* 스크롤이 위치를 지시하던 시절의 규칙. 지금은 스냅이 착지를 맡는다 */
-.js-scroll-driven .lineup__track {
-  scroll-snap-type: none;
-}
-
-/* 무대 구조로 바꾸면서 .lineup이 .container 밖으로 나왔다.
-   컨테이너 패딩을 상쇄하려던 음수 마진이 이제 화면 밖으로 삐져나가
-   가로 오버플로 24px을 만든다 — 무대 안에서는 상쇄할 대상이 없으므로 없앤다 */
-.lineup-sticky > .lineup {
-  margin-inline: 0;
-}
-
-
-/* ─────────────────────────────────────────────
-   전광판 패널 — 프로젝트를 담는 그릇
-   ───────────────────────────────────────────── */
-.project-card {
-  /* 전광판은 각지다. 둥근 카드 느낌을 걷어낸다 */
-  border-radius: var(--radius-sm);
-  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
-  background:
-    linear-gradient(180deg, var(--color-surface-alt), var(--color-surface));
-  box-shadow:
-    inset 0 0 0 1px oklch(0% 0 0 / 0.55),
-    0 12px 32px oklch(0% 0 0 / 0.45);
-}
-/* 표시창 제목 — 도트 전광판의 앰버 발광 */
-.project-name {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-phosphor);
-  text-shadow:
-    0 0 10px color-mix(in oklch, var(--color-phosphor) 55%, transparent),
-    0 0 26px color-mix(in oklch, var(--color-phosphor) 28%, transparent);
-}
-/* 등번호도 같은 램프로 */
-.project-index {
-  color: color-mix(in oklch, var(--color-phosphor) 40%, transparent);
-}
-@media (hover: hover) {
-  .project-card:hover .project-index {
-    color: var(--color-phosphor);
-  }
-}
-/* 스크린샷은 전광판에 끼운 표시창처럼 안으로 눌러 넣는다 */
-.project-thumb {
-  border-radius: 2px;
-  box-shadow:
-    inset 0 0 0 1px oklch(0% 0 0 / 0.6),
-    0 0 0 1px color-mix(in oklch, var(--color-stitch) 22%, transparent);
-}
-
-.about-card__inner {
-  position: relative;
-  z-index: 1;
-  /* 글자가 사진 위에 있을 때 필요했던 바닥 그림자는 뺐다.
-     이제 어두운 판 위라 그림자가 획을 뭉개기만 한다 */
-}
-
-
-/* ─────────────────────────────────────────────
-   하단 세 섹션을 전광판 패널 하나로 통일
-
-   Stack·Approach·Contact는 기본 목록 스타일이라 위쪽 섹션과 따로 놀았다.
-   새 모티프를 만들지 않고, 프로젝트 카드에서 이미 쓰는 전광판 언어
-   (각진 모서리 · 실밥색 테두리 · 인셋 그림자 · 발광 라벨)만 그대로 가져온다.
-   마크업은 건드리지 않는다 — 셀렉터가 전부 기존 것이다.
-   ───────────────────────────────────────────── */
-
-/* 패널 공통 값. 세 곳이 같은 그릇을 쓴다는 걸 한곳에 모아둔다 */
-.skill-list,
-.principle-item,
-.contact-list {
-  border: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
-  border-radius: var(--radius-sm);
-  background: linear-gradient(180deg, var(--color-surface-alt), var(--color-surface));
-  box-shadow:
-    inset 0 0 0 1px oklch(0% 0 0 / 0.55),
-    0 12px 32px oklch(0% 0 0 / 0.45);
-}
-
-/* ── 04 Stack — 라인스코어 표 ── */
-.skill-list {
-  overflow: hidden;
-}
-.skill-row {
-  /* 칸 경계가 표를 만든다. 패딩은 칸 안쪽으로 옮긴다 */
-  grid-template-columns: minmax(7rem, 11rem) 1fr;
-  gap: 0;
-  padding: 0;
-  align-items: stretch;
-  border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
-}
-.skill-row:last-child {
-  border-bottom: none;
-}
-.skill-group {
-  display: flex;
-  align-items: center;
-  padding: var(--space-4) var(--space-6);
-  border-right: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
-  background: oklch(0% 0 0 / 0.28);
-  font-weight: 700;
-  color: var(--color-phosphor);
-  text-shadow: 0 0 12px color-mix(in oklch, var(--color-phosphor) 45%, transparent);
-}
-.skill-items {
-  padding: var(--space-4) var(--space-6);
-  align-items: center;
-}
-.skill-chip {
-  /* 전광판 칸이라 각진다. 알약 모양을 걷어낸다 */
-  border-radius: 2px;
-  border-color: color-mix(in oklch, var(--color-stitch) 24%, transparent);
-  background: oklch(0% 0 0 / 0.35);
-  padding: 0.3rem 0.65rem;
-}
-.skill-chip:hover {
-  border-color: var(--color-phosphor);
-  color: var(--color-phosphor);
-}
-
-/* ── 05 Approach — 이닝 번호가 붙은 패널 ── */
-.principle-list {
-  gap: var(--space-6);
-}
-.principle-item {
-  /* 위쪽 강조선 대신 패널 자체가 형태를 갖는다 */
-  border-top: 2px solid color-mix(in oklch, var(--color-stitch) 38%, transparent);
-  padding: var(--space-6);
-}
-.principle-index {
-  font-size: var(--text-xl);
-  line-height: 1;
-  color: var(--color-phosphor);
-  text-shadow:
-    0 0 12px color-mix(in oklch, var(--color-phosphor) 50%, transparent),
-    0 0 28px color-mix(in oklch, var(--color-phosphor) 24%, transparent);
-  margin-bottom: var(--space-4);
-}
-
-/* ── 06 Contact — 같은 표 ── */
-.contact-list {
-  gap: 0;
-  overflow: hidden;
-}
-.contact-list li {
-  display: grid;
-  grid-template-columns: minmax(7rem, 11rem) 1fr;
-  align-items: stretch;
-  border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
-}
-.contact-list li:last-child {
-  border-bottom: none;
-}
-.contact-label {
-  display: flex;
-  align-items: center;
-  width: auto;
-  padding: var(--space-4) var(--space-6);
-  border-right: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
-  background: oklch(0% 0 0 / 0.28);
-  color: var(--color-phosphor);
-  text-shadow: 0 0 12px color-mix(in oklch, var(--color-phosphor) 45%, transparent);
-}
-.contact-list li > a {
-  display: flex;
-  align-items: center;
-  padding: var(--space-4) var(--space-6);
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 640px) {
-  /* 좁으면 표가 성립하지 않는다. 라벨을 칸 위로 올린다 */
-  .skill-row,
-  .contact-list li {
-    grid-template-columns: 1fr;
-  }
-  .skill-group,
-  .contact-label {
-    border-right: none;
-    padding-block: var(--space-3);
-  }
-  /* 스택은 라벨 아래가 칩이라 구분선이 있어야 묶음이 보인다 */
-  .skill-group {
-    border-bottom: 1px solid color-mix(in oklch, var(--color-stitch) 20%, transparent);
-  }
-  /* 연락처는 라벨도 값도 텍스트라, 같은 굵기 선을 넣으면
-     세 쌍이 여섯 행처럼 읽힌다. 쌍 안쪽 선은 빼고 붙여둔다 */
-  .contact-label {
-    padding-bottom: 0;
-  }
-  .contact-list li > a {
-    padding-top: var(--space-1);
-    padding-bottom: var(--space-3);
-  }
-}

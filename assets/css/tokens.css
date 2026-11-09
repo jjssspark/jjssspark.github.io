@@ -20,7 +20,14 @@
   --wood-500: oklch(72% 0.07 75);
   --wood-700: oklch(58% 0.08 70);
 
+  /* 원시 — 야구장 야간 조명. 3D 장면용 */
+  --light-sodium: oklch(93% 0.03 85);
+  --turf-night: oklch(30% 0.08 148);
+  --clay-night: oklch(34% 0.06 45);
+
   /* 의미 토큰 — 컴포넌트는 이것만 참조 */
+  --color-scene-fog: oklch(10% 0.01 260);
+  --color-board-text: var(--light-sodium);
   --color-bg: var(--ink-950);
   --color-surface: var(--ink-900);
   --color-surface-alt: var(--ink-800);
